@@ -22,4 +22,8 @@
 - save schema and data in application folder
 - save config values in application folder
 - allow saving to folder other than application folder
--
+- save cached data in application folder
+- check for cache expiration, load from cache as necessary.
+- generate helper code from schema?
+- validate arguments from schema
+- save/export data in csv, json, html?, google sheets
