@@ -2,6 +2,7 @@ import pytest
 from aiohttp import ClientSession
 from rich import inspect, print
 
+from eve_esi.app_data import load_schema
 from eve_esi.cli.schema_cli import download_schema
 
 

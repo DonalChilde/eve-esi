@@ -4,19 +4,19 @@ TODO option to save multiple copies of schema, allow for choice
     - this would require a certain ammount of dynamic validation.
 """
 import asyncio
-from pathlib import Path
+import json
 from typing import Any, Dict
 
 import click
 
 from eve_esi.actions import get_schema
-from eve_esi.app_config import APP_NAME
-from eve_esi.app_data import load_json_from_app_data, save_json_to_app_data
+from eve_esi.app_config import logger
+from eve_esi.app_data import save_json_to_app_data
 from eve_esi.pfmsoft.util.async_actions.aiohttp import (
-    AiohttpAction,
     AiohttpQueueWorker,
     do_aiohttp_action_queue,
 )
+from eve_esi.pfmsoft.util.file.read_write import load_json
 
 
 @click.group()
@@ -25,27 +25,44 @@ def schema():
 
 
 @click.command()
-# @click.option()
-def get():
-    # TODO options:
-    # download
-    #    to save to app data,
-    #    save to specific path
-    #    or print to stdout
-    # load from app data
-    #    save to specific path
-    #    or print to stdout
-    click.echo("getting json schema")
-    schema_ = download_schema()
-    if schema_ is not None:
+@click.option(
+    "--source",
+    "-s",
+    type=click.Choice(["download", "file"], case_sensitive=False),
+    default="download",
+    show_default=True,
+)
+@click.option(
+    "--destination",
+    "-d",
+    type=click.Choice(["app-dir", "stdout"], case_sensitive=False),
+    default="app-dir",
+    show_default=True,
+)
+@click.option("--source-url")
+def get(source, destination, source_url):
+    # TODO strat to pass back reasonable error messages.
+    # Maybe a try catch in download schema?
+
+    if source == "download":
+        schema_ = download_schema()
+    if source == "file":
+        try:
+            schema_ = load_json(source_url)
+        except Exception as ex:
+            raise click.ClickException(
+                f"Unable to load file from {source_url} with error message: {ex}"
+            )
+    if schema_ is None:
+        raise click.ClickException("Error loading schema.")
+    if destination == "app-dir":
         version = schema_["info"]["version"]
         params = {"version": version}
         file_path = save_json_to_app_data(schema_, "schema", params)
         click.echo(f"Schema saved to {file_path}")
-    else:
-        # TODO strat to pass back reasonable error messages.
-        # Maybe a try catch in download schema?
-        click.echo("Error downloading schema.")
+    if destination == "stdout":
+        # rich console overflow not compat with pipe to file.
+        print(json.dumps(schema_, indent=2))
 
 
 schema.add_command(get)

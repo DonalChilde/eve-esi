@@ -18,19 +18,19 @@ app-data
         manifest.json
 """
 # pylint: disable=empty-docstring, missing-function-docstring
+
 from pathlib import Path
 from string import Template
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
-import click
-
-from eve_esi.app_config import APP_DIR, APP_NAME
+from eve_esi.app_config import APP_DIR, logger
 from eve_esi.pfmsoft.util.collection.misc import optional_object
 from eve_esi.pfmsoft.util.file.read_write import load_json, save_json
 
 ROUTE: Dict = {
     "schema": {
-        "sub_path": "static/schemas/schema-${version}",
+        "sub_path": "static/schemas",
+        "version": "schema-${version}",
         "file_name": "schema-${version}.json",
     }
 }
@@ -42,10 +42,17 @@ def get_app_data_directory() -> Path:
 
 
 def get_data_subpath(route_name: str, params: Optional[Dict] = None) -> Path:
-    route_template = ROUTE[route_name]["sub_path"]
+    sub_path_template = ROUTE[route_name]["sub_path"]
     params = optional_object(params, dict)
-    sub_path = Template(route_template).substitute(params)
+    sub_path = Template(sub_path_template).substitute(params)
     return Path(sub_path)
+
+
+def get_data_version(route_name: str, params: Optional[Dict] = None) -> Path:
+    version_template = ROUTE[route_name]["version"]
+    params = optional_object(params, dict)
+    version = Template(version_template).substitute(params)
+    return Path(version)
 
 
 def get_data_filename(route_name: str, params: Optional[Dict] = None) -> str:
@@ -55,21 +62,47 @@ def get_data_filename(route_name: str, params: Optional[Dict] = None) -> str:
     return file_name
 
 
-def save_json_to_app_data(data, route_name: str, params: Optional[Dict] = None):
+def save_json_to_app_data(
+    data, route_name: str, params: Optional[Dict] = None
+) -> Optional[Path]:
     app_data_path = get_app_data_directory()
     sub_path = get_data_subpath(route_name, params)
+    version = get_data_version(route_name, params)
     file_name = get_data_filename(route_name, params)
-    file_path = app_data_path / sub_path / Path(file_name)
-    save_json(data, file_path, parents=True)
+    file_path = app_data_path / sub_path / version / Path(file_name)
+    try:
+        save_json(data, file_path, parents=True)
+    except Exception as ex:
+        logger.error(
+            "Unable to save %s with params: %s to path %s Error message: %s",
+            route_name,
+            params,
+            file_path,
+            ex,
+        )
+        return None
     return file_path
 
 
-def load_json_from_app_data(data, route_name: str, params: Optional[Dict] = None):
+def load_json_from_app_data(
+    route_name: str, params: Optional[Dict] = None
+) -> Optional[Dict]:
     app_data_path = get_app_data_directory()
     sub_path = get_data_subpath(route_name, params)
+    version = get_data_version(route_name, params)
     file_name = get_data_filename(route_name, params)
-    file_path = app_data_path / sub_path / Path(file_name)
-    data = load_json(file_path)
+    file_path = app_data_path / sub_path / version / Path(file_name)
+    try:
+        data = load_json(file_path)
+    except Exception as ex:
+        logger.error(
+            "Unable to load %s with params: %s to path %s Error message: %s",
+            route_name,
+            params,
+            file_path,
+            ex,
+        )
+        return None
     return data
 
 
@@ -92,3 +125,35 @@ def app_data_info():
     [extended_summary]
     """
     pass
+
+
+def get_directory_versions(parent: Path) -> List[str]:
+    """
+    [summary]
+    get list of directories
+    strip out versions
+    make a list
+    [extended_summary]
+
+    :param parent: [description]
+    :type parent: Path
+    :return: [description]
+    :rtype: List[str]
+    """
+    # FIXME
+    return ["1.7.15"]
+
+
+def most_recent_version(versions: List[str]) -> str:
+    # FIXME make smarter about 7 vs 10
+    versions.sort()
+    return versions[0]
+
+
+def load_schema(version: str) -> Optional[Dict]:
+    if version == "latest":
+        schema_parent = get_data_subpath("schema")
+        versions = get_directory_versions(schema_parent)
+        version = most_recent_version(versions)
+    schema = load_json_from_app_data("schema", {"version": version})
+    return schema

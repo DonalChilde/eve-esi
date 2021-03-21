@@ -1,11 +1,9 @@
 """entrypoint for eve-esi"""
-import logging
 
 import click
 
+from eve_esi.app_config import logger
 from eve_esi.cli import history_cli, schema_cli
-
-logger = logging.getLogger(__name__)
 
 # TODO Load schema from file, pass esiprovider through context to registered commands.
 # TODO error message if not found

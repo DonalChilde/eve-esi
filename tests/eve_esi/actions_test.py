@@ -22,8 +22,6 @@ LOG_LEVEL = logging.INFO
 def logger(test_log_path):
     log_file_name = f"{__name__}.log"
     _logger = logging.getLogger(__name__)
-    # log_level = int(os.getenv("PFMSOFT_EVE_ESI_LOG_LEVEL", str(logging.WARNING)))
-    # print("log_level in fixture", log_level)
     if not os.path.exists(test_log_path):
         os.mkdir(test_log_path)
     file_handler = RotatingFileHandler(
