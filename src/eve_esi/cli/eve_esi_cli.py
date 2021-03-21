@@ -7,14 +7,13 @@ from eve_esi.cli import history_cli, schema_cli
 
 logger = logging.getLogger(__name__)
 
+# TODO Load schema from file, pass esiprovider through context to registered commands.
+# TODO error message if not found
+# TODO option to load from specific path.
+
 
 @click.group()
 def esi_main():
-    pass
-
-
-@click.group()
-def esi():
     pass
 
 

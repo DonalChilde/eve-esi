@@ -3,6 +3,7 @@ from typing import Dict, Optional, Sequence, Tuple
 
 from aiohttp import ClientSession
 
+from eve_esi.app_config import SCHEMA_URL
 from eve_esi.pfmsoft.util.async_actions.aiohttp import (
     AiohttpAction,
     AiohttpActionCallback,
@@ -13,8 +14,6 @@ from eve_esi.pfmsoft.util.async_actions.aiohttp import (
     ResponseToJson,
 )
 from eve_esi.pfmsoft.util.collection.misc import optional_object
-
-SCHEMA_URL = "https://esi.evetech.net/latest/swagger.json"
 
 DEFAULT_CALLBACKS = {
     "success": [ResponseToJson(), LogSuccess()],
