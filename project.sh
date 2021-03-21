@@ -180,7 +180,7 @@ function pip3:upgrade:pip() { ## Upgrade pip, wheel, setuptools.
 }
 
 function pytest() { ## Takes Arguments. Run test suite with pytest.
-    python3 -m pytest tests/ "${@}"
+    python3 -m pytest tests/eve_esi "${@}"
 }
 
 function pytest:cov() { ## Takes arguments. Get test coverage with pytest-cov.
