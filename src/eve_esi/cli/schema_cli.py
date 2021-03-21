@@ -38,12 +38,17 @@ def get():
     click.echo("getting json schema")
     schema_ = download_schema()
     if schema_ is not None:
-        file_path = save_json_to_app_data(schema_, "schema")
+        version = schema_["info"]["version"]
+        params = {"version": version}
+        file_path = save_json_to_app_data(schema_, "schema", params)
         click.echo(f"Schema saved to {file_path}")
     else:
         # TODO strat to pass back reasonable error messages.
         # Maybe a try catch in download schema?
         click.echo("Error downloading schema.")
+
+
+schema.add_command(get)
 
 
 def download_schema() -> Dict[Any, Any]:

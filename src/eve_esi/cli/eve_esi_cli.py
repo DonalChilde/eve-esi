@@ -10,6 +10,8 @@ logger = logging.getLogger(__name__)
 # TODO Load schema from file, pass esiprovider through context to registered commands.
 # TODO error message if not found
 # TODO option to load from specific path.
+# TODO option to load config .env from specific path
+# TODO generate skeleton config .env
 
 
 @click.group()

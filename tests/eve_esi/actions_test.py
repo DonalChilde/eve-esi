@@ -1,4 +1,7 @@
 import asyncio
+import logging
+import os
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
 import pytest
@@ -12,18 +15,41 @@ from eve_esi.pfmsoft.util.async_actions.aiohttp import (
 )
 from eve_esi.pfmsoft.util.file.read_write import load_json
 
-
-@pytest.fixture(scope="class")
-def load_schema() -> dict:
-    file_path = Path("/home/chad/.eve-esi/schema/esi_schema.json")
-    schema = load_json(file_path)
-    return schema
+LOG_LEVEL = logging.INFO
 
 
-def test_load_schema(load_schema):
+@pytest.fixture(scope="module")
+def logger(test_log_path):
+    log_file_name = f"{__name__}.log"
+    _logger = logging.getLogger(__name__)
+    # log_level = int(os.getenv("PFMSOFT_EVE_ESI_LOG_LEVEL", str(logging.WARNING)))
+    # print("log_level in fixture", log_level)
+    if not os.path.exists(test_log_path):
+        os.mkdir(test_log_path)
+    file_handler = RotatingFileHandler(
+        test_log_path / Path(log_file_name), maxBytes=102400, backupCount=10
+    )
+    format_string = "%(asctime)s %(levelname)s:%(funcName)s: %(message)s [in %(pathname)s:%(lineno)d]"
+    file_handler.setFormatter(logging.Formatter(format_string))
+    file_handler.setLevel(LOG_LEVEL)
+    _logger.addHandler(file_handler)
+    _logger.setLevel(LOG_LEVEL)
+    ############################################################
+    # NOTE add file handler to other library modules as needed #
+    ############################################################
+    # async_logger = logging.getLogger("eve_esi")
+    # async_logger.addHandler(file_handler)
+    return _logger
+
+
+def test_load_schema(load_schema, logger):
     esi_provider = EsiProvider(load_schema)
     assert esi_provider.schema is not None
     assert esi_provider.schema["basePath"] == "/latest"
+    logger.info(
+        "created esi_provider with schema version: %s",
+        esi_provider.schema["info"]["version"],
+    )
 
 
 def test_get_action(load_schema):

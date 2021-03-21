@@ -1,18 +1,18 @@
 """Loading and saving data to data dir
 
 Data directory format:
-app_data
+app-data
     static
         schemas
-            schema_version
+            schema-version
                 schema.json
                 <generated schema info>
         data
-            schema_version
+            schema-version
             <static data>
         manifest.json
     dynamic
-        schema_version
+        schema-version
             history
                 <market history data>
         manifest.json
@@ -24,23 +24,20 @@ from typing import Dict, Optional
 
 import click
 
-from eve_esi.app_config import APP_NAME
+from eve_esi.app_config import APP_DIR, APP_NAME
 from eve_esi.pfmsoft.util.collection.misc import optional_object
 from eve_esi.pfmsoft.util.file.read_write import load_json, save_json
 
 ROUTE: Dict = {
     "schema": {
-        "sub_path": "static/schemas/schema_${version}",
-        "file_name": "schema_${version}.json",
+        "sub_path": "static/schemas/schema-${version}",
+        "file_name": "schema-${version}.json",
     }
 }
 
 
 def get_app_data_directory() -> Path:
-    """
-    TODO options for other data directories.
-    """
-    directory = Path(click.get_app_dir(APP_NAME, force_posix=True))
+    directory = Path(APP_DIR)
     return directory
 
 
