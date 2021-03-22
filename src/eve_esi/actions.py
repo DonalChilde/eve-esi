@@ -52,20 +52,35 @@ class EsiProvider:
                 lookup[lookup_key] = {
                     "method": method,
                     "path": path,
+                    "path_template": self.make_path_template(path),
                 }
         return lookup
 
-    def make_url_template(self, path: str) -> str:
+    def common_parameters(self) -> Dict:
+        return self.schema["parameters"]
+
+    def operation_parameters(self, op_id) -> Dict:
+        path = self.lookup_table[op_id]["path"]
+        method = self.lookup_table[op_id]["method"]
+        parameters = self.schema["paths"][path][method]["parameters"]
+        return parameters
+
+    def make_path_template(self, path: str) -> str:
         return path.replace("{", "${")
 
-    def lookup_path(self, op_id) -> Tuple[str, str]:
+    def lookup_url_template(self, op_id) -> Tuple[str, str]:
         data = self.lookup_table.get(op_id, None)
         if data is None:
             raise NotImplementedError(f"missing data for {op_id}")
         method = data["method"]
         # TODO handle route version changes
-        path = "https://" + self.schema["host"] + self.schema["basePath"] + data["path"]
-        return (method, path)
+        url_template = (
+            "https://"
+            + self.schema["host"]
+            + self.schema["basePath"]
+            + data["path_template"]
+        )
+        return (method, url_template)
 
     def validate_params(self, op_id, path_params, query_params) -> bool:
         return True
@@ -80,15 +95,13 @@ class EsiProvider:
         retry_limit=5,
         request_kwargs: Optional[dict] = None,
     ) -> AiohttpAction:
-        method, path = self.lookup_path(op_id)
-        url_template = self.make_url_template(path)
+        method, url_template = self.lookup_url_template(op_id)
         if not self.validate_params(op_id, path_params, query_params):
             raise NotImplementedError(
                 "Error validating params, this should be move to validation function."
             )
         request_kwargs = optional_object(request_kwargs, dict)
-        if request_kwargs is not None:
-            request_kwargs["params"] = query_params
+        request_kwargs["params"] = query_params
         action = AiohttpAction(
             method,
             url_template,
@@ -99,3 +112,34 @@ class EsiProvider:
             action_messengers=action_messengers,
         )
         return action
+
+
+def validate_params(esi_provider: EsiProvider, op_id, params) -> Dict:
+    path_params = validate_path_params(esi_provider, op_id, params)
+    query_params = validate_query_params(esi_provider, op_id, params)
+    return {"path_params": path_params, "query_params": query_params}
+
+
+def validate_path_params(esi_provider: EsiProvider, op_id, params) -> Dict:
+    path_parameters = {}
+    common_parameters = esi_provider.common_parameters()
+    operation_parameters = esi_provider.operation_parameters(op_id)
+    # TODO make a store of consolidated parameters on esi_provider to avoid repetition
+    # TODO combine commom and operational params
+    # check that all required params are present, return path_params
+    # add default params
+
+    return {}
+
+
+def validate_query_params(esi_provider: EsiProvider, op_id, params) -> Dict:
+    return {}
+
+    """
+    command to output a sample csv file that contains fields for a download operation.
+    ability to chain command files together for quicker download times
+    json file to have more command options?
+    some options only on first line of csv.
+
+
+    """

@@ -3,6 +3,7 @@
 import click
 
 from eve_esi.app_config import logger
+from eve_esi.app_data import load_schema
 from eve_esi.cli import history_cli, schema_cli
 
 # TODO Load schema from file, pass esiprovider through context to registered commands.
@@ -13,8 +14,11 @@ from eve_esi.cli import history_cli, schema_cli
 
 
 @click.group()
-def esi_main():
-    pass
+@click.pass_context
+def esi_main(ctx):
+    ctx.obj = {}
+    esi_provider = load_schema("latest")
+    ctx.obj["esi_provider"] = esi_provider
 
 
 esi_main.add_command(schema_cli.schema)
