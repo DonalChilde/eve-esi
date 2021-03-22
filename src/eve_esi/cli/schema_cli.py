@@ -65,7 +65,16 @@ def get(source, destination, source_url):
         print(json.dumps(schema_, indent=2))
 
 
+@click.command()
+@click.pass_context
+def test(ctx):
+    esi_provider = ctx.obj["esi_provider"]
+
+    print(json.dumps(esi_provider.op_id_lookup, indent=2))
+
+
 schema.add_command(get)
+schema.add_command(test)
 
 
 def download_schema() -> Dict[Any, Any]:

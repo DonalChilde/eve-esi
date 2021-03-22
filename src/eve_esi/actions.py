@@ -1,5 +1,5 @@
 from asyncio.queues import Queue
-from typing import Dict, Optional, Sequence, Tuple
+from typing import Dict, List, Optional, Sequence, Tuple
 
 from aiohttp import ClientSession
 
@@ -15,10 +15,10 @@ from eve_esi.pfmsoft.util.async_actions.aiohttp import (
 )
 from eve_esi.pfmsoft.util.collection.misc import optional_object
 
-DEFAULT_CALLBACKS = {
+DEFAULT_CALLBACKS: Dict[str, Sequence[AiohttpActionCallback]] = {
     "success": [ResponseToJson(), LogSuccess()],
     "retry": [LogRetry()],
-    "fail": [LogFail],
+    "fail": [LogFail()],
 }
 
 
@@ -42,26 +42,62 @@ class EsiProvider:
 
     def __init__(self, schema):
         self.schema = schema
-        self.lookup_table = self.make_lookup_table(self.schema)
+        self.op_id_lookup = self.make_op_id_lookup(self.schema)
+        for op_id in self.op_id_lookup:
+            self.op_id_lookup[op_id]["parameters"] = self.make_op_id_params(op_id)
 
-    def make_lookup_table(self, schema):
+    def schema_version(self) -> str:
+        return self.schema["info"]["version"]
+
+    def make_op_id_lookup(self, schema):
         lookup = {}
         for path, path_schema in schema["paths"].items():
             for method, method_schema in path_schema.items():
-                lookup_key = method_schema["operationId"]
-                lookup[lookup_key] = {
+                op_id = method_schema["operationId"]
+                lookup[op_id] = {
                     "method": method,
                     "path": path,
                     "path_template": self.make_path_template(path),
+                    "parameters": {},
                 }
         return lookup
+
+    def make_op_id_params(
+        self,
+        op_id: str,
+    ) -> Dict:
+        # params_example = {
+        #     "parameters": {"param_name": {"attribute_name": "attribute value"}}
+        # }
+
+        op_id_params: Dict = {}
+        for param in self.operation_parameters(op_id):
+            ref_check = param.get("$ref", None)
+            if ref_check is None:
+                op_id_params[param["name"]] = param
+            else:
+                common_param = self.resolve_common_parameter(ref_check)
+                op_id_params[common_param["name"]] = common_param
+        return op_id_params
+
+    def resolve_common_parameter(
+        self,
+        ref_value: str,
+    ):
+        split_ref_value = ref_value.split(sep="/")
+        param_id = split_ref_value[-1]
+        common_parameters = self.common_parameters()
+        params = common_parameters.get(param_id, None)
+        if params is None:
+            raise ValueError(f"Ref value {ref_value} not found in common parameters.")
+        return params
 
     def common_parameters(self) -> Dict:
         return self.schema["parameters"]
 
-    def operation_parameters(self, op_id) -> Dict:
-        path = self.lookup_table[op_id]["path"]
-        method = self.lookup_table[op_id]["method"]
+    def operation_parameters(self, op_id) -> List[Dict]:
+        path = self.op_id_lookup[op_id]["path"]
+        method = self.op_id_lookup[op_id]["method"]
         parameters = self.schema["paths"][path][method]["parameters"]
         return parameters
 
@@ -69,7 +105,7 @@ class EsiProvider:
         return path.replace("{", "${")
 
     def lookup_url_template(self, op_id) -> Tuple[str, str]:
-        data = self.lookup_table.get(op_id, None)
+        data = self.op_id_lookup.get(op_id, None)
         if data is None:
             raise NotImplementedError(f"missing data for {op_id}")
         method = data["method"]
@@ -94,6 +130,7 @@ class EsiProvider:
         action_messengers: Optional[Sequence[AiohttpActionMessenger]] = None,
         retry_limit=5,
         request_kwargs: Optional[dict] = None,
+        context: Optional[Dict] = None,
     ) -> AiohttpAction:
         method, url_template = self.lookup_url_template(op_id)
         if not self.validate_params(op_id, path_params, query_params):
@@ -110,6 +147,7 @@ class EsiProvider:
             request_kwargs=request_kwargs,
             action_callbacks=action_callbacks,
             action_messengers=action_messengers,
+            context=context,
         )
         return action
 
@@ -120,16 +158,16 @@ def validate_params(esi_provider: EsiProvider, op_id, params) -> Dict:
     return {"path_params": path_params, "query_params": query_params}
 
 
-def validate_path_params(esi_provider: EsiProvider, op_id, params) -> Dict:
-    path_parameters = {}
-    common_parameters = esi_provider.common_parameters()
-    operation_parameters = esi_provider.operation_parameters(op_id)
-    # TODO make a store of consolidated parameters on esi_provider to avoid repetition
-    # TODO combine commom and operational params
-    # check that all required params are present, return path_params
-    # add default params
+# def validate_path_params(esi_provider: EsiProvider, op_id, params) ->List[Dict}:
+#     path_parameters = {}
+#     # common_parameters = esi_provider.common_parameters()
+#     # operation_parameters = esi_provider.operation_parameters(op_id)
+#     # # TODO make a store of consolidated parameters on esi_provider to avoid repetition
+#     # TODO combine commom and operational params
+#     # check that all required params are present, return path_params
+#     # add default params
 
-    return {}
+#     return
 
 
 def validate_query_params(esi_provider: EsiProvider, op_id, params) -> Dict:

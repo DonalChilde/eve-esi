@@ -4,6 +4,8 @@ from pathlib import Path
 
 import pytest
 
+from eve_esi.actions import EsiProvider
+from eve_esi.app_data import load_schema
 from eve_esi.pfmsoft.util.file.read_write import load_json
 
 # import logging
@@ -37,6 +39,14 @@ from eve_esi.pfmsoft.util.file.read_write import load_json
 
 
 @pytest.fixture(scope="session")
+def esi_provider():
+    schema = load_schema("latest")
+    provider: EsiProvider = EsiProvider(schema)
+    assert provider.schema_version() == "1.7.15"
+    return provider
+
+
+@pytest.fixture(scope="session")
 def test_log_path(test_app_dir):
     log_path = test_app_dir / Path("test-logs")
     print(f"Logging at: {log_path}")
@@ -49,14 +59,14 @@ def test_app_dir(tmp_path_factory):
     return app_dir_path
 
 
-@pytest.fixture(scope="class")
-def load_schema() -> dict:
-    # TODO this needs to handle loading from a testing resource
-    file_path = Path(
-        "/home/chad/.eve-esi/static/schemas/schema-1.7.15/schema-1.7.15.json"
-    )
-    schema = load_json(file_path)
-    return schema
+# @pytest.fixture(scope="class")
+# def load_schema() -> dict:
+#     # TODO this needs to handle loading from a testing resource
+#     file_path = Path(
+#         "/home/chad/.eve-esi/static/schemas/schema-1.7.15/schema-1.7.15.json"
+#     )
+#     schema = load_json(file_path)
+#     return schema
 
 
 @pytest.fixture(autouse=True)

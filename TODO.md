@@ -27,3 +27,8 @@
 - generate helper code from schema?
 - validate arguments from schema
 - save/export data in csv, json, html?, google sheets
+
+Getting in the weeds on this project. I need to narrow the focus.
+Start with json input job creation. Save results to file with given file template path.
+Check json parameters against schema.
+Save results including json job, data recieved, headers?, date?

@@ -14,8 +14,8 @@ def history():
 @click.command()
 @click.option("--regions", "-r", type=click.STRING)
 @click.option("--type_ids", "-t", type=click.STRING)
-@click.option("--json", "-j", type=click.File)
-@click.option("--csv", "-c", type=click.File)
+@click.option("--json", "-j", type=click.File())
+@click.option("--csv", "-c", type=click.File())
 @click.option(
     "--destination",
     "-d",
