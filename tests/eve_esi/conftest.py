@@ -37,6 +37,8 @@ from eve_esi.pfmsoft.util.file.read_write import load_json
 #     # async_logger.addHandler(file_handler)
 #     return _logger
 
+APP_LOG_LEVEL = logging.INFO
+
 
 @pytest.fixture(scope="session")
 def esi_provider():
@@ -70,7 +72,8 @@ def test_app_dir(tmp_path_factory):
 
 
 @pytest.fixture(autouse=True)
-def env_setup(monkeypatch):
+def env_setup(monkeypatch, test_app_dir):
     print("In test env setup")
     monkeypatch.setenv("PFMSOFT_EVE_ESI_TESTING", "True")
-    monkeypatch.setenv("PFMSOFT_EVE_ESI_LOG_LEVEL", str(logging.INFO))
+    monkeypatch.setenv("PFMSOFT_EVE_ESI_LOG_LEVEL", str(APP_LOG_LEVEL))
+    monkeypatch.setenv("PFMSOFT_EVE_ESI_APP_DIR", test_app_dir)
