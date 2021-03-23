@@ -1,4 +1,5 @@
 from asyncio.queues import Queue
+from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Sequence, Tuple
 
 from aiohttp import ClientSession
@@ -31,6 +32,14 @@ def get_schema():
     return action
 
 
+@dataclass
+class Op_IdLookup:
+    method: str
+    path: str
+    path_template: str
+    parameters: Dict = field(default_factory=dict)
+
+
 class EsiProvider:
     """
     # TODO param validation
@@ -42,24 +51,24 @@ class EsiProvider:
 
     def __init__(self, schema):
         self.schema = schema
-        self.op_id_lookup = self.make_op_id_lookup(self.schema)
+        self.op_id_lookup: Dict[str, Op_IdLookup] = self.make_op_id_lookup(self.schema)
         for op_id in self.op_id_lookup:
-            self.op_id_lookup[op_id]["parameters"] = self.make_op_id_params(op_id)
+            self.op_id_lookup[op_id].parameters = self.make_op_id_params(op_id)
 
     def schema_version(self) -> str:
         return self.schema["info"]["version"]
 
-    def make_op_id_lookup(self, schema):
+    def make_op_id_lookup(self, schema) -> Dict[str, Op_IdLookup]:
         lookup = {}
         for path, path_schema in schema["paths"].items():
             for method, method_schema in path_schema.items():
                 op_id = method_schema["operationId"]
-                lookup[op_id] = {
-                    "method": method,
-                    "path": path,
-                    "path_template": self.make_path_template(path),
-                    "parameters": {},
-                }
+                lookup[op_id] = Op_IdLookup(
+                    method=method,
+                    path=path,
+                    path_template=self.make_path_template(path),
+                    parameters={},
+                )
         return lookup
 
     def make_op_id_params(
@@ -96,8 +105,8 @@ class EsiProvider:
         return self.schema["parameters"]
 
     def operation_parameters(self, op_id) -> List[Dict]:
-        path = self.op_id_lookup[op_id]["path"]
-        method = self.op_id_lookup[op_id]["method"]
+        path = self.op_id_lookup[op_id].path
+        method = self.op_id_lookup[op_id].method
         parameters = self.schema["paths"][path][method]["parameters"]
         return parameters
 
@@ -108,13 +117,13 @@ class EsiProvider:
         data = self.op_id_lookup.get(op_id, None)
         if data is None:
             raise NotImplementedError(f"missing data for {op_id}")
-        method = data["method"]
+        method = data.method
         # TODO handle route version changes
         url_template = (
             "https://"
             + self.schema["host"]
             + self.schema["basePath"]
-            + data["path_template"]
+            + data.path_template
         )
         return (method, url_template)
 
@@ -152,10 +161,10 @@ class EsiProvider:
         return action
 
 
-def validate_params(esi_provider: EsiProvider, op_id, params) -> Dict:
-    path_params = validate_path_params(esi_provider, op_id, params)
-    query_params = validate_query_params(esi_provider, op_id, params)
-    return {"path_params": path_params, "query_params": query_params}
+# def validate_params(esi_provider: EsiProvider, op_id, params) -> Dict:
+#     path_params = validate_path_params(esi_provider, op_id, params)
+#     query_params = validate_query_params(esi_provider, op_id, params)
+#     return {"path_params": path_params, "query_params": query_params}
 
 
 # def validate_path_params(esi_provider: EsiProvider, op_id, params) ->List[Dict}:

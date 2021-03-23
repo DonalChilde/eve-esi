@@ -76,4 +76,4 @@ def env_setup(monkeypatch, test_app_dir):
     print("In test env setup")
     monkeypatch.setenv("PFMSOFT_EVE_ESI_TESTING", "True")
     monkeypatch.setenv("PFMSOFT_EVE_ESI_LOG_LEVEL", str(APP_LOG_LEVEL))
-    monkeypatch.setenv("PFMSOFT_EVE_ESI_APP_DIR", test_app_dir)
+    monkeypatch.setenv("PFMSOFT_EVE_ESI_APP_DIR", str(test_app_dir))
