@@ -1,5 +1,7 @@
 """ fixtures """
 import logging
+import os
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
 import pytest
@@ -8,14 +10,7 @@ from eve_esi_jobs.app_data import load_schema
 from eve_esi_jobs.esi_provider import EsiProvider
 from eve_esi_jobs.pfmsoft.util.file.read_write import load_json
 
-# import logging
-# import os
-# from logging.handlers import RotatingFileHandler
-# from pathlib import Path
-
-
-# @pytest.fixture(scope="module")
-# def logger(test_log_path):
+# def logger_(test_log_path):
 #     log_file_name = f"{__name__}.log"
 #     _logger = logging.getLogger(__name__)
 #     log_path = test_log_path / Path("test-logs")
@@ -37,13 +32,21 @@ from eve_esi_jobs.pfmsoft.util.file.read_write import load_json
 #     # async_logger.addHandler(file_handler)
 #     return _logger
 
+
 APP_LOG_LEVEL = logging.INFO
 
 
 @pytest.fixture(scope="session")
-def esi_provider():
+def esi_provider(test_log_path):
+    # logger = logger_(test_log_path)
     schema = load_schema("latest")
     provider: EsiProvider = EsiProvider(schema)
+    assert provider.schema is not None
+    assert provider.schema["basePath"] == "/latest"
+    # logger.info(
+    #     "created esi_provider with schema version: %s",
+    #     provider.schema["info"]["version"],
+    # )
     assert provider.schema_version() == "1.7.15"
     return provider
 

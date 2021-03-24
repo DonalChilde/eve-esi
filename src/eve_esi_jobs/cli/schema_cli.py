@@ -78,6 +78,7 @@ schema.add_command(test)
 
 
 def download_schema() -> Dict[Any, Any]:
+    # where to put this? esi_provider? collection later defined?
     action = get_schema()
     worker = AiohttpQueueWorker()
     asyncio.run(do_aiohttp_action_queue([action], [worker]))
