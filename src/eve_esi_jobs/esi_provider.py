@@ -1,8 +1,5 @@
-from asyncio.queues import Queue
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Sequence, Tuple
-
-from aiohttp import ClientSession
 
 from eve_esi_jobs.app_config import SCHEMA_URL, logger
 from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (

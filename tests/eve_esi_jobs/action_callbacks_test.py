@@ -8,8 +8,8 @@ import pytest
 from rich import inspect, print
 
 from eve_esi_jobs import action_callbacks
-from eve_esi_jobs import action_callbacks as AC
-from eve_esi_jobs import action_json as AJ
+from eve_esi_jobs.jobs.jobs import make_action_from_job
+from eve_esi_jobs.jobs.models import deserialize_json_job
 from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
     AiohttpAction,
     AiohttpQueueWorker,
@@ -42,8 +42,9 @@ def logger(test_log_path):
 
 
 def test_make_action_from_json(esi_provider, test_app_dir):
+    # TODO make this a file callback test
     file_path = test_app_dir / Path("data/test.json")
-    action_json = {
+    esi_job_json = {
         "op_id": "get_markets_region_id_history",
         "retry_limit": 1,
         "parameters": {"region_id": 10000002, "type_id": 34},
@@ -57,10 +58,10 @@ def test_make_action_from_json(esi_provider, test_app_dir):
             ]
         },
     }
-
-    action = AJ.make_action_from_json(action_json, esi_provider)
-    assert action.url_parameters == {"region_id": "10000002"}
-    assert action.request_kwargs["params"] == {"type_id": "34"}
+    esi_job = deserialize_json_job(esi_job_json)
+    action = make_action_from_job(esi_job, esi_provider)
+    assert action.url_parameters == {"region_id": 10000002}
+    assert action.request_kwargs["params"] == {"type_id": 34}
     assert isinstance(action, AiohttpAction)
     worker = AiohttpQueueWorker()
     asyncio.run(do_aiohttp_action_queue([action], [worker]))
@@ -69,4 +70,4 @@ def test_make_action_from_json(esi_provider, test_app_dir):
     keys = ["average", "date", "highest", "lowest", "order_count", "volume"]
     assert all(key in keys for key in action.result[0])
     # inspect(action.action_callbacks)
-    assert action.context["action_json"]["op_id"] == "get_markets_region_id_history"
+    assert action.context["esi_job"]["op_id"] == "get_markets_region_id_history"

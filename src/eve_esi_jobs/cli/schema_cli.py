@@ -9,9 +9,9 @@ from typing import Any, Dict
 
 import click
 
-from eve_esi_jobs.actions import get_schema
 from eve_esi_jobs.app_config import logger
 from eve_esi_jobs.app_data import save_json_to_app_data
+from eve_esi_jobs.esi_provider import get_schema
 from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
     AiohttpQueueWorker,
     do_aiohttp_action_queue,

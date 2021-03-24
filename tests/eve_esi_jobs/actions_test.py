@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 from rich import inspect, print
 
-from eve_esi_jobs.actions import EsiProvider
+from eve_esi_jobs.esi_provider import EsiProvider
 from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
     AiohttpQueueWorker,
     ResponseToJson,
@@ -40,8 +40,8 @@ def logger(test_log_path):
     return _logger
 
 
-def test_load_schema(load_schema, logger):
-    esi_provider = EsiProvider(load_schema)
+def test_load_schema(esi_provider, logger):
+
     assert esi_provider.schema is not None
     assert esi_provider.schema["basePath"] == "/latest"
     logger.info(
@@ -50,8 +50,8 @@ def test_load_schema(load_schema, logger):
     )
 
 
-def test_get_action(load_schema):
-    esi_provider = EsiProvider(load_schema)
+def test_get_action(esi_provider):
+
     op_id = "get_markets_region_id_history"
     path_params = {"region_id": 10000002}
     query_params = {"type_id": 34}
