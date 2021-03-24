@@ -1,1 +1,1 @@
-"""Unit test package for eve_esi."""
+"""Unit test package for eve_esi_jobs."""

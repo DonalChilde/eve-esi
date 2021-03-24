@@ -3,7 +3,7 @@ omit = .venv/* .tox/*
 # .coveragerc to control coverage.py
 # [run]
 branch = True
-source = ./src/eve_esi
+source = ./src/eve_esi_jobs
 
 [report]
 # Regexes for lines to exclude from consideration

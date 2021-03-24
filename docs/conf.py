@@ -15,11 +15,11 @@ import sys
 
 sys.path.insert(0, os.path.abspath("../src"))
 
-import eve_esi
+import eve_esi_jobs
 
 # -- Project information -----------------------------------------------------
 
-project = "Eve Esi"
+project = "Eve Esi Jobs"
 copyright = "2021, Chad Lowe"
 author = "Chad Lowe"
 
@@ -29,9 +29,9 @@ author = "Chad Lowe"
 # the built documents.
 #
 # The short X.Y version.
-version = eve_esi.__version__
+version = eve_esi_jobs.__version__
 # The full version, including alpha/beta/rc tags.
-release = eve_esi.__version__
+release = eve_esi_jobs.__version__
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
@@ -103,7 +103,7 @@ html_static_path = ["_static"]
 # -- Options for HTMLHelp output ---------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "eve_esidoc"
+htmlhelp_basename = "eve_esi_jobsdoc"
 
 
 # -- Options for LaTeX output ------------------------------------------
@@ -127,7 +127,13 @@ latex_elements = {
 # (source start file, target name, title, author, documentclass
 # [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, "eve_esi.tex", "Eve Esi Documentation", "Chad Lowe", "manual"),
+    (
+        master_doc,
+        "eve_esi_jobs.tex",
+        "Eve Esi Jobs Documentation",
+        "Chad Lowe",
+        "manual",
+    ),
 ]
 
 
@@ -135,7 +141,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "eve_esi", "Eve Esi Documentation", [author], 1)]
+man_pages = [(master_doc, "eve_esi_jobs", "Eve Esi Jobs Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output ----------------------------------------
@@ -146,10 +152,10 @@ man_pages = [(master_doc, "eve_esi", "Eve Esi Documentation", [author], 1)]
 texinfo_documents = [
     (
         master_doc,
-        "eve_esi",
-        "Eve Esi Documentation",
+        "eve_esi_jobs",
+        "Eve Esi Jobs Documentation",
         author,
-        "eve_esi",
+        "eve_esi_jobs",
         "One line description of project.",
         "Miscellaneous",
     ),

@@ -10,7 +10,7 @@ import pytest
 from aiohttp.client import ClientSession
 from rich import inspect, print
 
-from eve_esi.pfmsoft.util.async_actions.aiohttp import (
+from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
     AiohttpAction,
     AiohttpActionCallback,
     AiohttpActionMessenger,

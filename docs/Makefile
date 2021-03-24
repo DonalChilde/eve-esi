@@ -4,7 +4,7 @@
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = python -msphinx
-SPHINXPROJ    = eve_esi
+SPHINXPROJ    = eve_esi_jobs
 SOURCEDIR     = .
 BUILDDIR      = _build
 

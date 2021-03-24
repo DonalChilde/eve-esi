@@ -18,7 +18,7 @@ set -euo pipefail
 # https://iridakos.com/programming/2018/03/01/bash-programmable-completion-tutorial
 # TODO add check to make sure that we are piping to the correct virtual env?
 
-PACKAGE="${PACKAGE:-eve_esi}"
+PACKAGE="${PACKAGE:-eve_esi_jobs}"
 # SRC_PATH="src/"
 BROWSER="google-chrome"
 CODE_PATHS=("./src" "./tests")
@@ -180,7 +180,7 @@ function pip3:upgrade:pip() { ## Upgrade pip, wheel, setuptools.
 }
 
 function pytest() { ## Takes Arguments. Run test suite with pytest.
-    python3 -m pytest tests/eve_esi "${@}"
+    python3 -m pytest tests/eve_esi_jobs "${@}"
 }
 
 function pytest:cov() { ## Takes arguments. Get test coverage with pytest-cov.

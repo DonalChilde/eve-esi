@@ -7,13 +7,13 @@ from pathlib import Path
 import pytest
 from rich import inspect, print
 
-from eve_esi.actions import EsiProvider
-from eve_esi.pfmsoft.util.async_actions.aiohttp import (
+from eve_esi_jobs.actions import EsiProvider
+from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
     AiohttpQueueWorker,
     ResponseToJson,
     do_aiohttp_action_queue,
 )
-from eve_esi.pfmsoft.util.file.read_write import load_json
+from eve_esi_jobs.pfmsoft.util.file.read_write import load_json
 
 LOG_LEVEL = logging.INFO
 
@@ -35,7 +35,7 @@ def logger(test_log_path):
     ############################################################
     # NOTE add file handler to other library modules as needed #
     ############################################################
-    # async_logger = logging.getLogger("eve_esi")
+    # async_logger = logging.getLogger("eve_esi_jobs")
     # async_logger.addHandler(file_handler)
     return _logger
 

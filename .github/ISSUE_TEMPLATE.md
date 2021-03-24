@@ -1,6 +1,6 @@
-* Eve Esi version:
-* Python version:
-* Operating System:
+- Eve Esi Jobs version:
+- Python version:
+- Operating System:
 
 ### Description
 

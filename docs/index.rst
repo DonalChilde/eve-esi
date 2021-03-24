@@ -1,4 +1,4 @@
-Welcome to Eve Esi's documentation!
+Welcome to Eve Esi Job's documentation!
 ======================================
 
 .. toctree::

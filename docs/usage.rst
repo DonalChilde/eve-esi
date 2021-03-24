@@ -2,6 +2,6 @@
 Usage
 =====
 
-To use Eve Esi in a project::
+To use Eve Esi Jobs in a project::
 
-    import eve_esi
+    import eve_esi_jobs

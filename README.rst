@@ -1,13 +1,13 @@
-=======
-Eve Esi
-=======
+============
+Eve Esi Jobs
+============
 
 
-.. image:: https://img.shields.io/pypi/v/eve_esi.svg
-        :target: https://pypi.python.org/pypi/eve_esi
+.. image:: https://img.shields.io/pypi/v/eve_esi_jobs.svg
+        :target: https://pypi.python.org/pypi/eve_esi_jobs
 
-.. image:: https://img.shields.io/travis/DonalChilde/eve_esi.svg
-        :target: https://travis-ci.com/DonalChilde/eve_esi
+.. image:: https://img.shields.io/travis/DonalChilde/eve_esi_jobs.svg
+        :target: https://travis-ci.com/DonalChilde/eve_esi_jobs
 
 .. image:: https://readthedocs.org/projects/eve-esi/badge/?version=latest
         :target: https://eve-esi.readthedocs.io/en/latest/?version=latest

@@ -25,9 +25,8 @@ deploy:
     secure: PLEASE_REPLACE_ME
   on:
     tags: true
-    repo: DonalChilde/eve_esi
+    repo: DonalChilde/eve_esi_jobs
     python: 3.8
-
 # another example
 # https://github.com/hugovk/pypistats/blob/b704363160891a8fe4a79cce1db6ef2553cfbcca/.travis.yml#L29-L52
 # deploy:

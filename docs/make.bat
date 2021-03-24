@@ -9,7 +9,7 @@ if "%SPHINXBUILD%" == "" (
 )
 set SOURCEDIR=.
 set BUILDDIR=_build
-set SPHINXPROJ=eve_esi
+set SPHINXPROJ=eve_esi_jobs
 
 if "%1" == "" goto help
 

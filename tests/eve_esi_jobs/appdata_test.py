@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from eve_esi.app_data import load_schema
+from eve_esi_jobs.app_data import load_schema
 
 LOG_LEVEL = logging.INFO
 
@@ -27,7 +27,7 @@ def logger(test_log_path):
     ############################################################
     # NOTE add file handler to other library modules as needed #
     ############################################################
-    # async_logger = logging.getLogger("eve_esi")
+    # async_logger = logging.getLogger("eve_esi_jobs")
     # async_logger.addHandler(file_handler)
     return _logger
 
