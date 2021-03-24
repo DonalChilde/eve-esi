@@ -7,13 +7,12 @@ from pathlib import Path
 import pytest
 from rich import inspect
 
-# from eve_esi_jobs import action_json as AJ
-from eve_esi_jobs.jobs.jobs import (
+from eve_esi_jobs.job_to_action import (
     build_path_params,
     build_query_params,
     make_action_from_job,
 )
-from eve_esi_jobs.jobs.models import deserialize_json_job
+from eve_esi_jobs.models import deserialize_json_job
 from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
     AiohttpAction,
     AiohttpQueueWorker,

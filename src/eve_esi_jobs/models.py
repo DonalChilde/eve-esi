@@ -1,18 +1,17 @@
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Sequence, Type
+from typing import Any, Dict, List, Type
 
 from pydantic import BaseModel
-from rich import inspect
 
 from eve_esi_jobs.app_config import logger
-from eve_esi_jobs.esi_provider import EsiProvider
-from eve_esi_jobs.jobs.callbacks import SaveResultToFile
+from eve_esi_jobs.callbacks import SaveResultToFile
 from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
-    AiohttpAction,
     AiohttpActionCallback,
     ResponseToJson,
     ResponseToText,
 )
+
+# from rich import inspect
 
 
 @dataclass

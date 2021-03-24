@@ -7,9 +7,8 @@ from pathlib import Path
 import pytest
 from rich import inspect, print
 
-from eve_esi_jobs import action_callbacks
-from eve_esi_jobs.jobs.jobs import make_action_from_job
-from eve_esi_jobs.jobs.models import deserialize_json_job
+from eve_esi_jobs.job_to_action import make_action_from_job
+from eve_esi_jobs.models import deserialize_json_job
 from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
     AiohttpAction,
     AiohttpQueueWorker,

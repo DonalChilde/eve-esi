@@ -7,13 +7,11 @@ from pathlib import Path
 import pytest
 from rich import inspect, print
 
-from eve_esi_jobs.esi_provider import EsiProvider
 from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
     AiohttpQueueWorker,
     ResponseToJson,
     do_aiohttp_action_queue,
 )
-from eve_esi_jobs.pfmsoft.util.file.read_write import load_json
 
 LOG_LEVEL = logging.INFO
 

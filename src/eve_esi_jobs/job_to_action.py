@@ -4,7 +4,7 @@ from rich import inspect
 
 from eve_esi_jobs.app_config import logger
 from eve_esi_jobs.esi_provider import EsiProvider
-from eve_esi_jobs.jobs.models import CALLBACK_MANIFEST, EsiJob, JobCallback
+from eve_esi_jobs.models import CALLBACK_MANIFEST, EsiJob, JobCallback
 from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
     AiohttpAction,
     AiohttpActionCallback,
@@ -24,29 +24,6 @@ def make_action_from_job(esi_job: EsiJob, esi_provider: EsiProvider) -> AiohttpA
         context=build_context(esi_job, esi_provider),
     )
     return action
-
-
-# def make_action_from_json(
-#     action_json_raw: Dict, esi_provider: "EsiProvider"
-# ) -> AiohttpAction:
-#     action_json: EsiJob = EsiJob(**action_json_raw)
-#     # op_id = action_json["op_id"]
-#     # path_params = build_path_params(action_json, esi_provider)
-#     # query_params = build_query_params(action_json, esi_provider)
-#     # action_callbacks = build_action_callbacks(action_json, esi_provider)
-#     # retry_limit = action_json["retry_limit"]
-#     # request_kwargs = build_request_kwargs(action_json, esi_provider)
-#     # context = build_context(action_json, esi_provider)
-#     action = esi_provider.build_action(
-#         op_id=action_json.op_id,
-#         path_params=build_path_params(action_json, esi_provider),
-#         query_params=build_query_params(action_json, esi_provider),
-#         action_callbacks=build_action_callbacks(action_json, esi_provider),
-#         retry_limit=action_json.retry_limit,
-#         request_kwargs=build_request_kwargs(action_json, esi_provider),
-#         context=build_context(action_json, esi_provider),
-#     )
-#     return action
 
 
 def build_path_params(esi_job: EsiJob, esi_provider: EsiProvider) -> Dict:
