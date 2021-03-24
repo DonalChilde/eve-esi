@@ -5,8 +5,8 @@ from pathlib import Path
 import aiofiles
 from rich import print
 
-from eve_esi.app_config import logger
-from eve_esi.pfmsoft.util.async_actions.aiohttp import (
+from eve_esi_jobs.app_config import logger
+from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
     AiohttpAction,
     AiohttpActionCallback,
 )

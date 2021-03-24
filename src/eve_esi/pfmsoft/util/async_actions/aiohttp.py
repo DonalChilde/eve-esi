@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Sequence, Union
 
 from aiohttp import ClientResponse, ClientSession
 
-from eve_esi.pfmsoft.util.collection.misc import optional_object
+from eve_esi_jobs.pfmsoft.util.collection.misc import optional_object
 
 logger = logging.getLogger(__name__)
 

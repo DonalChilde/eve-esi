@@ -4,8 +4,8 @@ from typing import Dict, List, Optional, Sequence, Tuple
 
 from aiohttp import ClientSession
 
-from eve_esi.app_config import SCHEMA_URL, logger
-from eve_esi.pfmsoft.util.async_actions.aiohttp import (
+from eve_esi_jobs.app_config import SCHEMA_URL, logger
+from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
     AiohttpAction,
     AiohttpActionCallback,
     AiohttpActionMessenger,
@@ -14,7 +14,7 @@ from eve_esi.pfmsoft.util.async_actions.aiohttp import (
     LogSuccess,
     ResponseToJson,
 )
-from eve_esi.pfmsoft.util.collection.misc import optional_object
+from eve_esi_jobs.pfmsoft.util.collection.misc import optional_object
 
 DEFAULT_CALLBACKS: Dict[str, Sequence[AiohttpActionCallback]] = {
     "success": [ResponseToJson(), LogSuccess()],

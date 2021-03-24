@@ -4,9 +4,9 @@ from pathlib import Path
 
 import pytest
 
-from eve_esi.actions import EsiProvider
-from eve_esi.app_data import load_schema
-from eve_esi.pfmsoft.util.file.read_write import load_json
+from eve_esi_jobs.actions import EsiProvider
+from eve_esi_jobs.app_data import load_schema
+from eve_esi_jobs.pfmsoft.util.file.read_write import load_json
 
 # import logging
 # import os

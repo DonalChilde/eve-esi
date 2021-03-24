@@ -4,10 +4,10 @@ from typing import Any, Dict, List, Sequence, Type, Union
 from pydantic import BaseModel
 from rich import inspect
 
-from eve_esi.action_callbacks import SaveResultToFile
-from eve_esi.actions import EsiProvider
-from eve_esi.app_config import SCHEMA_URL, logger
-from eve_esi.pfmsoft.util.async_actions.aiohttp import (
+from eve_esi_jobs.action_callbacks import SaveResultToFile
+from eve_esi_jobs.actions import EsiProvider
+from eve_esi_jobs.app_config import SCHEMA_URL, logger
+from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
     AiohttpAction,
     AiohttpActionCallback,
     ResponseToJson,

@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from eve_esi import action_json as AJ
-from eve_esi.pfmsoft.util.async_actions.aiohttp import (
+from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
     AiohttpAction,
     AiohttpQueueWorker,
     do_aiohttp_action_queue,

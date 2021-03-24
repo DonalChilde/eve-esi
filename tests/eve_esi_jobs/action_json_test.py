@@ -98,3 +98,26 @@ def test_roundtrip_json():
     action = AJ.ActionJson(**action_json)
     assert action.op_id == "get_markets_region_id_history"
     inspect(action)
+
+
+def test_action_json_deserialize(test_app_dir):
+    file_path = test_app_dir / Path("data/test.json")
+    action_json = {
+        "op_id": "get_markets_region_id_history",
+        "retry_limit": 1,
+        "parameters": {"region_id": 10000002, "type_id": 34},
+        "result_callbacks": {
+            "success": [
+                {"callback_id": "response_to_json"},
+                {
+                    "callback_id": "save_json_to_file",
+                    "kwargs": {"file_path": file_path},
+                },
+            ]
+        },
+    }
+    deserialized = AJ.ActionJson(**action_json)
+    print(deserialized)
+    print(deserialized.json(indent=2))
+    assert deserialized.op_id == action_json["op_id"]
+    assert deserialized.retry_limit == action_json["retry_limit"]

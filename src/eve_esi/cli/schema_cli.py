@@ -9,14 +9,14 @@ from typing import Any, Dict
 
 import click
 
-from eve_esi.actions import get_schema
-from eve_esi.app_config import logger
-from eve_esi.app_data import save_json_to_app_data
-from eve_esi.pfmsoft.util.async_actions.aiohttp import (
+from eve_esi_jobs.actions import get_schema
+from eve_esi_jobs.app_config import logger
+from eve_esi_jobs.app_data import save_json_to_app_data
+from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
     AiohttpQueueWorker,
     do_aiohttp_action_queue,
 )
-from eve_esi.pfmsoft.util.file.read_write import load_json
+from eve_esi_jobs.pfmsoft.util.file.read_write import load_json
 
 
 @click.group()
