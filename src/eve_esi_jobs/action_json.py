@@ -49,7 +49,7 @@ class CallbackCollection(BaseModel):
 class ActionJson(BaseModel):
     op_id: str
     retry_limit: int
-    parameters: Dict[str, Union[str, int, float]] = {}
+    parameters: Dict[str, Any] = {}
     result_callbacks: CallbackCollection
 
 

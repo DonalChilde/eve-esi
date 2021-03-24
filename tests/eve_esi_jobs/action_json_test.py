@@ -87,25 +87,25 @@ def test_build_query_parameters(esi_provider):
     assert len(list(query_params.keys())) == 1
 
 
-def test_roundtrip_json():
-    action_json = {
-        "op_id": "get_markets_region_id_history",
-        "retry_limit": 1,
-        "parameters": {"region_id": 10000002, "type_id": 34},
-        "result_callbacks": {},
-        "additional_results": [],
-    }
-    action = AJ.ActionJson(**action_json)
-    assert action.op_id == "get_markets_region_id_history"
-    inspect(action)
+# def test_roundtrip_json():
+#     action_json = {
+#         "op_id": "get_markets_region_id_history",
+#         "retry_limit": 1,
+#         "parameters": {"region_id": 10000002, "type_id": 34},
+#         "result_callbacks": {},
+#         "additional_results": [],
+#     }
+#     action = AJ.ActionJson(**action_json)
+#     assert action.op_id == "get_markets_region_id_history"
+#     inspect(action)
 
 
-def test_action_json_deserialize(test_app_dir):
+def test_roundtrip_json(test_app_dir):
     file_path = test_app_dir / Path("data/test.json")
     action_json = {
         "op_id": "get_markets_region_id_history",
         "retry_limit": 1,
-        "parameters": {"region_id": 10000002, "type_id": 34},
+        "parameters": {"region_id": "10000002", "type_id": 34},
         "result_callbacks": {
             "success": [
                 {"callback_id": "response_to_json"},
@@ -121,3 +121,9 @@ def test_action_json_deserialize(test_app_dir):
     print(deserialized.json(indent=2))
     assert deserialized.op_id == action_json["op_id"]
     assert deserialized.retry_limit == action_json["retry_limit"]
+    assert deserialized.parameters == action_json["parameters"]
+    # assert deserialized.result_callbacks == action_json["result_callbacks"]
+    serialized = deserialized.dict()
+    assert serialized["op_id"] == action_json["op_id"]
+    assert serialized["retry_limit"] == action_json["retry_limit"]
+    assert serialized["parameters"] == action_json["parameters"]
