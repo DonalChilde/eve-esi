@@ -12,9 +12,9 @@ def resolve_file_callback_path_template(
     esi_job: "EsiJob", overrides: Optional[Dict] = None
 ):
     if overrides is not None:
-        combined_params = combine_dictionaries(esi_job.parameters, [overrides])
+        combined_params = combine_dictionaries(esi_job.get_params(), [overrides])
     else:
-        combined_params = esi_job.parameters
+        combined_params = esi_job.get_params()
     parent_path: str = combined_params.get("ewo_parent_path_template", "")
     for callback in esi_job.callback_iter():
         if callback.config is not None:
@@ -31,7 +31,11 @@ def resolve_file_callback_path_template(
 
 def pre_process_work_order(ewo: "EsiWorkOrder"):
     for esi_job in ewo.jobs:
-        resolve_file_callback_path_template(esi_job, ewo.get_params())
+        pre_process_job(esi_job, ewo.get_params())
+
+
+def pre_process_job(esi_job: "EsiJob", override_params: Dict):
+    resolve_file_callback_path_template(esi_job, override_params)
 
 
 def combine_dictionaries(base_dict: dict, overrides: Optional[Sequence[Dict]]) -> Dict:

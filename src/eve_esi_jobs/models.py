@@ -50,12 +50,13 @@ class CallbackCollection(BaseModel):
 
 
 class EsiJob(BaseModel):
-    # job_id: str
-    # name: str
+    id_: Optional[str]
+    name: Optional[str]
     op_id: str
     retry_limit: int
     parameters: Dict[str, Any] = {}
     result_callbacks: CallbackCollection
+    over_rides: Dict[str, Any] = {}
 
     def callback_iter(self) -> Iterable:
         return chain(
@@ -63,6 +64,30 @@ class EsiJob(BaseModel):
             self.result_callbacks.retry,
             self.result_callbacks.fail,
         )
+
+    def add_param_overrides(self, override: Dict):
+        """Update esi_job param overrides with additional values"""
+        self.over_rides.update(override)
+
+    def get_params(self):
+        """return a new combined dict of parameters, esi_job params, and overrides.
+
+        Overrides will overwrite params.
+        """
+        params = combine_dictionaries(
+            self.parameters, [self._build_parameters(), self.over_rides]
+        )
+
+        return params
+
+    def _build_parameters(self):
+        """make a dict of all the esi_job params usable in templates"""
+        params = {
+            "esi_job_name": self.name,
+            "esi_job_id": self.id_,
+            # "ewo_parent_path_template": self.parent_path_template,
+        }
+        return params
 
 
 class EsiWorkOrder(BaseModel):
