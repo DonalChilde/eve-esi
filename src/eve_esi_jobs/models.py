@@ -6,7 +6,13 @@ from typing import Any, Dict, Iterable, List, Optional, Type
 from pydantic import BaseModel
 
 from eve_esi_jobs.app_config import logger
-from eve_esi_jobs.callbacks import SaveJsonResultToFile, SaveResultToFile
+from eve_esi_jobs.callbacks import (
+    ResponseToEsiJob,
+    ResultToEsiJob,
+    SaveEsiJobToJson,
+    SaveJsonResultToFile,
+    SaveResultToFile,
+)
 from eve_esi_jobs.model_helpers import combine_dictionaries
 from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
     AiohttpActionCallback,
@@ -27,10 +33,19 @@ CALLBACK_MANIFEST: Dict[str, CallbackManifestEntry] = {
     "save_json_to_file": CallbackManifestEntry(
         callback=SaveJsonResultToFile, valid_targets=["success"]
     ),
-    "response_to_json": CallbackManifestEntry(
+    "save_esi_job_result_to_file": CallbackManifestEntry(
+        callback=SaveEsiJobToJson, valid_targets=["success", "fail"]
+    ),
+    "result_to_esi_job": CallbackManifestEntry(
+        callback=ResultToEsiJob, valid_targets=["success"]
+    ),
+    "response_to_esi_job": CallbackManifestEntry(
+        callback=ResponseToEsiJob, valid_targets=["success", "fail"]
+    ),
+    "result_to_json": CallbackManifestEntry(
         callback=ResponseToJson, valid_targets=["success"]
     ),
-    "response_to_text": CallbackManifestEntry(
+    "result_to_text": CallbackManifestEntry(
         callback=ResponseToText, valid_targets=["success"]
     ),
 }
@@ -57,6 +72,7 @@ class EsiJob(BaseModel):
     parameters: Dict[str, Any] = {}
     result_callbacks: CallbackCollection
     over_rides: Dict[str, Any] = {}
+    result: Dict = {}
 
     def callback_iter(self) -> Iterable:
         return chain(

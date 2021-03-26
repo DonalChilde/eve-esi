@@ -2,8 +2,10 @@
 import json
 from json.encoder import JSONEncoder
 from pathlib import Path
+from typing import TYPE_CHECKING, Any, Dict, Literal, Optional, Union
 
 import aiofiles
+import aiohttp
 
 from eve_esi_jobs.app_config import logger
 from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
@@ -11,9 +13,11 @@ from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
     AiohttpActionCallback,
 )
 
+if TYPE_CHECKING:
+    from eve_esi_jobs.models import EsiJob
+
 # TODO callback to add results data to EsiJob possibly instead of save to file
 # TODO callback to add response data to EsiJob?
-# TODO base class save to file, sub for json
 
 
 class SaveResultToFile(AiohttpActionCallback):
@@ -29,7 +33,7 @@ class SaveResultToFile(AiohttpActionCallback):
         # noop
 
     def get_data(self, caller: AiohttpAction, *args, **kwargs) -> str:
-        """expects data to be a string."""
+        """expects caller.result to be a string."""
         data = caller.result
         return data
 
@@ -54,17 +58,77 @@ class SaveJsonResultToFile(SaveResultToFile):
     def get_data(self, caller: AiohttpAction, *args, **kwargs) -> str:
         """expects data (caller.result in super) to be json."""
         data = super().get_data(caller, *args, **kwargs)
-        try:
-            json_data = json.dumps(data, indent=2)
-            return json_data
-        except json.JSONDecodeError as ex:
-            logger.exception(
-                "Unable to decode json data for %s, message was %s", caller, ex
+        json_data = json.dumps(data, indent=2)
+        return json_data
+
+
+class SaveEsiJobToJson(SaveJsonResultToFile):
+    """data location can be either caller or job"""
+
+    def __init__(
+        self,
+        file_path: str,
+        mode: str = "w",
+    ) -> None:
+        super().__init__(file_path, mode=mode)
+
+    def get_data(self, caller: AiohttpAction, *args, **kwargs) -> str:
+        """expects data (caller.result in super) to be json."""
+        # data: Optional[Dict] = {}
+        # if self.data_location == "job":
+        job: "EsiJob" = caller.context.get("esi_job", None)
+        if job is not None:
+            data = job.result
+        if data is None or not data:
+            logger.warning(
+                "Could not get result data from esi_job. job: %s action: %s",
+                job,
+                caller,
             )
-            return json.dumps(
-                {
-                    "error_msg": "Unable to decode json data for {}, message was {}".format(
-                        caller, ex
-                    )
-                }
-            )
+        json_data = json.dumps(data, indent=2)
+        return json_data
+
+
+class ResultToEsiJob(AiohttpActionCallback):
+    """Copies result to EsiJob for use outside of event loop"""
+
+    def __init__(self) -> None:
+        super().__init__()
+
+    async def do_callback(self, caller: AiohttpAction, *args, **kwargs):
+        esi_job: "EsiJob" = caller.context.get("esi_job", None)
+        if esi_job is None:
+            raise ValueError(f"EsiJob was not attatched to {caller}")
+        esi_job.result["result"] = caller.result
+
+
+class ResponseToEsiJob(AiohttpActionCallback):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
+    async def do_callback(self, caller: AiohttpAction, *args, **kwargs):
+        esi_job: "EsiJob" = caller.context.get("esi_job", None)
+        if esi_job is None:
+            raise ValueError(f"EsiJob was not attatched to {caller}")
+        if caller.response is not None:
+            esi_job.result["response"] = response_to_json(caller.response)
+
+
+def response_to_json(response: aiohttp.ClientResponse) -> Dict:
+    # TODO move this to AiohttpActions
+    data: Dict[str, Any] = {}
+    info = response.request_info
+    request_headers = []
+    for key, value in info.headers.items():
+        request_headers.append({key: value})
+    response_headers = [{key: value} for key, value in response.headers.items()]
+    data["version"] = response.version
+    data["status"] = response.status
+    data["reason"] = response.reason
+    data["method"] = info.method
+    data["url"] = str(info.url)
+    data["real_url"] = str(info.real_url)
+    data["cookies"] = response.cookies
+    data["request_headers"] = request_headers
+    data["response_headers"] = response_headers
+    return data
