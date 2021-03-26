@@ -1,27 +1,44 @@
 from pathlib import Path
-from typing import Dict, Optional
+from string import Template
+from typing import TYPE_CHECKING, Dict, Optional, Sequence
 
-from eve_esi_jobs.models import EsiJob, EsiWorkOrder
+from rich import inspect
 
-
-def deserialize_json_job(esi_job_json: Dict) -> EsiJob:
-    esi_job = EsiJob(**esi_job_json)
-    return esi_job
-
-
-def deserialize_json_work_order(esi_work_order_json: Dict) -> EsiWorkOrder:
-    esi_work_order = EsiWorkOrder(**esi_work_order_json)
-    return esi_work_order
+if TYPE_CHECKING:
+    from eve_esi_jobs.models import EsiJob, EsiWorkOrder
 
 
-def add_parent_path(esi_work_order: EsiWorkOrder, parent_path_override: Optional[Path]):
-    """work order pre processor. preprocessors should include override option to allow outside modification. ie cli override"""
-    if parent_path_override is not None:
-        parent_path = parent_path_override
+def resolve_file_callback_path_template(
+    esi_job: "EsiJob", overrides: Optional[Dict] = None
+):
+    if overrides is not None:
+        combined_params = combine_dictionaries(esi_job.parameters, [overrides])
     else:
-        parent_path = esi_work_order.parent_path
-    for esi_job in esi_work_order.jobs:
-        for callback in esi_job.callback_iter():
-            if callback.callback_id == "save_json_to_file":
-                full_path = parent_path / Path(callback.kwargs["file_path"])
-                callback.kwargs["file_path"] = full_path
+        combined_params = esi_job.parameters
+    parent_path: str = combined_params.get("ewo_parent_path_template", "")
+    for callback in esi_job.callback_iter():
+        if callback.config is not None:
+            file_path_template = callback.config.get("file_path_template", None)
+            if file_path_template is not None:
+                full_path_template_string = str(
+                    Path(parent_path) / Path(file_path_template)
+                )
+                template = Template(full_path_template_string)
+                resolved_string = template.substitute(combined_params)
+                callback.kwargs["file_path"] = resolved_string
+                # inspect(callback)
+
+
+def pre_process_work_order(ewo: "EsiWorkOrder"):
+    for esi_job in ewo.jobs:
+        resolve_file_callback_path_template(esi_job, ewo.get_params())
+
+
+def combine_dictionaries(base_dict: dict, overrides: Optional[Sequence[Dict]]) -> Dict:
+    # TODO move this to collection util - NB makes a new dict with optional overrides
+    combined_dict: Dict = {}
+    combined_dict.update(base_dict)
+    if overrides is not None:
+        for override in overrides:
+            combined_dict.update(override)
+    return combined_dict

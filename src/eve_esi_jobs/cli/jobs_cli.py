@@ -5,8 +5,8 @@ from typing import Dict, Optional, Sequence, Tuple
 import click
 
 from eve_esi_jobs.eve_esi_jobs import do_jobs
-from eve_esi_jobs.model_helpers import add_parent_path, deserialize_json_work_order
-from eve_esi_jobs.models import EsiJob, EsiWorkOrder
+from eve_esi_jobs.model_helpers import pre_process_work_order
+from eve_esi_jobs.models import EsiJob, EsiWorkOrder, deserialize_json_work_order
 from eve_esi_jobs.pfmsoft.util.file.read_write import load_json
 
 
@@ -30,7 +30,11 @@ def run(ctx, path_in, path_out, validate):
     path_in, path_out = validate_in_out_paths(path_in, path_out)
     esi_work_order_json = load_esi_work_order_json(path_in)
     esi_work_order = deserialize_json_work_order(esi_work_order_json)
-    add_parent_path(esi_work_order, path_out)
+    # TODO move the ewo initialization to helper, include overrides
+    # overrides = {"ewo_name": "override_name"}
+    overrides = {}
+    esi_work_order.add_param_overrides(overrides)
+    pre_process_work_order(esi_work_order)
     esi_provider = ctx.obj["esi_provider"]
     do_jobs(esi_work_order.jobs, esi_provider)
 

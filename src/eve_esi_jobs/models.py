@@ -7,6 +7,7 @@ from pydantic import BaseModel
 
 from eve_esi_jobs.app_config import logger
 from eve_esi_jobs.callbacks import SaveResultToFile
+from eve_esi_jobs.model_helpers import combine_dictionaries
 from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
     AiohttpActionCallback,
     ResponseToJson,
@@ -39,6 +40,7 @@ class JobCallback(BaseModel):
     callback_id: str
     args: List[Any] = []
     kwargs: Dict[str, Any] = {}
+    config: Optional[Dict[str, Any]]
 
 
 class CallbackCollection(BaseModel):
@@ -64,8 +66,40 @@ class EsiJob(BaseModel):
 
 
 class EsiWorkOrder(BaseModel):
-    # work_order_id: str
-    # work_order_name: str
+    id_: Optional[str]
+    name: str
     jobs: List[EsiJob]
-    parent_path: Path
-    over_ride: Dict[str, Any] = {}
+    parent_path_template: str
+    over_rides: Dict[str, Any] = {}
+
+    def add_param_overrides(self, override: Dict):
+        """Update ewo param overrides with additional values"""
+        self.over_rides.update(override)
+
+    def get_params(self):
+        """return a new combined dict of ewo params and overrides.
+
+        Overrides will overwrite params.
+        """
+        params = self._build_parameters()
+        params.update(self.over_rides)
+        return params
+
+    def _build_parameters(self):
+        """make a dict of all the ewo params usable in templates"""
+        params = {
+            "ewo_name": self.name,
+            "ewo_id": self.id_,
+            "ewo_parent_path_template": self.parent_path_template,
+        }
+        return params
+
+
+def deserialize_json_job(esi_job_json: Dict) -> EsiJob:
+    esi_job = EsiJob(**esi_job_json)
+    return esi_job
+
+
+def deserialize_json_work_order(esi_work_order_json: Dict) -> EsiWorkOrder:
+    esi_work_order = EsiWorkOrder(**esi_work_order_json)
+    return esi_work_order

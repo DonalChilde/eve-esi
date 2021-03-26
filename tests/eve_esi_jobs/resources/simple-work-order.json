@@ -1,4 +1,5 @@
 {
+  "name": "simple_workorder_1",
   "jobs": [
     {
       "op_id": "get_markets_region_id_history",
@@ -9,11 +10,13 @@
           { "callback_id": "response_to_json" },
           {
             "callback_id": "save_json_to_file",
-            "kwargs": { "file_path": "data/simple-result.json" }
+            "config": {
+              "file_path_template": "data/market-history/${region_id}-${type_id}.json"
+            }
           }
         ]
       }
     }
   ],
-  "parent_path": "./tmp/simple_work_order"
+  "parent_path_template": "./tmp/simple_work_order/${ewo_name}"
 }

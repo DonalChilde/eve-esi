@@ -4,8 +4,7 @@ from typing import Dict, List, Sequence
 
 from eve_esi_jobs.esi_provider import EsiProvider
 from eve_esi_jobs.job_to_action import make_action_from_job
-from eve_esi_jobs.model_helpers import deserialize_json_job
-from eve_esi_jobs.models import EsiJob
+from eve_esi_jobs.models import EsiJob, deserialize_json_job
 from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
     AiohttpQueueWorker,
     do_aiohttp_action_queue,
