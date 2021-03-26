@@ -27,7 +27,7 @@ class SaveResultToFile(AiohttpActionCallback):
     async def do_callback(self, caller: AiohttpAction, *args, **kwargs):
         self.refine_path(caller, args, kwargs)
         try:
-            self.file_path.parent.mkdir(parents=True)
+            self.file_path.parent.mkdir(parents=True, exist_ok=True)
             async with aiofiles.open(str(self.file_path), mode=self.mode) as file:
                 # with open(self.file_path, mode=self.mode) as file:
                 data = self.get_data(caller, args, kwargs)
