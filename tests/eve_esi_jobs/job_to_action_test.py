@@ -12,7 +12,7 @@ from eve_esi_jobs.job_to_action import (
     build_query_params,
     make_action_from_job,
 )
-from eve_esi_jobs.model_helpers import deserialize_json_job
+from eve_esi_jobs.models import deserialize_json_job
 from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
     AiohttpAction,
     AiohttpQueueWorker,
@@ -51,7 +51,7 @@ def test_make_action_from_json(esi_provider, caplog):
         "retry_limit": 1,
         "parameters": {"region_id": 10000002, "type_id": 34},
         "result_callbacks": {
-            "success": [{"callback_id": "response_to_json", "args": [], "kwargs": {}}],
+            "success": [{"callback_id": "result_to_json", "args": [], "kwargs": {}}],
             "retry": [],
             "fail": [],
         },
@@ -66,7 +66,6 @@ def test_make_action_from_json(esi_provider, caplog):
     assert action.result is not None
     assert len(action.result) > 5
     inspect(action.context["esi_job"])
-    assert action.context["esi_job"] == esi_job_json
 
 
 def test_build_path_parameters(esi_provider):

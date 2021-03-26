@@ -184,7 +184,7 @@ function pytest() { ## Takes Arguments. Run test suite with pytest.
 }
 
 function pytest:cov() { ## Takes arguments. Get test coverage with pytest-cov.
-    python3 -m pytest --cov test/ --cov-report term-missing "${@}"
+    python3 -m pytest --cov src/ --cov-report term-missing "${@}"
 }
 
 function tox() { ## Run tox.

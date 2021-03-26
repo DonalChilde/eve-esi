@@ -116,6 +116,9 @@ class ResponseToEsiJob(AiohttpActionCallback):
 
 def response_to_json(response: aiohttp.ClientResponse) -> Dict:
     # TODO move this to AiohttpActions
+    # TODO change name of Aiohttp callback from responsetojson to resulttojson
+    # TODO make this a callback, figure out how to assign. attrgetter and a list of args?
+
     data: Dict[str, Any] = {}
     info = response.request_info
     request_headers = []
