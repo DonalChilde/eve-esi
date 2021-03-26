@@ -6,7 +6,7 @@ from typing import Any, Dict, Iterable, List, Optional, Type
 from pydantic import BaseModel
 
 from eve_esi_jobs.app_config import logger
-from eve_esi_jobs.callbacks import SaveResultToFile
+from eve_esi_jobs.callbacks import SaveJsonResultToFile, SaveResultToFile
 from eve_esi_jobs.model_helpers import combine_dictionaries
 from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
     AiohttpActionCallback,
@@ -25,7 +25,7 @@ class CallbackManifestEntry:
 
 CALLBACK_MANIFEST: Dict[str, CallbackManifestEntry] = {
     "save_json_to_file": CallbackManifestEntry(
-        callback=SaveResultToFile, valid_targets=["success"]
+        callback=SaveJsonResultToFile, valid_targets=["success"]
     ),
     "response_to_json": CallbackManifestEntry(
         callback=ResponseToJson, valid_targets=["success"]
