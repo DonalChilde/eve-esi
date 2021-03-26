@@ -13,7 +13,7 @@ from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
 
 
 def do_jobs(esi_jobs: Sequence[EsiJob], esi_provider: EsiProvider, worker_count=1):
-    """ Mutates esi_jobs """
+    """ May mutate esi_jobs """
     workers = []
     for _ in range(worker_count):
         workers.append(AiohttpQueueWorker())

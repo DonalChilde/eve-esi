@@ -10,6 +10,10 @@ from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
     AiohttpActionCallback,
 )
 
+# TODO callback to add results data to EsiJob possibly instead of save to file
+# TODO callback to add response data to EsiJob?
+# TODO base class save to file, sub for json
+
 
 class SaveResultToFile(AiohttpActionCallback):
     def __init__(self, file_path: str, mode: str = "w") -> None:
