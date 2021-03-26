@@ -1,5 +1,7 @@
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Type
+from itertools import chain
+from pathlib import Path
+from typing import Any, Dict, Iterable, List, Optional, Type
 
 from pydantic import BaseModel
 
@@ -46,30 +48,24 @@ class CallbackCollection(BaseModel):
 
 
 class EsiJob(BaseModel):
+    # job_id: str
+    # name: str
     op_id: str
     retry_limit: int
     parameters: Dict[str, Any] = {}
     result_callbacks: CallbackCollection
 
-
-esi_job_json_format = {
-    "op_id": "value",
-    "retry_limit": 1,
-    "parameters": {},
-    "result_callbacks": {
-        "success": [
-            {
-                "callback_id": "id of callback",
-                "args": "list of arguments to callback",
-                "kwargs": {"key1": "value"},
-            }
-        ],
-        "fail": [],
-        "retry": [],
-    },
-}
+    def callback_iter(self) -> Iterable:
+        return chain(
+            self.result_callbacks.success,
+            self.result_callbacks.retry,
+            self.result_callbacks.fail,
+        )
 
 
-def deserialize_json_job(esi_job_json: Dict) -> EsiJob:
-    esi_job = EsiJob(**esi_job_json)
-    return esi_job
+class EsiWorkOrder(BaseModel):
+    # work_order_id: str
+    # work_order_name: str
+    jobs: List[EsiJob]
+    parent_path: Path
+    over_ride: Dict[str, Any] = {}
