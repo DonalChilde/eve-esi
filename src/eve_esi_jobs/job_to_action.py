@@ -130,5 +130,5 @@ def build_request_kwargs(esi_job: EsiJob, esi_provider: EsiProvider) -> Dict[str
 
 def build_context(esi_job: EsiJob, esi_provider: EsiProvider) -> Dict:
     context = {}
-    context["esi_job"] = esi_job.dict()
+    context["esi_job"] = esi_job
     return context
