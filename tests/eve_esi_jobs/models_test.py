@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 from rich import inspect, print
 
-from eve_esi_jobs.models import deserialize_json_job
+from eve_esi_jobs.model_helpers import deserialize_json_job
 
 LOG_LEVEL = logging.INFO
 

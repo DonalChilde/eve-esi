@@ -1,6 +1,8 @@
 """ fixtures """
+import json
 import logging
 import os
+from importlib import resources
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
@@ -37,10 +39,10 @@ APP_LOG_LEVEL = logging.INFO
 
 
 @pytest.fixture(scope="session")
-def esi_provider(test_log_path):
+def esi_provider(test_log_path, esi_schema):
     # logger = logger_(test_log_path)
-    schema = load_schema("latest")
-    provider: EsiProvider = EsiProvider(schema)
+    # schema = load_schema("latest")
+    provider: EsiProvider = EsiProvider(esi_schema)
     assert provider.schema is not None
     assert provider.schema["basePath"] == "/latest"
     # logger.info(
@@ -62,6 +64,15 @@ def test_log_path(test_app_dir):
 def test_app_dir(tmp_path_factory):
     app_dir_path = tmp_path_factory.mktemp("eve-esi-")
     return app_dir_path
+
+
+@pytest.fixture(scope="session")
+def esi_schema() -> dict:
+    with resources.open_text(
+        "tests.eve_esi_jobs.resources.schema", "esi_schema_1.7.15.json"
+    ) as schema_file:
+        schema = json.load(schema_file)
+        return schema
 
 
 # @pytest.fixture(scope="class")

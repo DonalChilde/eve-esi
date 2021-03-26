@@ -12,7 +12,7 @@ from eve_esi_jobs.job_to_action import (
     build_query_params,
     make_action_from_job,
 )
-from eve_esi_jobs.models import deserialize_json_job
+from eve_esi_jobs.model_helpers import deserialize_json_job
 from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
     AiohttpAction,
     AiohttpQueueWorker,
