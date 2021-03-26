@@ -1,0 +1,19 @@
+{
+  "jobs": [
+    {
+      "op_id": "get_markets_region_id_history",
+      "retry_limit": 1,
+      "parameters": { "region_id": 10000002, "type_id": 34 },
+      "result_callbacks": {
+        "success": [
+          { "callback_id": "response_to_json" },
+          {
+            "callback_id": "save_json_to_file",
+            "kwargs": { "file_path": "data/simple-result.json" }
+          }
+        ]
+      }
+    }
+  ],
+  "parent_path": "./tmp/simple_work_order"
+}
