@@ -2,7 +2,7 @@ from typing import Dict, List
 
 import click
 
-from eve_esi_jobs.actions import EsiProvider
+from eve_esi_jobs.esi_provider import EsiProvider
 from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import AiohttpAction
 
 

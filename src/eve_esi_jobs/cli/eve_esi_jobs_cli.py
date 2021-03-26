@@ -2,10 +2,10 @@
 
 import click
 
-from eve_esi_jobs.actions import EsiProvider
 from eve_esi_jobs.app_config import logger
 from eve_esi_jobs.app_data import load_schema
-from eve_esi_jobs.cli import history_cli, schema_cli
+from eve_esi_jobs.cli import history_cli, jobs_cli, schema_cli
+from eve_esi_jobs.esi_provider import EsiProvider
 
 # TODO Load schema from file, pass esiprovider through context to registered commands.
 # TODO error message if not found
@@ -25,3 +25,4 @@ def esi_main(ctx):
 
 esi_main.add_command(schema_cli.schema)
 esi_main.add_command(history_cli.history)
+esi_main.add_command(jobs_cli.jobs)
