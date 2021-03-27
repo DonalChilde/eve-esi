@@ -33,10 +33,9 @@ def run(ctx, path_in, path_out, validate):
     esi_work_order_json = load_esi_work_order_json(path_in)
     esi_work_order = deserialize_json_work_order(esi_work_order_json)
     if path_out is not None:
-        path_out = validate_output_path(path_out)
-        esi_work_order.parent_path_template = (
-            path_out / esi_work_order.parent_path_template
-        )
+        path_out: Path = validate_output_path(path_out)
+        output_path_string = str(path_out / Path(esi_work_order.parent_path_template))
+        overrides["ewo_parent_path_template"] = output_path_string
     esi_work_order.add_param_overrides(overrides)
     esi_provider = ctx.obj["esi_provider"]
     do_work_order(esi_work_order, esi_provider)

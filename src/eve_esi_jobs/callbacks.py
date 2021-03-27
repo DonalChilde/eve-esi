@@ -5,6 +5,7 @@ from typing import Any, Dict, Optional
 
 import aiofiles
 import aiohttp
+from rich import inspect
 
 from eve_esi_jobs.app_config import logger
 from eve_esi_jobs.models import EsiJob, EsiJobResult
@@ -37,7 +38,9 @@ class SaveResultToFile(AiohttpActionCallback):
         self.refine_path(caller, args, kwargs)
         try:
             self.file_path.parent.mkdir(parents=True, exist_ok=True)
-            async with aiofiles.open(str(self.file_path), mode=self.mode) as file:
+            async with aiofiles.open(
+                str(self.file_path), mode=self.mode
+            ) as file:  # type:ignore
                 # with open(self.file_path, mode=self.mode) as file:
                 data = self.get_data(caller, args, kwargs)
                 await file.write(data)
@@ -79,6 +82,7 @@ class SaveEsiJobToJson(SaveJsonResultToFile):
                 job,
                 caller,
             )
+        # inspect(data)
         json_string = json.dumps(data, indent=2)
         return json_string
 
