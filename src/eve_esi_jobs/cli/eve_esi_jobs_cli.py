@@ -18,9 +18,12 @@ from eve_esi_jobs.esi_provider import EsiProvider
 @click.pass_context
 def esi_main(ctx):
     ctx.obj = {}
-    schema = load_schema("latest")
-    esi_provider = EsiProvider(schema)
-    ctx.obj["esi_provider"] = esi_provider
+    try:
+        schema = load_schema("latest")
+        esi_provider = EsiProvider(schema)
+        ctx.obj["esi_provider"] = esi_provider
+    except Exception as ex:
+        click.echo("Esi schema was not found in App Data folder.")
 
 
 esi_main.add_command(schema_cli.schema)

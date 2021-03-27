@@ -1,7 +1,7 @@
 """Cli download and manipulation of schema
 TODO option to parse schema for versioned routes?
 TODO option to save multiple copies of schema, allow for choice
-    - this would require a certain ammount of dynamic validation.
+TODO this would require a certain ammount of dynamic validation.
 """
 import asyncio
 import json

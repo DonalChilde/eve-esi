@@ -4,7 +4,7 @@ import os
 
 import click
 
-APP_NAME = os.getenv("PFMSOFT_eve_esi_jobs_APP_NAME", "Eve-Esi")
+APP_NAME = os.getenv("PFMSOFT_eve_esi_jobs_APP_NAME", "Pfmsoft-Eve-Esi")
 logger = logging.getLogger(APP_NAME)
 APP_DIR = os.getenv(
     "PFMSOFT_eve_esi_jobs_APP_DIR", click.get_app_dir(APP_NAME, force_posix=True)
