@@ -3,8 +3,9 @@ from typing import Any, Dict, List, Optional, Sequence
 from rich import inspect
 
 from eve_esi_jobs.app_config import logger
+from eve_esi_jobs.callback_manifest import CALLBACK_MANIFEST
 from eve_esi_jobs.esi_provider import EsiProvider
-from eve_esi_jobs.models import CALLBACK_MANIFEST, EsiJob, JobCallback
+from eve_esi_jobs.models import EsiJob, JobCallback
 from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
     AiohttpAction,
     AiohttpActionCallback,

@@ -1,20 +1,17 @@
 """foo"""
 import json
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict
+from typing import Any, Dict, Optional
 
 import aiofiles
 import aiohttp
 
 from eve_esi_jobs.app_config import logger
+from eve_esi_jobs.models import EsiJob, EsiJobResult
 from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
     AiohttpAction,
     AiohttpActionCallback,
 )
-
-if TYPE_CHECKING:
-    from eve_esi_jobs.models import EsiJob
-
 
 # TODO callback to generate market history summary
 
@@ -73,19 +70,17 @@ class SaveEsiJobToJson(SaveJsonResultToFile):
 
     def get_data(self, caller: AiohttpAction, *args, **kwargs) -> str:
         """expects data (caller.result in super) to be json."""
-        # data: Optional[Dict] = {}
-        # if self.data_location == "job":
-        job: "EsiJob" = caller.context.get("esi_job", None)
+        job: EsiJob = caller.context.get("esi_job", None)
         if job is not None:
-            data = job.result
+            data = job.dict()
         if data is None or not data:
             logger.warning(
                 "Could not get result data from esi_job. job: %s action: %s",
                 job,
                 caller,
             )
-        json_data = json.dumps(data, indent=2)
-        return json_data
+        json_string = json.dumps(data, indent=2)
+        return json_string
 
 
 class ResultToEsiJob(AiohttpActionCallback):
@@ -98,7 +93,11 @@ class ResultToEsiJob(AiohttpActionCallback):
         esi_job: "EsiJob" = caller.context.get("esi_job", None)
         if esi_job is None:
             raise ValueError(f"EsiJob was not attatched to {caller}")
-        esi_job.result["result"] = caller.result
+        if esi_job.result is None:
+            esi_job.result = EsiJobResult()
+        esi_job.result.data = caller.result
+        esi_job.result.work_order_id = esi_job.get_params().get("ewo_id", "")  # type: ignore
+        esi_job.result.work_order_name = esi_job.get_params().get("ewo_name", "")  # type: ignore
 
 
 class ResponseToEsiJob(AiohttpActionCallback):
@@ -109,28 +108,35 @@ class ResponseToEsiJob(AiohttpActionCallback):
         esi_job: "EsiJob" = caller.context.get("esi_job", None)
         if esi_job is None:
             raise ValueError(f"EsiJob was not attatched to {caller}")
-        if caller.response is not None:
-            esi_job.result["response"] = response_to_json(caller.response)
+        # if caller.response is not None:
+        #     esi_job.result["response"] = response_to_json(caller.response)
+        if esi_job.result is None:
+            esi_job.result = EsiJobResult()
+        esi_job.result.response = response_to_json(caller.response)
+        esi_job.result.work_order_id = esi_job.get_params().get("ewo_id", "")  # type: ignore
+        esi_job.result.work_order_name = esi_job.get_params().get("ewo_name", "")  # type: ignore
 
 
-def response_to_json(response: aiohttp.ClientResponse) -> Dict:
+def response_to_json(response: Optional[aiohttp.ClientResponse]) -> Dict:
     # TODO move this to AiohttpActions
     # TODO change name of Aiohttp callback from responsetojson to resulttojson
     # TODO make this a callback, figure out how to assign. attrgetter and a list of args?
-
-    data: Dict[str, Any] = {}
-    info = response.request_info
-    request_headers = []
-    for key, value in info.headers.items():
-        request_headers.append({key: value})
-    response_headers = [{key: value} for key, value in response.headers.items()]
-    data["version"] = response.version
-    data["status"] = response.status
-    data["reason"] = response.reason
-    data["method"] = info.method
-    data["url"] = str(info.url)
-    data["real_url"] = str(info.real_url)
-    data["cookies"] = response.cookies
-    data["request_headers"] = request_headers
-    data["response_headers"] = response_headers
+    if response is not None:
+        data: Dict[str, Any] = {}
+        info = response.request_info
+        request_headers = []
+        for key, value in info.headers.items():
+            request_headers.append({key: value})
+        response_headers = [{key: value} for key, value in response.headers.items()]
+        data["version"] = response.version
+        data["status"] = response.status
+        data["reason"] = response.reason
+        data["method"] = info.method
+        data["url"] = str(info.url)
+        data["real_url"] = str(info.real_url)
+        data["cookies"] = response.cookies
+        data["request_headers"] = request_headers
+        data["response_headers"] = response_headers
+    else:
+        data = {"error": "response to json called before response recieved."}
     return data

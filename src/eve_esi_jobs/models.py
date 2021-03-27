@@ -1,54 +1,12 @@
-from dataclasses import dataclass, field
 from itertools import chain
-from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Type
+from typing import Any, Dict, Iterable, List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel  # pylint: disable=no-name-in-module
 
 from eve_esi_jobs.app_config import logger
-from eve_esi_jobs.callbacks import (
-    ResponseToEsiJob,
-    ResultToEsiJob,
-    SaveEsiJobToJson,
-    SaveJsonResultToFile,
-    SaveResultToFile,
-)
 from eve_esi_jobs.model_helpers import combine_dictionaries
-from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
-    AiohttpActionCallback,
-    ResponseToJson,
-    ResponseToText,
-)
 
 # from rich import inspect
-
-
-@dataclass
-class CallbackManifestEntry:
-    callback: Type[AiohttpActionCallback]
-    valid_targets: List[str] = field(default_factory=list)
-
-
-CALLBACK_MANIFEST: Dict[str, CallbackManifestEntry] = {
-    "save_result_to_json_file": CallbackManifestEntry(
-        callback=SaveJsonResultToFile, valid_targets=["success"]
-    ),
-    "save_esi_job_to_json_file": CallbackManifestEntry(
-        callback=SaveEsiJobToJson, valid_targets=["success", "fail"]
-    ),
-    "result_to_esi_job": CallbackManifestEntry(
-        callback=ResultToEsiJob, valid_targets=["success"]
-    ),
-    "response_to_esi_job": CallbackManifestEntry(
-        callback=ResponseToEsiJob, valid_targets=["success", "fail"]
-    ),
-    "result_to_json": CallbackManifestEntry(
-        callback=ResponseToJson, valid_targets=["success"]
-    ),
-    "result_to_text": CallbackManifestEntry(
-        callback=ResponseToText, valid_targets=["success"]
-    ),
-}
 
 
 class JobCallback(BaseModel):
@@ -64,6 +22,13 @@ class CallbackCollection(BaseModel):
     fail: List[JobCallback] = []
 
 
+class EsiJobResult(BaseModel):
+    work_order_name: Optional[str] = None
+    work_order_id: Optional[str] = None
+    data: Optional[Any] = None
+    response: Optional[Any] = None
+
+
 class EsiJob(BaseModel):
     id_: Optional[str]
     name: Optional[str]
@@ -72,7 +37,7 @@ class EsiJob(BaseModel):
     parameters: Dict[str, Any] = {}
     result_callbacks: CallbackCollection = CallbackCollection()
     over_rides: Dict[str, Any] = {}
-    result: Dict = {}
+    result: Optional[EsiJobResult] = None
 
     def callback_iter(self) -> Iterable:
         return chain(
