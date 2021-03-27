@@ -4,7 +4,7 @@ from typing import Any, Dict, Iterable, List, Optional
 from pydantic import BaseModel  # pylint: disable=no-name-in-module
 
 from eve_esi_jobs.app_config import logger
-from eve_esi_jobs.model_helpers import combine_dictionaries
+from eve_esi_jobs.collection_util import combine_dictionaries
 
 # from rich import inspect
 
@@ -100,13 +100,3 @@ class EsiWorkOrder(BaseModel):
             "ewo_parent_path_template": self.parent_path_template,
         }
         return params
-
-
-def deserialize_json_job(esi_job_json: Dict) -> EsiJob:
-    esi_job = EsiJob(**esi_job_json)
-    return esi_job
-
-
-def deserialize_json_work_order(esi_work_order_json: Dict) -> EsiWorkOrder:
-    esi_work_order = EsiWorkOrder(**esi_work_order_json)
-    return esi_work_order

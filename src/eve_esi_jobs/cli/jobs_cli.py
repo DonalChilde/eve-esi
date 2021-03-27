@@ -1,13 +1,11 @@
 import json
 from pathlib import Path
-from typing import Dict, Optional, Sequence, Tuple
+from typing import Dict
 
 import click
 
 from eve_esi_jobs import sample_work_orders
-from eve_esi_jobs.eve_esi_jobs import do_work_order
-from eve_esi_jobs.model_helpers import pre_process_work_order
-from eve_esi_jobs.models import EsiJob, EsiWorkOrder, deserialize_json_work_order
+from eve_esi_jobs.eve_esi_jobs import deserialize_json_work_order, do_work_order
 from eve_esi_jobs.pfmsoft.util.file.read_write import load_json, save_json
 
 

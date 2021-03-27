@@ -42,3 +42,13 @@ def get_worker_count(job_count, worker_count: Optional[int]) -> int:
     if worker_count is not None:
         worker_calc = worker_count
     return worker_calc
+
+
+def deserialize_json_job(esi_job_json: Dict) -> EsiJob:
+    esi_job = EsiJob(**esi_job_json)
+    return esi_job
+
+
+def deserialize_json_work_order(esi_work_order_json: Dict) -> EsiWorkOrder:
+    esi_work_order = EsiWorkOrder(**esi_work_order_json)
+    return esi_work_order

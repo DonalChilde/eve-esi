@@ -4,12 +4,12 @@ from typing import TYPE_CHECKING, Dict, Optional, Sequence
 
 from rich import inspect
 
-if TYPE_CHECKING:
-    from eve_esi_jobs.models import EsiJob, EsiWorkOrder
+from eve_esi_jobs.collection_util import combine_dictionaries
+from eve_esi_jobs.models import EsiJob, EsiWorkOrder
 
 
 def resolve_file_callback_path_template(
-    esi_job: "EsiJob", overrides: Optional[Dict] = None
+    esi_job: EsiJob, overrides: Optional[Dict] = None
 ):
     if overrides is not None:
         combined_params = combine_dictionaries(esi_job.get_params(), [overrides])
@@ -30,21 +30,11 @@ def resolve_file_callback_path_template(
                 # inspect(callback)
 
 
-def pre_process_work_order(ewo: "EsiWorkOrder"):
+def pre_process_work_order(ewo: EsiWorkOrder):
     for esi_job in ewo.jobs:
         pre_process_job(esi_job, ewo.get_params())
 
 
-def pre_process_job(esi_job: "EsiJob", override_params: Dict):
+def pre_process_job(esi_job: EsiJob, override_params: Dict):
     esi_job.add_param_overrides(override_params)
     resolve_file_callback_path_template(esi_job)
-
-
-def combine_dictionaries(base_dict: dict, overrides: Optional[Sequence[Dict]]) -> Dict:
-    # TODO move this to collection util - NB makes a new dict with optional overrides
-    combined_dict: Dict = {}
-    combined_dict.update(base_dict)
-    if overrides is not None:
-        for override in overrides:
-            combined_dict.update(override)
-    return combined_dict
