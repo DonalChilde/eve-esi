@@ -68,9 +68,9 @@ class EsiJob(BaseModel):
     id_: Optional[str]
     name: Optional[str]
     op_id: str
-    retry_limit: int
+    retry_limit: int = 5
     parameters: Dict[str, Any] = {}
-    result_callbacks: CallbackCollection
+    result_callbacks: CallbackCollection = CallbackCollection()
     over_rides: Dict[str, Any] = {}
     result: Dict = {}
 
@@ -108,9 +108,9 @@ class EsiJob(BaseModel):
 
 class EsiWorkOrder(BaseModel):
     id_: Optional[str]
-    name: str
-    jobs: List[EsiJob]
-    parent_path_template: str
+    name: str = ""
+    jobs: List[EsiJob] = []
+    parent_path_template: str = ""
     over_rides: Dict[str, Any] = {}
 
     def add_param_overrides(self, override: Dict):
