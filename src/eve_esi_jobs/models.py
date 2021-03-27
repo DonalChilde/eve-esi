@@ -30,10 +30,10 @@ class CallbackManifestEntry:
 
 
 CALLBACK_MANIFEST: Dict[str, CallbackManifestEntry] = {
-    "save_json_to_file": CallbackManifestEntry(
+    "save_result_to_json_file": CallbackManifestEntry(
         callback=SaveJsonResultToFile, valid_targets=["success"]
     ),
-    "save_esi_job_result_to_file": CallbackManifestEntry(
+    "save_esi_job_to_json_file": CallbackManifestEntry(
         callback=SaveEsiJobToJson, valid_targets=["success", "fail"]
     ),
     "result_to_esi_job": CallbackManifestEntry(
@@ -109,6 +109,7 @@ class EsiJob(BaseModel):
 class EsiWorkOrder(BaseModel):
     id_: Optional[str]
     name: str = ""
+    description: str = ""
     jobs: List[EsiJob] = []
     parent_path_template: str = ""
     over_rides: Dict[str, Any] = {}
