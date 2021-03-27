@@ -10,7 +10,13 @@ from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
     AiohttpActionCallback,
 )
 
+
 # FIXME default file name:${op_id}-${path parameters alpha sort?}-${isodate nanosecond}
+def validate_job(esi_job: EsiJob, esi_provider: EsiProvider):
+    # raise error if fail
+    # validate esi params
+    # instance callbacks to check valid args? build_action_callbacks
+    pass
 
 
 def make_action_from_job(esi_job: EsiJob, esi_provider: EsiProvider) -> AiohttpAction:
@@ -37,8 +43,8 @@ def build_path_params(esi_job: EsiJob, esi_provider: EsiProvider) -> Dict:
 
 
 def split_parameters(esi_job: EsiJob, split_id: str, esi_provider: EsiProvider) -> Dict:
+    # TODO refactor this to make more clear, add more validation?
     split_params = {}
-
     possible_parameters: Dict = esi_provider.op_id_lookup[esi_job.op_id].parameters
     for param_id, values in possible_parameters.items():
         param_location = values.get("in", None)
@@ -124,7 +130,7 @@ def build_request_kwargs(esi_job: EsiJob, esi_provider: EsiProvider) -> Dict[str
     # auth? expect to use oauth token
     request_kwargs: Dict[str, Any] = {}
     request_kwargs["params"] = build_query_params(esi_job, esi_provider)
-    request_kwargs["params"] = build_headers(esi_job, esi_provider)
+    request_kwargs["headers"] = build_headers(esi_job, esi_provider)
     return request_kwargs
 
 

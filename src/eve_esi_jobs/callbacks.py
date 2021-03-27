@@ -1,8 +1,7 @@
 """foo"""
 import json
-from json.encoder import JSONEncoder
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict
 
 import aiofiles
 import aiohttp
@@ -16,8 +15,8 @@ from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
 if TYPE_CHECKING:
     from eve_esi_jobs.models import EsiJob
 
-# TODO callback to add results data to EsiJob possibly instead of save to file
-# TODO callback to add response data to EsiJob?
+
+# TODO callback to generate market history summary
 
 
 class SaveResultToFile(AiohttpActionCallback):
