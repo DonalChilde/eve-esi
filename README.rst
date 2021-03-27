@@ -9,8 +9,8 @@ Eve Esi Jobs
 .. image:: https://img.shields.io/travis/DonalChilde/eve_esi_jobs.svg
         :target: https://travis-ci.com/DonalChilde/eve_esi_jobs
 
-.. image:: https://readthedocs.org/projects/eve-esi/badge/?version=latest
-        :target: https://eve-esi.readthedocs.io/en/latest/?version=latest
+.. image:: https://readthedocs.org/projects/eve-esi-jobs/badge/?version=latest
+        :target: https://eve-esi-jobs.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
 
