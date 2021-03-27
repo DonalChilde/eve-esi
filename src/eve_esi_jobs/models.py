@@ -66,7 +66,6 @@ class EsiJob(BaseModel):
         params = {
             "esi_job_name": self.name,
             "esi_job_id": self.id_,
-            # "ewo_parent_path_template": self.parent_path_template,
         }
         return params
 

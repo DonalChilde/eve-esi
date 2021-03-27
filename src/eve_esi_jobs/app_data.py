@@ -1,22 +1,21 @@
 """Loading and saving data to data dir
-
-Data directory format:
-app-data
-    static
-        schemas
-            schema-version
-                schema.json
-                <generated schema info>
-        data
-            schema-version
-            <static data>
-        manifest.json
-    dynamic
-        schema-version
-            history
-                <market history data>
-        manifest.json
 """
+# Data directory format:
+# app-data
+#     static
+#         schemas
+#             schema-version
+#                 schema.json
+#                 <generated schema info>
+#         data
+#             schema-version
+#             <static data>
+#         manifest.json
+#     dynamic
+#         schema-version
+#             history
+#                 <market history data>
+#         manifest.json
 # pylint: disable=empty-docstring, missing-function-docstring
 
 from pathlib import Path
@@ -96,13 +95,13 @@ def load_json_from_app_data(
         data = load_json(file_path)
     except Exception as ex:
         logger.error(
-            "Unable to load %s with params: %s to path %s Error message: %s",
+            "Unable to load %s with params: %s to path %s\nError message: %s",
             route_name,
             params,
             file_path,
             ex,
         )
-        return None
+        raise ex
     return data
 
 
