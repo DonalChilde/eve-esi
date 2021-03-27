@@ -58,7 +58,7 @@ def work_order_samples(ctx, path_out):
         sample_work_orders.result_to_job,
         sample_work_orders.result_to_file_and_response_to_json,
         sample_work_orders.result_and_response_to_job,
-        sample_work_orders.save_json_to_file,
+        sample_work_orders.result_to_file,
     ]
     click.echo(f"Sample Esi work orders will be saved to {output_path.resolve()}")
     for sample in sample_list:

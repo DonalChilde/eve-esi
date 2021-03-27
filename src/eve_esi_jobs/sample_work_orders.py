@@ -137,9 +137,9 @@ def result_and_response_to_job():
     return work_order
 
 
-def save_json_to_file():
+def result_to_file():
     work_order = models.EsiWorkOrder(
-        name="save_json_to_file",
+        name="result_to_file",
         parent_path_template="samples/order_output/${ewo_name}",
         description=("An example of saving the raw results to a json file."),
     )
