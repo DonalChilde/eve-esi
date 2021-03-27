@@ -17,11 +17,6 @@ def response_to_job():
         parameters={"region_id": 10000002, "type_id": 34},
     )
     work_order.jobs.append(job)
-    # work_order.name = "response_to_job"
-    # work_order.parent_path_template = "samples/order_output/${ewo_name}"
-    # job.op_id = "get_markets_region_id_history"
-    # job.retry_limit = 1
-    # job.parameters = {"region_id": 10000002, "type_id": 34}
     job.result_callbacks.success.append(
         models.JobCallback(callback_id="result_to_json")
     )
@@ -144,7 +139,7 @@ def result_and_response_to_job():
 
 def save_json_to_file():
     work_order = models.EsiWorkOrder(
-        name="result_and_response_to_job",
+        name="save_json_to_file",
         parent_path_template="samples/order_output/${ewo_name}",
         description=("An example of saving the raw results to a json file."),
     )

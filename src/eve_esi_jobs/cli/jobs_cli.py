@@ -55,9 +55,18 @@ def work_order_samples(ctx, path_out):
         output_path = output_path / Path("samples")
     else:
         output_path = Path("samples")
-    ewo = sample_work_orders.response_to_job()
-    file_path = output_path / Path(ewo.name).with_suffix(".json")
-    save_json(ewo.dict(), file_path, parents=True)
+    sample_list = [
+        sample_work_orders.response_to_job,
+        sample_work_orders.result_to_job,
+        sample_work_orders.result_to_file_and_response_to_json,
+        sample_work_orders.result_and_response_to_job,
+        sample_work_orders.save_json_to_file,
+    ]
+    click.echo(f"Sample Esi work orders will be saved to {output_path.resolve()}")
+    for sample in sample_list:
+        ewo = sample()
+        file_path = output_path / Path(ewo.name).with_suffix(".json")
+        save_json(ewo.dict(), file_path, parents=True)
 
 
 jobs.add_command(run)
