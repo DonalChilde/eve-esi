@@ -12,6 +12,7 @@
 #
 import os
 import sys
+from typing import Any, Dict
 
 sys.path.insert(0, os.path.abspath("../src"))
 
@@ -38,6 +39,7 @@ release = eve_esi_jobs.__version__
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "sphinx.ext.napoleon",
     "sphinx.ext.autodoc",
     "sphinx.ext.viewcode",
     "sphinx_autodoc_typehints",
@@ -108,7 +110,7 @@ htmlhelp_basename = "eve_esi_jobsdoc"
 
 # -- Options for LaTeX output ------------------------------------------
 
-latex_elements = {
+latex_elements: Dict[Any, Any] = {
     # The paper size ('letterpaper' or 'a4paper').
     #
     # 'papersize': 'letterpaper',
