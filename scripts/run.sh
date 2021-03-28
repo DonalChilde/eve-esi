@@ -67,9 +67,10 @@ function dist:release() { ## package and upload a release.
 }
 
 function docs:build() { ## Build documentation.
-    rm -f docs/$PACKAGE.rst
-	rm -f docs/modules.rst
-	sphinx-apidoc -o ./docs/ ./src/$PACKAGE
+    # rm -f docs/$PACKAGE.rst
+	# rm -f docs/modules.rst
+	# sphinx-apidoc -o ./docs/api -e ./src/$PACKAGE
+    # sphinx-apidoc -o ./docs/api -fMeET ./src/$PACKAGE
     sphinx-build -b html ./docs ./docs/_build
 }
 
