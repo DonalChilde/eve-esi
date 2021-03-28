@@ -1,10 +1,11 @@
 """Cli download and manipulation of schema
+
 TODO option to parse schema for versioned routes?
 TODO option to save multiple copies of schema, allow for choice
-TODO this would require a certain ammount of dynamic validation.
 """
 import asyncio
 import json
+from pathlib import Path
 from typing import Any, Dict
 
 import click
@@ -41,14 +42,18 @@ def schema():
 )
 @click.option("--source-url")
 def get(source, destination, source_url):
-    # TODO strat to pass back reasonable error messages.
-    # Maybe a try catch in download schema?
+    """Get an ESI schema from online or a local file, then save it to the App Data folder or output it to stdout"""
 
     if source == "download":
         schema_ = download_schema()
     if source == "file":
+        if source_url is None:
+            click.ClickException(
+                "You must provide a source-url when loading from a file."
+            )
         try:
-            schema_ = load_json(source_url)
+            source_path: Path = Path(source_url)
+            schema_ = load_json(source_path)
         except Exception as ex:
             raise click.ClickException(
                 f"Unable to load file from {source_url} with error message: {ex}"
@@ -65,16 +70,16 @@ def get(source, destination, source_url):
         print(json.dumps(schema_, indent=2))
 
 
-@click.command()
-@click.pass_context
-def test(ctx):
-    esi_provider = ctx.obj["esi_provider"]
+# @click.command()
+# @click.pass_context
+# def test(ctx):
+#     esi_provider = ctx.obj["esi_provider"]
 
-    print(json.dumps(esi_provider.op_id_lookup, indent=2))
+#     print(json.dumps(esi_provider.op_id_lookup, indent=2))
 
 
 schema.add_command(get)
-schema.add_command(test)
+# schema.add_command(test)
 
 
 def download_schema() -> Dict[Any, Any]:

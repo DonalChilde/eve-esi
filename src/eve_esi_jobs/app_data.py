@@ -1,21 +1,27 @@
-"""Loading and saving data to data dir
+"""Loading and saving data in the app data dir.
+
+manifest.json will support metadata for each file. Maybe include support for ETag,
+or somekind of caching expiration.
+
+| Data directory format:
+| app-data
+|     static
+|         schemas
+|             schema-version
+|                 schema.json
+|                 <generated schema info>
+|         data
+|             schema-version
+|             <static data>
+|         manifest.json
+|     dynamic
+|         schema-version
+|             history
+|                 <market history data>
+|         manifest.json
+
 """
-# Data directory format:
-# app-data
-#     static
-#         schemas
-#             schema-version
-#                 schema.json
-#                 <generated schema info>
-#         data
-#             schema-version
-#             <static data>
-#         manifest.json
-#     dynamic
-#         schema-version
-#             history
-#                 <market history data>
-#         manifest.json
+
 # pylint: disable=empty-docstring, missing-function-docstring
 
 from pathlib import Path
@@ -33,9 +39,11 @@ ROUTE: Dict = {
         "file_name": "schema-${version}.json",
     }
 }
+"""Routes to file locations by key"""
 
 
 def get_app_data_directory() -> Path:
+    """Get the app data directory."""
     directory = Path(APP_DIR)
     return directory
 
