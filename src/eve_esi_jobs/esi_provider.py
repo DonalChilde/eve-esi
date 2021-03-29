@@ -10,7 +10,7 @@ from pfmsoft.aiohttp_queue.callbacks import (
 )
 
 from eve_esi_jobs.app_config import SCHEMA_URL, logger
-from eve_esi_jobs.pfmsoft.util.collection.misc import optional_object
+from eve_esi_jobs.helpers import optional_object
 
 DEFAULT_CALLBACKS: ActionCallbacks = ActionCallbacks(
     success=[ResponseContentToJson(), LogSuccess()],

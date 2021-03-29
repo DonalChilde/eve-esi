@@ -15,7 +15,7 @@ from pfmsoft.aiohttp_queue.runners import queue_runner
 from eve_esi_jobs.app_config import logger
 from eve_esi_jobs.app_data import save_json_to_app_data
 from eve_esi_jobs.esi_provider import get_schema
-from eve_esi_jobs.pfmsoft.util.file.read_write import load_json
+from eve_esi_jobs.helpers import load_json
 
 
 @click.group()

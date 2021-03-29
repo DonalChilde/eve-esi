@@ -1,10 +1,10 @@
 from pathlib import Path
 from string import Template
-from typing import TYPE_CHECKING, Dict, Optional, Sequence
+from typing import Dict, Optional
 
 from rich import inspect
 
-from eve_esi_jobs.collection_util import combine_dictionaries
+from eve_esi_jobs.helpers import combine_dictionaries
 from eve_esi_jobs.models import EsiJob, EsiWorkOrder
 
 

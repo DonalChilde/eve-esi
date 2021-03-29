@@ -1,7 +1,7 @@
 """Main module."""
 import asyncio
 from math import ceil
-from typing import Dict, List, Optional, Sequence
+from typing import Dict, Optional, Sequence
 
 from pfmsoft.aiohttp_queue import AiohttpQueueWorkerFactory
 from pfmsoft.aiohttp_queue.runners import queue_runner

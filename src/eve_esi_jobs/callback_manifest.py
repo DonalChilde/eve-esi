@@ -6,7 +6,6 @@ from pfmsoft.aiohttp_queue.callbacks import (
     ResponseContentToJson,
     ResponseContentToText,
     SaveJsonResultToFile,
-    SaveResultToFile,
 )
 
 from eve_esi_jobs.callbacks import ResponseToEsiJob, ResultToEsiJob, SaveEsiJobToJson

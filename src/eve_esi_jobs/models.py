@@ -4,9 +4,7 @@ from typing import Any, Dict, Iterable, List, Optional
 from pydantic import BaseModel  # pylint: disable=no-name-in-module
 
 from eve_esi_jobs.app_config import logger
-from eve_esi_jobs.collection_util import combine_dictionaries
-
-# from rich import inspect
+from eve_esi_jobs.helpers import combine_dictionaries
 
 
 class JobCallback(BaseModel):
