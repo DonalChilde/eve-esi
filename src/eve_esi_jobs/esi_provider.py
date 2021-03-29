@@ -1,30 +1,29 @@
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Sequence, Tuple
 
-from eve_esi_jobs.app_config import SCHEMA_URL, logger
-from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
-    AiohttpAction,
-    AiohttpActionCallback,
-    AiohttpActionMessenger,
+from pfmsoft.aiohttp_queue import ActionCallbacks, AiohttpAction, AiohttpActionCallback
+from pfmsoft.aiohttp_queue.callbacks import (
     LogFail,
     LogRetry,
     LogSuccess,
-    ResponseToJson,
+    ResponseContentToJson,
 )
+
+from eve_esi_jobs.app_config import SCHEMA_URL, logger
 from eve_esi_jobs.pfmsoft.util.collection.misc import optional_object
 
-DEFAULT_CALLBACKS: Dict[str, Sequence[AiohttpActionCallback]] = {
-    "success": [ResponseToJson(), LogSuccess()],
-    "retry": [LogRetry()],
-    "fail": [LogFail()],
-}
+DEFAULT_CALLBACKS: ActionCallbacks = ActionCallbacks(
+    success=[ResponseContentToJson(), LogSuccess()],
+    retry=[LogRetry()],
+    fail=[LogFail()],
+)
 
 
 def get_schema():
     action: AiohttpAction = AiohttpAction(
         method="get",
         url_template=SCHEMA_URL,
-        action_callbacks=DEFAULT_CALLBACKS,
+        callbacks=DEFAULT_CALLBACKS,
     )
     return action
 
@@ -132,8 +131,7 @@ class EsiProvider:
         op_id: str,
         path_params,
         query_params,
-        action_callbacks: Optional[Dict[str, Sequence[AiohttpActionCallback]]] = None,
-        action_messengers: Optional[Sequence[AiohttpActionMessenger]] = None,
+        callbacks: Optional[ActionCallbacks] = None,
         retry_limit=5,
         request_kwargs: Optional[dict] = None,
         context: Optional[Dict] = None,
@@ -151,8 +149,7 @@ class EsiProvider:
             url_parameters=path_params,
             retry_limit=retry_limit,
             request_kwargs=request_kwargs,
-            action_callbacks=action_callbacks,
-            action_messengers=action_messengers,
+            callbacks=callbacks,
             context=context,
         )
         return action

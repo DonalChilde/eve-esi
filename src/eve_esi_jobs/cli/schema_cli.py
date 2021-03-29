@@ -9,14 +9,12 @@ from pathlib import Path
 from typing import Any, Dict
 
 import click
+from pfmsoft.aiohttp_queue import AiohttpQueueWorkerFactory
+from pfmsoft.aiohttp_queue.runners import queue_runner
 
 from eve_esi_jobs.app_config import logger
 from eve_esi_jobs.app_data import save_json_to_app_data
 from eve_esi_jobs.esi_provider import get_schema
-from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
-    AiohttpQueueWorker,
-    do_aiohttp_action_queue,
-)
 from eve_esi_jobs.pfmsoft.util.file.read_write import load_json
 
 
@@ -85,6 +83,6 @@ schema.add_command(get)
 def download_schema() -> Dict[Any, Any]:
     # where to put this? esi_provider? collection later defined?
     action = get_schema()
-    worker = AiohttpQueueWorker()
-    asyncio.run(do_aiohttp_action_queue([action], [worker]))
+    worker = AiohttpQueueWorkerFactory()
+    asyncio.run(queue_runner([action], [worker]))
     return action.result

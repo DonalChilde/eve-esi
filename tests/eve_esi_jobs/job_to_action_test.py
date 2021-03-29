@@ -1,6 +1,8 @@
 import asyncio
 import logging
 
+from pfmsoft.aiohttp_queue import AiohttpAction, AiohttpQueueWorkerFactory
+from pfmsoft.aiohttp_queue.runners import queue_runner
 from rich import inspect
 
 from eve_esi_jobs.eve_esi_jobs import deserialize_json_job
@@ -8,11 +10,6 @@ from eve_esi_jobs.job_to_action import (
     build_path_params,
     build_query_params,
     make_action_from_job,
-)
-from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
-    AiohttpAction,
-    AiohttpQueueWorker,
-    do_aiohttp_action_queue,
 )
 
 
@@ -33,8 +30,8 @@ def test_make_action_from_json(esi_provider, caplog):
     assert action.url_parameters == {"region_id": 10000002}
     assert action.request_kwargs["params"] == {"type_id": 34}
     assert isinstance(action, AiohttpAction)
-    worker = AiohttpQueueWorker()
-    asyncio.run(do_aiohttp_action_queue([action], [worker]))
+    worker = AiohttpQueueWorkerFactory()
+    asyncio.run(queue_runner([action], [worker]))
     assert action.result is not None
     assert len(action.result) > 5
     inspect(action.context["esi_job"])

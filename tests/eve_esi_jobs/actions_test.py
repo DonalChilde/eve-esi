@@ -1,12 +1,9 @@
 import asyncio
 
+from pfmsoft.aiohttp_queue import ActionCallbacks, AiohttpQueueWorkerFactory
+from pfmsoft.aiohttp_queue.callbacks import ResponseContentToJson
+from pfmsoft.aiohttp_queue.runners import queue_runner
 from rich import inspect
-
-from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
-    AiohttpQueueWorker,
-    ResponseToJson,
-    do_aiohttp_action_queue,
-)
 
 
 def test_get_action(esi_provider):
@@ -18,13 +15,13 @@ def test_get_action(esi_provider):
     op_id = "get_markets_region_id_history"
     path_params = {"region_id": 10000002}
     query_params = {"type_id": 34}
-    action_callbacks = {"success": [ResponseToJson()]}
+    callbacks = ActionCallbacks(success=[ResponseContentToJson()])
     action = esi_provider.build_action(
-        op_id, path_params, query_params, action_callbacks=action_callbacks
+        op_id, path_params, query_params, callbacks=callbacks
     )
     inspect(action)
     assert action is not None
-    worker = AiohttpQueueWorker()
-    asyncio.run(do_aiohttp_action_queue([action], [worker]))
+    worker = AiohttpQueueWorkerFactory()
+    asyncio.run(queue_runner([action], [worker]))
     assert action.result is not None
     assert len(action.result) > 5

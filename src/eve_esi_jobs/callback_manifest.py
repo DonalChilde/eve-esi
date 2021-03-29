@@ -1,18 +1,15 @@
 from dataclasses import dataclass, field
 from typing import Dict, List, Type
 
-from eve_esi_jobs.callbacks import (
-    ResponseToEsiJob,
-    ResultToEsiJob,
-    SaveEsiJobToJson,
+from pfmsoft.aiohttp_queue import AiohttpActionCallback
+from pfmsoft.aiohttp_queue.callbacks import (
+    ResponseContentToJson,
+    ResponseContentToText,
     SaveJsonResultToFile,
     SaveResultToFile,
 )
-from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
-    AiohttpActionCallback,
-    ResponseToJson,
-    ResponseToText,
-)
+
+from eve_esi_jobs.callbacks import ResponseToEsiJob, ResultToEsiJob, SaveEsiJobToJson
 
 
 @dataclass
@@ -35,9 +32,9 @@ CALLBACK_MANIFEST: Dict[str, CallbackManifestEntry] = {
         callback=ResponseToEsiJob, valid_targets=["success", "fail"]
     ),
     "result_to_json": CallbackManifestEntry(
-        callback=ResponseToJson, valid_targets=["success"]
+        callback=ResponseContentToJson, valid_targets=["success"]
     ),
     "result_to_text": CallbackManifestEntry(
-        callback=ResponseToText, valid_targets=["success"]
+        callback=ResponseContentToText, valid_targets=["success"]
     ),
 }

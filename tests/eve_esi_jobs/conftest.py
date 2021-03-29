@@ -36,6 +36,7 @@ def logger_(test_log_path):
     ############################################################
     # async_logger = logging.getLogger("eve_esi_jobs")
     # async_logger.addHandler(file_handler)
+    # async_logger.setLevel(log_level)
     return _logger
 
 

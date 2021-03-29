@@ -1,15 +1,12 @@
 from typing import Any, Dict, List, Optional, Sequence
 
+from pfmsoft.aiohttp_queue import ActionCallbacks, AiohttpAction, AiohttpActionCallback
 from rich import inspect
 
 from eve_esi_jobs.app_config import logger
 from eve_esi_jobs.callback_manifest import CALLBACK_MANIFEST
 from eve_esi_jobs.esi_provider import EsiProvider
 from eve_esi_jobs.models import EsiJob, JobCallback
-from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
-    AiohttpAction,
-    AiohttpActionCallback,
-)
 
 
 # FIXME default file name:${op_id}-${path parameters alpha sort?}-${isodate nanosecond}
@@ -25,7 +22,7 @@ def make_action_from_job(esi_job: EsiJob, esi_provider: EsiProvider) -> AiohttpA
         op_id=esi_job.op_id,
         path_params=build_path_params(esi_job, esi_provider),
         query_params=build_query_params(esi_job, esi_provider),
-        action_callbacks=build_action_callbacks(esi_job, esi_provider),
+        callbacks=build_action_callbacks(esi_job, esi_provider),
         retry_limit=esi_job.retry_limit,
         request_kwargs=build_request_kwargs(esi_job, esi_provider),
         context=build_context(esi_job, esi_provider),
@@ -72,18 +69,13 @@ def build_query_params(action_json: EsiJob, esi_provider: EsiProvider) -> Dict:
 
 def build_action_callbacks(
     esi_job: EsiJob, esi_provider: EsiProvider
-) -> Dict[str, Sequence[AiohttpActionCallback]]:
-    callbacks: Dict[str, Sequence[AiohttpActionCallback]] = {
-        "success": [],
-        "retry": [],
-        "fail": [],
-    }
-    callbacks["success"] = build_target_callbacks(
+) -> ActionCallbacks:
+    callbacks: ActionCallbacks = ActionCallbacks()
+    callbacks.success = build_target_callbacks(
         "success", esi_job.result_callbacks.success
     )
-    callbacks["retry"] = build_target_callbacks("retry", esi_job.result_callbacks.retry)
-    callbacks["fail"] = build_target_callbacks("fail", esi_job.result_callbacks.fail)
-    # inspect(callbacks)
+    callbacks.retry = build_target_callbacks("retry", esi_job.result_callbacks.retry)
+    callbacks.fail = build_target_callbacks("fail", esi_job.result_callbacks.fail)
     return callbacks
 
 

@@ -3,26 +3,25 @@ import asyncio
 from math import ceil
 from typing import Dict, List, Optional, Sequence
 
+from pfmsoft.aiohttp_queue import AiohttpQueueWorkerFactory
+from pfmsoft.aiohttp_queue.runners import queue_runner
+
 from eve_esi_jobs.esi_provider import EsiProvider
 from eve_esi_jobs.job_to_action import make_action_from_job
 from eve_esi_jobs.model_helpers import pre_process_work_order
 from eve_esi_jobs.models import EsiJob, EsiWorkOrder
-from eve_esi_jobs.pfmsoft.util.async_actions.aiohttp import (
-    AiohttpQueueWorker,
-    do_aiohttp_action_queue,
-)
 
 
 def do_jobs(esi_jobs: Sequence[EsiJob], esi_provider: EsiProvider, worker_count=1):
     """ May mutate esi_jobs """
     workers = []
     for _ in range(worker_count):
-        workers.append(AiohttpQueueWorker())
+        workers.append(AiohttpQueueWorkerFactory())
     actions = []
     for esi_job in esi_jobs:
         action = make_action_from_job(esi_job, esi_provider)
         actions.append(action)
-    asyncio.run(do_aiohttp_action_queue(actions, workers))
+    asyncio.run(queue_runner(actions, workers))
     return esi_jobs
 
 
