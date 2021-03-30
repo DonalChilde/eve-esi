@@ -161,5 +161,9 @@ def load_schema(version: str) -> Optional[Dict]:
         schema_parent = get_data_subpath("schema")
         versions = get_directory_versions(schema_parent)
         version = most_recent_version(versions)
-    schema = load_json_from_app_data("schema", {"version": version})
+    try:
+        schema = load_json_from_app_data("schema", {"version": version})
+    except Exception as ex:
+        logger.warning("Unable to load schema version %s, msg was %s", version, ex)
+        schema = None
     return schema

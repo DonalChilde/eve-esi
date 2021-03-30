@@ -5,8 +5,14 @@ from typing import Any, Dict, Optional
 
 import aiofiles
 import aiohttp
-from pfmsoft.aiohttp_queue import AiohttpAction, AiohttpActionCallback
-from pfmsoft.aiohttp_queue.callbacks import SaveJsonResultToFile
+from pfmsoft.aiohttp_queue import ActionCallbacks, AiohttpAction, AiohttpActionCallback
+from pfmsoft.aiohttp_queue.callbacks import (
+    LogFail,
+    LogRetry,
+    LogSuccess,
+    ResponseContentToJson,
+    SaveJsonResultToFile,
+)
 from rich import inspect
 
 from eve_esi_jobs.app_config import logger
@@ -14,7 +20,11 @@ from eve_esi_jobs.models import EsiJob, EsiJobResult
 
 # TODO callback to generate market history summary
 
-
+DEFAULT_CALLBACKS: ActionCallbacks = ActionCallbacks(
+    success=[ResponseContentToJson(), LogSuccess()],
+    retry=[LogRetry()],
+    fail=[LogFail()],
+)
 # class SaveResultToFile(AiohttpActionCallback):
 #     """Usually used after ResponseToText callback"""
 

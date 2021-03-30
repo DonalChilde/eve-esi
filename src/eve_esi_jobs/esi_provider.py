@@ -1,22 +1,14 @@
+import logging
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Sequence, Tuple
 
 from pfmsoft.aiohttp_queue import ActionCallbacks, AiohttpAction, AiohttpActionCallback
-from pfmsoft.aiohttp_queue.callbacks import (
-    LogFail,
-    LogRetry,
-    LogSuccess,
-    ResponseContentToJson,
-)
 
-from eve_esi_jobs.app_config import SCHEMA_URL, logger
+from eve_esi_jobs.app_config import SCHEMA_URL
+from eve_esi_jobs.callbacks import DEFAULT_CALLBACKS
 from eve_esi_jobs.helpers import optional_object
 
-DEFAULT_CALLBACKS: ActionCallbacks = ActionCallbacks(
-    success=[ResponseContentToJson(), LogSuccess()],
-    retry=[LogRetry()],
-    fail=[LogFail()],
-)
+logger = logging.getLogger(__name__)
 
 
 def get_schema():
@@ -40,6 +32,7 @@ class EsiProvider:
     """
     # TODO param validation
     # TODO default callbacks
+    # TODO need some sort of schema validation during creation of esi provider
 
 
     [extended_summary]
