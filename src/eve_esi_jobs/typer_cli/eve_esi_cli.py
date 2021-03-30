@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 @app.callback()
-def eve_esi_main(
+def eve_esi(
     ctx: typer.Context,
     version: str = typer.Option(
         "latest",

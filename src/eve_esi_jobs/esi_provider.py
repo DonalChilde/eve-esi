@@ -33,6 +33,7 @@ class EsiProvider:
     # TODO param validation
     # TODO default callbacks
     # TODO need some sort of schema validation during creation of esi provider
+    # TODO option to parse schema for versioned routes?
 
 
     [extended_summary]
