@@ -13,10 +13,22 @@ logger.addHandler(logging.NullHandler())
 
 
 def resolve_file_callback_path_template(
-    esi_job: EsiJob, overrides: Optional[Dict] = None
+    esi_job: EsiJob, template_overrides: Optional[Dict[str, str]] = None
 ):
-    if overrides is not None:
-        combined_params = combine_dictionaries(esi_job.get_params(), [overrides])
+    """Turn a template into a file path for callbacks.
+
+    Check :func:`JobCallback`.config for a `file_path_template` entry,
+    process the template and update the kwargs for the callback.
+
+    Args:
+        esi_job: A job with callbacks to check.
+        template_overrides: A dict of values to override those found
+            in the :class:`EsiJob`. Defaults to None.
+    """
+    if template_overrides is not None:
+        combined_params = combine_dictionaries(
+            esi_job.get_params(), [template_overrides]
+        )
     else:
         combined_params = esi_job.get_params()
     parent_path: str = combined_params.get("ewo_parent_path_template", "")
