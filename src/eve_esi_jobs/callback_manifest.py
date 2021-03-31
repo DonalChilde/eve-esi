@@ -1,3 +1,4 @@
+"""A lookup table of valid callbacks for Esi Jobs."""
 import logging
 from dataclasses import dataclass, field
 from typing import Dict, List, Type

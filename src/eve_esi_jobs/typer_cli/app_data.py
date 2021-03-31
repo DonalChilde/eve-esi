@@ -29,8 +29,8 @@ from pathlib import Path
 from string import Template
 from typing import Dict, List, Optional
 
-# from eve_esi_jobs.app_config import APP_DIR
-from eve_esi_jobs.helpers import load_json, optional_object, save_json
+from eve_esi_jobs.helpers import optional_object
+from eve_esi_jobs.typer_cli.cli_helpers import load_json, save_json
 
 logger = logging.getLogger(__name__)
 ROUTE: Dict = {

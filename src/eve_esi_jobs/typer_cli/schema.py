@@ -11,11 +11,11 @@ from pfmsoft.aiohttp_queue import ActionCallbacks, AiohttpAction
 from pfmsoft.aiohttp_queue.callbacks import ResponseContentToJson
 from pfmsoft.aiohttp_queue.runners import do_action_runner
 
-from eve_esi_jobs.helpers import save_json
 from eve_esi_jobs.typer_cli.app_config import EveEsiJobConfig
 
 # from eve_esi_jobs.app_config import SCHEMA_URL
 from eve_esi_jobs.typer_cli.app_data import save_json_to_app_data
+from eve_esi_jobs.typer_cli.cli_helpers import save_json
 
 logger = logging.getLogger(__name__)
 app = typer.Typer(
