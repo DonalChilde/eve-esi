@@ -68,8 +68,8 @@ class ResultToEsiJob(AiohttpActionCallback):
         if esi_job.result is None:
             esi_job.result = EsiJobResult()
         esi_job.result.data = caller.result
-        esi_job.result.work_order_id = esi_job.get_params().get("ewo_id", "")  # type: ignore
-        esi_job.result.work_order_name = esi_job.get_params().get("ewo_name", "")  # type: ignore
+        esi_job.result.work_order_id = esi_job.get_template_overrides().get("ewo_id", "")  # type: ignore
+        esi_job.result.work_order_name = esi_job.get_template_overrides().get("ewo_name", "")  # type: ignore
 
 
 class ResponseToEsiJob(AiohttpActionCallback):
@@ -85,5 +85,5 @@ class ResponseToEsiJob(AiohttpActionCallback):
         if esi_job.result is None:
             esi_job.result = EsiJobResult()
         esi_job.result.response = caller.response_meta_to_json()
-        esi_job.result.work_order_id = esi_job.get_params().get("ewo_id", "")  # type: ignore
-        esi_job.result.work_order_name = esi_job.get_params().get("ewo_name", "")  # type: ignore
+        esi_job.result.work_order_id = esi_job.get_template_overrides().get("ewo_id", "")  # type: ignore
+        esi_job.result.work_order_name = esi_job.get_template_overrides().get("ewo_name", "")  # type: ignore
