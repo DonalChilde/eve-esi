@@ -1,7 +1,13 @@
 import logging
 from pathlib import Path
 
-from eve_esi_jobs.eve_esi_jobs import deserialize_json_job
+from eve_esi_jobs.eve_esi_jobs import (
+    deserialize_json_job,
+    deserialize_json_work_order,
+    serialize_job,
+    serialize_work_order,
+)
+from eve_esi_jobs.sample_work_orders import result_and_response_to_job
 
 # import pytest
 # from rich import inspect, print
@@ -10,7 +16,7 @@ from eve_esi_jobs.eve_esi_jobs import deserialize_json_job
 LOG_LEVEL = logging.INFO
 
 
-def test_roundtrip_json(test_app_dir):
+def test_roundtrip_json_job(test_app_dir):
     # caplog.set_level(logging.INFO)
     file_path = test_app_dir / Path("data/test.json")
     action_json = {
@@ -41,8 +47,16 @@ def test_roundtrip_json(test_app_dir):
     assert deserialized.retry_limit == action_json["retry_limit"]
     assert deserialized.parameters == action_json["parameters"]
     assert deserialized.result_callbacks == action_json["result_callbacks"]
-    serialized = deserialized.dict()
+    serialized = serialize_job(deserialized)
     assert serialized["op_id"] == action_json["op_id"]
     assert serialized["retry_limit"] == action_json["retry_limit"]
     assert serialized["parameters"] == action_json["parameters"]
     assert serialized["result_callbacks"] == action_json["result_callbacks"]
+
+
+def test_roundtrip_work_order():
+    ewo = result_and_response_to_job()
+    serialized = serialize_work_order(ewo)
+    deserialized = deserialize_json_work_order(serialized)
+    assert ewo == deserialized
+    assert ewo.dict() == serialized

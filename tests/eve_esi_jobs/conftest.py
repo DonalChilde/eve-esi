@@ -61,7 +61,7 @@ def esi_provider(esi_schema):
     #     "created esi_provider with schema version: %s",
     #     provider.schema["info"]["version"],
     # )
-    assert provider.schema_version() == "1.7.15"
+    assert provider.schema_version == "1.7.15"
     return provider
 
 
