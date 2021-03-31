@@ -1,5 +1,6 @@
 """Main module."""
 import asyncio
+import logging
 from math import ceil
 from typing import Dict, Optional, Sequence
 
@@ -10,6 +11,9 @@ from eve_esi_jobs.esi_provider import EsiProvider
 from eve_esi_jobs.job_to_action import make_action_from_job
 from eve_esi_jobs.model_helpers import pre_process_work_order
 from eve_esi_jobs.models import EsiJob, EsiWorkOrder
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 def do_jobs(esi_jobs: Sequence[EsiJob], esi_provider: EsiProvider, worker_count=1):

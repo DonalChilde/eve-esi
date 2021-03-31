@@ -1,6 +1,11 @@
+import logging
+
 from rich import inspect
 
 from eve_esi_jobs import models
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 def response_to_job():

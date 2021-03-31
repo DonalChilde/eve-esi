@@ -7,10 +7,12 @@ from time import perf_counter_ns
 
 import typer
 
-from eve_esi_jobs.app_data import load_schema
 from eve_esi_jobs.esi_provider import EsiProvider
+from eve_esi_jobs.typer_cli.app_config import make_config_from_env
+from eve_esi_jobs.typer_cli.app_data import load_schema
 from eve_esi_jobs.typer_cli.jobs import app as jobs_app
 from eve_esi_jobs.typer_cli.schema import app as schema_app
+from eve_esi_jobs.typer_cli.schema import download_json
 
 app = typer.Typer()
 app.add_typer(jobs_app, name="jobs")
@@ -38,14 +40,18 @@ def eve_esi(
     ctx.obj = {}
     start = perf_counter_ns()
     ctx.obj["start_time"] = start
-    schema = load_schema(version)
+    logger.info("loading schema")
+    config = make_config_from_env()
+    ctx.obj["config"] = config
+    schema = None
+
+    schema = load_schema(config.app_dir, version)
+
     if schema is None:
-        typer.echo(
-            (
-                "ESI schema was not found. Use `eve-esi schema get` to download "
-                "the schema, or provide a valid local path to the schema."
-            )
-        )
+        typer.echo("Schema not found in app data, attempting to download.")
+        typer.echo("Consider using `eve-esi schema download` to save a local copy,")
+        typer.echo("or provide a valid local path to the schema.")
+        schema = download_json(config.schema_url)
     try:
         esi_provider = EsiProvider(schema)
     except Exception:

@@ -24,13 +24,15 @@ or somekind of caching expiration.
 
 # pylint: disable=empty-docstring, missing-function-docstring
 
+import logging
 from pathlib import Path
 from string import Template
 from typing import Dict, List, Optional
 
-from eve_esi_jobs.app_config import APP_DIR, logger
+# from eve_esi_jobs.app_config import APP_DIR
 from eve_esi_jobs.helpers import load_json, optional_object, save_json
 
+logger = logging.getLogger(__name__)
 ROUTE: Dict = {
     "schema": {
         "sub_path": "static/schemas",
@@ -41,10 +43,10 @@ ROUTE: Dict = {
 """Routes to file locations by key"""
 
 
-def get_app_data_directory() -> Path:
-    """Get the app data directory."""
-    directory = Path(APP_DIR)
-    return directory
+# def get_app_data_directory() -> Path:
+#     """Get the app data directory."""
+#     directory = Path(APP_DIR)
+#     return directory
 
 
 def get_data_subpath(route_name: str, params: Optional[Dict] = None) -> Path:
@@ -69,13 +71,13 @@ def get_data_filename(route_name: str, params: Optional[Dict] = None) -> str:
 
 
 def save_json_to_app_data(
-    data, route_name: str, params: Optional[Dict] = None
+    data, app_dir: Path, route_name: str, params: Optional[Dict] = None
 ) -> Optional[Path]:
-    app_data_path = get_app_data_directory()
+    # app_data_path = get_app_data_directory()
     sub_path = get_data_subpath(route_name, params)
     version = get_data_version(route_name, params)
     file_name = get_data_filename(route_name, params)
-    file_path = app_data_path / sub_path / version / Path(file_name)
+    file_path = app_dir / sub_path / version / Path(file_name)
     try:
         save_json(data, file_path, parents=True)
     except Exception as ex:
@@ -91,13 +93,13 @@ def save_json_to_app_data(
 
 
 def load_json_from_app_data(
-    route_name: str, params: Optional[Dict] = None
+    app_dir: Path, route_name: str, params: Optional[Dict] = None
 ) -> Optional[Dict]:
-    app_data_path = get_app_data_directory()
+    # app_data_path = get_app_data_directory()
     sub_path = get_data_subpath(route_name, params)
     version = get_data_version(route_name, params)
     file_name = get_data_filename(route_name, params)
-    file_path = app_data_path / sub_path / version / Path(file_name)
+    file_path = app_dir / sub_path / version / Path(file_name)
     try:
         data = load_json(file_path)
     except Exception as ex:
@@ -156,14 +158,23 @@ def most_recent_version(versions: List[str]) -> str:
     return versions[0]
 
 
-def load_schema(version: str) -> Optional[Dict]:
+def load_schema(app_dir: Path, version: str) -> Optional[Dict]:
     if version == "latest":
         schema_parent = get_data_subpath("schema")
         versions = get_directory_versions(schema_parent)
         version = most_recent_version(versions)
     try:
-        schema = load_json_from_app_data("schema", {"version": version})
+        schema = load_json_from_app_data(app_dir, "schema", {"version": version})
     except Exception as ex:
         logger.warning("Unable to load schema version %s, msg was %s", version, ex)
         schema = None
     return schema
+
+
+# def get_schema(url):
+#     action: AiohttpAction = AiohttpAction(
+#         method="get",
+#         url_template=SCHEMA_URL,
+#         callbacks=DEFAULT_CALLBACKS,
+#     )
+#     return action

@@ -1,3 +1,5 @@
+import os
+
 from typer.testing import CliRunner
 
 from eve_esi_jobs.typer_cli.eve_esi_cli import app
@@ -12,14 +14,9 @@ def test_command_line_interface():
     help_result = runner.invoke(app, ["--help"])
     assert help_result.exit_code == 0
     assert "[OPTIONS] COMMAND [ARGS]" in help_result.output
+    # assert False
 
 
-# def test_hello():
-#     """Test the hello command."""
-#     runner = CliRunner()
-#     result = runner.invoke(cli.eve_esi_main, ["hello", "Foo"])
-#     assert result.exit_code == 0
-#     assert "Hello Foo" in result.output
-#     help_result = runner.invoke(cli.eve_esi_main, ["--help"])
-#     assert help_result.exit_code == 0
-#     assert "--help  Show this message and exit." in help_result.output
+def test_env_settings():
+    testing = os.getenv("PFMSOFT_eve_esi_jobs_TESTING", "Not Set")
+    assert testing == "True"

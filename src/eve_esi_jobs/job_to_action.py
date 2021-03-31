@@ -1,14 +1,15 @@
+import logging
 from typing import Any, Dict, List, Optional, Sequence
 
 from pfmsoft.aiohttp_queue import ActionCallbacks, AiohttpAction, AiohttpActionCallback
 from rich import inspect
 
-from eve_esi_jobs.app_config import logger
 from eve_esi_jobs.callback_manifest import CALLBACK_MANIFEST
 from eve_esi_jobs.esi_provider import EsiProvider
 from eve_esi_jobs.models import EsiJob, JobCallback
 
-
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 # FIXME default file name:${op_id}-${path parameters alpha sort?}-${isodate nanosecond}
 def validate_job(esi_job: EsiJob, esi_provider: EsiProvider):
     # raise error if fail

@@ -4,16 +4,18 @@ import json
 import logging
 from pathlib import Path
 from time import perf_counter_ns
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional
 
 import typer
 from pfmsoft.aiohttp_queue import ActionCallbacks, AiohttpAction
 from pfmsoft.aiohttp_queue.callbacks import ResponseContentToJson
 from pfmsoft.aiohttp_queue.runners import do_action_runner
 
-from eve_esi_jobs.app_config import SCHEMA_URL
-from eve_esi_jobs.app_data import save_json_to_app_data
 from eve_esi_jobs.helpers import save_json
+from eve_esi_jobs.typer_cli.app_config import EveEsiJobConfig
+
+# from eve_esi_jobs.app_config import SCHEMA_URL
+from eve_esi_jobs.typer_cli.app_data import save_json_to_app_data
 
 logger = logging.getLogger(__name__)
 app = typer.Typer(
@@ -24,7 +26,11 @@ app = typer.Typer(
 @app.command()
 def download(
     ctx: typer.Context,
-    url: str = typer.Option(SCHEMA_URL, "--url", help="The url to ESI schema."),
+    url: str = typer.Option(
+        "https://esi.evetech.net/latest/swagger.json",
+        "--url",
+        help="The url to ESI schema.",
+    ),
     destination: str = typer.Option(
         "app-data",
         "-d",
@@ -35,13 +41,15 @@ def download(
     ),
 ):
     """Download a schema, use --help for more options."""
+    config: EveEsiJobConfig = ctx.obj["config"]
+    url = config.schema_url
     schema: Optional[Dict] = download_json(url)
     if schema is None:
         typer.BadParameter(f"Unable to download schema from {url}")
     if destination == "app-data":
         version = schema["info"]["version"]
         params = {"version": version}
-        file_path = save_json_to_app_data(schema, "schema", params)
+        file_path = save_json_to_app_data(schema, config.app_dir, "schema", params)
         typer.echo(f"Schema saved to {file_path}")
         typer.Exit()
     elif destination == "stdout":

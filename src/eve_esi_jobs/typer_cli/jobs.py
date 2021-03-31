@@ -12,6 +12,7 @@ from eve_esi_jobs.eve_esi_jobs import deserialize_json_work_order, do_work_order
 from eve_esi_jobs.helpers import load_json, save_json
 
 app = typer.Typer(help="""Work with Esi Jobs and Work Orders.\n\nmore info.""")
+logger = logging.getLogger(__name__)
 
 
 @app.command()

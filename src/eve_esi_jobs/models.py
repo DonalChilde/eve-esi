@@ -1,10 +1,13 @@
+import logging
 from itertools import chain
 from typing import Any, Dict, Iterable, List, Optional
 
 from pydantic import BaseModel  # pylint: disable=no-name-in-module
 
-from eve_esi_jobs.app_config import logger
 from eve_esi_jobs.helpers import combine_dictionaries
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 class JobCallback(BaseModel):

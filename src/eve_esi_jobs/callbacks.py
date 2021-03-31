@@ -1,5 +1,6 @@
 """foo"""
 import json
+import logging
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -15,9 +16,10 @@ from pfmsoft.aiohttp_queue.callbacks import (
 )
 from rich import inspect
 
-from eve_esi_jobs.app_config import logger
 from eve_esi_jobs.models import EsiJob, EsiJobResult
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 # TODO callback to generate market history summary
 
 DEFAULT_CALLBACKS: ActionCallbacks = ActionCallbacks(

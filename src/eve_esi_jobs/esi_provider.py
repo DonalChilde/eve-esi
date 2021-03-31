@@ -4,20 +4,12 @@ from typing import Dict, List, Optional, Sequence, Tuple
 
 from pfmsoft.aiohttp_queue import ActionCallbacks, AiohttpAction, AiohttpActionCallback
 
-from eve_esi_jobs.app_config import SCHEMA_URL
+# from eve_esi_jobs.app_config import SCHEMA_URL
 from eve_esi_jobs.callbacks import DEFAULT_CALLBACKS
 from eve_esi_jobs.helpers import optional_object
 
 logger = logging.getLogger(__name__)
-
-
-def get_schema():
-    action: AiohttpAction = AiohttpAction(
-        method="get",
-        url_template=SCHEMA_URL,
-        callbacks=DEFAULT_CALLBACKS,
-    )
-    return action
+logger.addHandler(logging.NullHandler())
 
 
 @dataclass

@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 from string import Template
 from typing import Dict, Optional
@@ -6,6 +7,9 @@ from rich import inspect
 
 from eve_esi_jobs.helpers import combine_dictionaries
 from eve_esi_jobs.models import EsiJob, EsiWorkOrder
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 def resolve_file_callback_path_template(

@@ -1,3 +1,6 @@
+import logging
+import os
+
 from typer.testing import CliRunner
 
 from eve_esi_jobs.typer_cli.eve_esi_cli import app
@@ -19,12 +22,15 @@ def test_schema():
     result = runner.invoke(app, ["schema"])
     assert result.exit_code == 0
     assert "Usage: eve-esi schema [OPTIONS] COMMAND [ARGS]" in result.output
-    help_result = runner.invoke(app, ["--help"])
+    help_result = runner.invoke(app, ["schema", "--help"])
     assert help_result.exit_code == 0
     assert "Usage: eve-esi schema [OPTIONS] COMMAND [ARGS]" in help_result.output
+    print(os.getenv("PFMSOFT_eve_esi_jobs_TESTING", "Not set"))
+    assert False
 
 
-def test_download():
+def test_download(test_app_dir, monkeypatch):
+    # set_env(test_app_dir, monkeypatch)
     runner = CliRunner()
     result = runner.invoke(app, ["schema", "download"])
     print(result.output)
@@ -33,3 +39,10 @@ def test_download():
     help_result = runner.invoke(app, ["schema", "download", "--help"])
     assert help_result.exit_code == 0
     assert "eve-esi schema download [OPTIONS]" in help_result.output
+    assert False
+
+
+def set_env(test_app_dir, monkeypatch):
+    monkeypatch.setenv("PFMSOFT_eve_esi_jobs_TESTING", "True")
+    monkeypatch.setenv("PFMSOFT_eve_esi_jobs_LOG_LEVEL", str(logging.INFO))
+    monkeypatch.setenv("PFMSOFT_eve_esi_jobs_APP_DIR", str(test_app_dir))

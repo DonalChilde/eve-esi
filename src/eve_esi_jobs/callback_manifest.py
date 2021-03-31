@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass, field
 from typing import Dict, List, Type
 
@@ -9,6 +10,9 @@ from pfmsoft.aiohttp_queue.callbacks import (
 )
 
 from eve_esi_jobs.callbacks import ResponseToEsiJob, ResultToEsiJob, SaveEsiJobToJson
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 @dataclass

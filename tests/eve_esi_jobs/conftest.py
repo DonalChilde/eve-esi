@@ -4,9 +4,12 @@ import logging
 from importlib import resources
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
+from typing import Optional
 
 import pytest
+from rich import inspect
 
+from eve_esi_jobs import logger as app_logger
 from eve_esi_jobs.esi_provider import EsiProvider
 
 APP_LOG_LEVEL = logging.INFO
@@ -17,19 +20,11 @@ def logger_(test_log_path):
     log_level = logging.DEBUG
     log_file_name = f"{__name__}.log"
     _logger = logging.getLogger(__name__)
-    log_path: Path = test_log_path / Path("test-logs")
-    log_path.mkdir(parents=True, exist_ok=True)
-    file_handler = RotatingFileHandler(
-        log_path / Path(log_file_name), maxBytes=102400, backupCount=10
-    )
-    format_string = (
-        "%(asctime)s %(levelname)s:%(funcName)s: "
-        "%(message)s [in %(pathname)s:%(lineno)d]"
-    )
-    file_handler.setFormatter(logging.Formatter(format_string))
-    file_handler.setLevel(log_level)
-    _logger.addHandler(file_handler)
-    # _logger.addHandler(RichHandler()
+    log_dir_path: Path = test_log_path / Path("test-logs")
+    log_dir_path.mkdir(parents=True, exist_ok=True)
+    log_file_path = log_dir_path / Path(log_file_name)
+    handler = file_handler(log_file_path)
+    _logger.addHandler(handler)
     _logger.setLevel(log_level)
     ############################################################
     # NOTE add file handler to other library modules as needed #
@@ -38,6 +33,21 @@ def logger_(test_log_path):
     # async_logger.addHandler(file_handler)
     # async_logger.setLevel(log_level)
     return _logger
+
+
+def file_handler(
+    file_path: Path,
+    log_level: int = logging.WARNING,
+    format_string: Optional[str] = None,
+):
+    handler = RotatingFileHandler(file_path, maxBytes=102400, backupCount=10)
+    format_string = (
+        "%(asctime)s %(levelname)s:%(funcName)s: "
+        "%(message)s [in %(pathname)s:%(lineno)d]"
+    )
+    handler.setFormatter(logging.Formatter(format_string))
+    handler.setLevel(log_level)
+    return handler
 
 
 @pytest.fixture(scope="session")
@@ -89,7 +99,17 @@ def esi_schema_(logger) -> dict:
 
 @pytest.fixture(autouse=True)
 def env_setup(monkeypatch, test_app_dir):
+    # app_logger.setLevel(APP_LOG_LEVEL)
+    # for handler in app_logger.handlers:
+    #     if isinstance(handler, logging.FileHandler):
+    #         app_logger.handlers.remove(handler)
+    #     handler.setLevel(APP_LOG_LEVEL)
+
     # print("In test env setup")
     monkeypatch.setenv("PFMSOFT_eve_esi_jobs_TESTING", "True")
     monkeypatch.setenv("PFMSOFT_eve_esi_jobs_LOG_LEVEL", str(APP_LOG_LEVEL))
     monkeypatch.setenv("PFMSOFT_eve_esi_jobs_APP_DIR", str(test_app_dir))
+    # log_file_path = test_app_dir / Path("esi-test.log")
+    # new_handler = file_handler(log_file_path, log_level=APP_LOG_LEVEL)
+    # app_logger.addHandler(new_handler)
+    # inspect(app_logger)
