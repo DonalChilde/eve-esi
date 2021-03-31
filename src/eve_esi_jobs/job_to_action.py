@@ -11,6 +11,8 @@ from eve_esi_jobs.models import EsiJob, JobCallback
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 # FIXME default file name:${op_id}-${path parameters alpha sort?}-${isodate nanosecond}
+
+
 def validate_job(esi_job: EsiJob, esi_provider: EsiProvider):
     # raise error if fail
     # validate esi params

@@ -25,13 +25,14 @@ def resolve_file_callback_path_template(
         template_overrides: A dict of values to override those found
             in the :class:`EsiJob`. Defaults to None.
     """
+    # FIXME test with empty ewo_parent_path_template
     if template_overrides is not None:
-        combined_params = combine_dictionaries(
-            esi_job.get_params(), [template_overrides]
+        template_values = combine_dictionaries(
+            esi_job.get_template_overrides(), [template_overrides]
         )
     else:
-        combined_params = esi_job.get_params()
-    parent_path: str = combined_params.get("ewo_parent_path_template", "")
+        template_values = esi_job.get_template_overrides()
+    parent_path: str = template_values.get("ewo_parent_path_template", "")
     # inspect(combined_params)
     for callback in esi_job.callback_iter():
         if callback.config is not None:
@@ -41,16 +42,16 @@ def resolve_file_callback_path_template(
                     Path(parent_path) / Path(file_path_template)
                 )
                 template = Template(full_path_template_string)
-                resolved_string = template.substitute(combined_params)
+                resolved_string = template.substitute(template_values)
                 callback.kwargs["file_path"] = resolved_string
                 # inspect(callback)
 
 
 def pre_process_work_order(ewo: EsiWorkOrder):
     for esi_job in ewo.jobs:
-        pre_process_job(esi_job, ewo.get_params())
+        pre_process_job(esi_job, ewo.get_template_overrides())
 
 
-def pre_process_job(esi_job: EsiJob, override_params: Dict):
-    esi_job.add_param_overrides(override_params)
-    resolve_file_callback_path_template(esi_job)
+def pre_process_job(esi_job: EsiJob, template_overrides: Dict):
+    # esi_job.add_template_overrides(override_params)
+    resolve_file_callback_path_template(esi_job, template_overrides)

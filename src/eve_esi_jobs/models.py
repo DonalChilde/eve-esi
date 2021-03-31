@@ -37,33 +37,34 @@ class EsiJob(BaseModel):
     retry_limit: int = 5
     parameters: Dict[str, Any] = {}
     result_callbacks: CallbackCollection = CallbackCollection()
-    over_rides: Dict[str, Any] = {}
+    template_overrides: Dict[str, Any] = {}
     result: Optional[EsiJobResult] = None
 
     def callback_iter(self) -> Iterable:
+        """An iterator that chains all the callbacks"""
         return chain(
             self.result_callbacks.success,
             self.result_callbacks.retry,
             self.result_callbacks.fail,
         )
 
-    def add_param_overrides(self, override: Dict):
-        """Update esi_job param overrides with additional values"""
-        self.over_rides.update(override)
+    def add_template_overrides(self, override: Dict):
+        """Update esi_job.template_over_rides with additional values"""
+        self.template_overrides.update(override)
 
-    def get_params(self):
-        """return a new combined dict of parameters, esi_job params, and overrides.
+    def get_template_overrides(self):
+        """return a new combined dict of esi_job parameters, and template_overrides.
 
-        Overrides will overwrite params.
+        Overrides will overwrite local parameters.
         """
         params = combine_dictionaries(
-            self.parameters, [self._build_parameters(), self.over_rides]
+            self.parameters, [self._build_parameters(), self.template_overrides]
         )
 
         return params
 
     def _build_parameters(self):
-        """make a dict of all the esi_job params usable in templates"""
+        """make a dict of all the esi_job parameters usable in templates"""
         params = {
             "esi_job_name": self.name,
             "esi_job_id": self.id_,
@@ -77,23 +78,23 @@ class EsiWorkOrder(BaseModel):
     description: str = ""
     jobs: List[EsiJob] = []
     parent_path_template: str = ""
-    over_rides: Dict[str, Any] = {}
+    template_overrides: Dict[str, Any] = {}
 
-    def add_param_overrides(self, override: Dict):
-        """Update ewo param overrides with additional values"""
-        self.over_rides.update(override)
+    def add_template_overrides(self, override: Dict):
+        """Update EsiWorkOrder template_overrides with additional values"""
+        self.template_overrides.update(override)
 
-    def get_params(self):
-        """return a new combined dict of ewo params and overrides.
+    def get_template_overrides(self):
+        """return a new combined dict of EsiWorkOrder parameters and and template_overrides.
 
-        Overrides will overwrite params.
+        template_overrides will overwrite parameters.
         """
         params = self._build_parameters()
-        params.update(self.over_rides)
+        params.update(self.template_overrides)
         return params
 
     def _build_parameters(self):
-        """make a dict of all the ewo params usable in templates"""
+        """make a dict of all the EsiWorkOrder parameters usable in templates"""
         params = {
             "ewo_name": self.name,
             "ewo_id": self.id_,
