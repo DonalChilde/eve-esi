@@ -63,12 +63,15 @@ def browse(
 
 
 @app.command()
-def list_op_ids(ctx: typer.Context, switch: str = typer.Argument("all")):
-    """List available op_ids"""
+def list_op_ids(
+    ctx: typer.Context,
+    output: str = typer.Argument("list", help="use json for json output"),
+):
+    """List available op_ids, add json for json output."""
     esi_provider: EsiProvider = ctx.obj["esi_provider"]
     op_id_keys = list(esi_provider.op_id_lookup)
     op_id_keys.sort()
-    if switch == "json":
+    if output == "json":
         op_ids = json.dumps(op_id_keys, indent=2)
     else:
         op_ids = "\n".join(op_id_keys)
