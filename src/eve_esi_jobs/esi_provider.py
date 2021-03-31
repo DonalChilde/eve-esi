@@ -15,10 +15,11 @@ logger.addHandler(logging.NullHandler())
 @dataclass
 class Op_IdLookup:
     method: str
+    description: str
     path: str
     path_template: str
     url_template: str
-    base_paths: List[str] = field(default_factory=list)
+    alternate_routes: List[str] = field(default_factory=list)
     parameters: Dict = field(default_factory=dict)
 
 
@@ -52,13 +53,14 @@ class EsiProvider:
                 op_id = method_schema["operationId"]
                 path_template = self.make_path_template(path)
                 url_template = self.make_url_template(host, base_path, path_template)
-                base_paths = self.make_base_paths("")
+                alternate_routes = self.make_alternate_routes("")
                 lookup[op_id] = Op_IdLookup(
                     method=method,
+                    description=method_schema["description"],
                     path=path,
                     path_template=path_template,
                     url_template=url_template,
-                    base_paths=base_paths,
+                    alternate_routes=alternate_routes,
                     parameters=self.make_op_id_params(path, method),
                 )
         return lookup
@@ -104,10 +106,10 @@ class EsiProvider:
         url_template = "https://" + host + base_path + path_template
         return url_template
 
-    def make_base_paths(self, description):
+    def make_alternate_routes(self, description):
         """Parse possible base paths from description."""
         # FIXME add parsing
-        return ["/latest"]
+        return [""]
 
     # def lookup_url_template(self, op_id) -> Tuple[str, str]:
     #     data = self.op_id_lookup.get(op_id, None)
