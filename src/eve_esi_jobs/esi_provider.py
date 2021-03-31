@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from pfmsoft.aiohttp_queue import ActionCallbacks, AiohttpAction, AiohttpActionCallback
 
@@ -17,6 +17,8 @@ class Op_IdLookup:
     method: str
     path: str
     path_template: str
+    url_template: str
+    base_paths: List[str] = field(default_factory=list)
     parameters: Dict = field(default_factory=dict)
 
 
@@ -24,8 +26,8 @@ class EsiProvider:
     """
     # TODO param validation
     # TODO default callbacks
-    # TODO need some sort of schema validation during creation of esi provider
     # TODO option to parse schema for versioned routes?
+    # TODO option to use `latest` or highest versioned route.
 
 
     [extended_summary]
@@ -33,36 +35,41 @@ class EsiProvider:
 
     def __init__(self, schema):
         self.schema = schema
+        self.schema_version = schema["info"]["version"]
         self.op_id_lookup: Dict[str, Op_IdLookup] = self.make_op_id_lookup(self.schema)
-        for op_id in self.op_id_lookup:
-            self.op_id_lookup[op_id].parameters = self.make_op_id_params(op_id)
+        # for op_id in self.op_id_lookup:
+        #     self.op_id_lookup[op_id].parameters = self.make_op_id_params(op_id)
 
-    def schema_version(self) -> str:
-        return self.schema["info"]["version"]
+    # def schema_version(self) -> str:
+    #     return self.schema["info"]["version"]
 
     def make_op_id_lookup(self, schema) -> Dict[str, Op_IdLookup]:
         lookup = {}
+        host = schema["host"]
+        base_path = schema["basePath"]
         for path, path_schema in schema["paths"].items():
             for method, method_schema in path_schema.items():
                 op_id = method_schema["operationId"]
+                path_template = self.make_path_template(path)
+                url_template = self.make_url_template(host, base_path, path_template)
+                base_paths = self.make_base_paths("")
                 lookup[op_id] = Op_IdLookup(
                     method=method,
                     path=path,
-                    path_template=self.make_path_template(path),
-                    parameters={},
+                    path_template=path_template,
+                    url_template=url_template,
+                    base_paths=base_paths,
+                    parameters=self.make_op_id_params(path, method),
                 )
         return lookup
 
-    def make_op_id_params(
-        self,
-        op_id: str,
-    ) -> Dict:
+    def make_op_id_params(self, path: str, method: str) -> Dict:
         # params_example = {
-        #     "parameters": {"param_name": {"attribute_name": "attribute value"}}
+        # "param_name": {"attribute_name": "attribute value"}}
         # }
 
         op_id_params: Dict = {}
-        for param in self.operation_parameters(op_id):
+        for param in self.operation_parameters(path, method):
             ref_check = param.get("$ref", None)
             if ref_check is None:
                 op_id_params[param["name"]] = param
@@ -86,43 +93,71 @@ class EsiProvider:
     def common_parameters(self) -> Dict:
         return self.schema["parameters"]
 
-    def operation_parameters(self, op_id) -> List[Dict]:
-        path = self.op_id_lookup[op_id].path
-        method = self.op_id_lookup[op_id].method
+    def operation_parameters(self, path, method) -> List[Dict]:
         parameters = self.schema["paths"][path][method]["parameters"]
         return parameters
 
     def make_path_template(self, path: str) -> str:
         return path.replace("{", "${")
 
-    def lookup_url_template(self, op_id) -> Tuple[str, str]:
-        data = self.op_id_lookup.get(op_id, None)
-        if data is None:
-            raise NotImplementedError(f"missing data for {op_id}")
-        method = data.method
-        # TODO handle route version changes
-        url_template = (
-            "https://"
-            + self.schema["host"]
-            + self.schema["basePath"]
-            + data.path_template
-        )
-        return (method, url_template)
+    def make_url_template(self, host, base_path, path_template):
+        url_template = "https://" + host + base_path + path_template
+        return url_template
+
+    def make_base_paths(self, description):
+        """Parse possible base paths from description."""
+        # FIXME add parsing
+        return ["/latest"]
+
+    # def lookup_url_template(self, op_id) -> Tuple[str, str]:
+    #     data = self.op_id_lookup.get(op_id, None)
+    #     if data is None:
+    #         raise NotImplementedError(f"missing data for {op_id}")
+    #     method = data.method
+    #     # TODO handle route version changes
+    #     url_template = (
+    #         "https://"
+    #         + self.schema["host"]
+    #         + self.schema["basePath"]
+    #         + data.path_template
+    #     )
+    #     return (method, url_template)
 
     def validate_params(self, op_id, path_params, query_params) -> bool:
         return True
 
-    def build_action(
+    def build_action_from_op_id(
         self,
         op_id: str,
-        path_params,
-        query_params,
+        path_params: Dict[str, Any],
+        query_params: Dict[str, Any],
         callbacks: Optional[ActionCallbacks] = None,
-        retry_limit=5,
+        retry_limit: int = 5,
         request_kwargs: Optional[dict] = None,
         context: Optional[Dict] = None,
     ) -> AiohttpAction:
-        method, url_template = self.lookup_url_template(op_id)
+        """
+        Build an AiohttpAction from an op_id.
+
+        [extended_summary]
+
+        Args:
+            op_id: [description]
+            path_params: [description]
+            query_params: [description]
+            callbacks: [description]. Defaults to None.
+            retry_limit: [description]. Defaults to 5.
+            request_kwargs: [description]. Defaults to None.
+            context: [description]. Defaults to None.
+
+        Raises:
+            NotImplementedError: [description]
+
+        Returns:
+            [type]: [description]
+        """
+        op_id_info = self.op_id_lookup[op_id]
+        # method, url_template = self.lookup_url_template(op_id)
         if not self.validate_params(op_id, path_params, query_params):
             raise NotImplementedError(
                 "Error validating params, this should be move to validation function."
@@ -130,8 +165,8 @@ class EsiProvider:
         request_kwargs = optional_object(request_kwargs, dict)
         request_kwargs["params"] = query_params
         action = AiohttpAction(
-            method,
-            url_template,
+            op_id_info.method,
+            op_id_info.url_template,
             url_parameters=path_params,
             retry_limit=retry_limit,
             request_kwargs=request_kwargs,

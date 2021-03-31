@@ -21,7 +21,7 @@ def validate_job(esi_job: EsiJob, esi_provider: EsiProvider):
 
 
 def make_action_from_job(esi_job: EsiJob, esi_provider: EsiProvider) -> AiohttpAction:
-    action = esi_provider.build_action(
+    action = esi_provider.build_action_from_op_id(
         op_id=esi_job.op_id,
         path_params=build_path_params(esi_job, esi_provider),
         query_params=build_query_params(esi_job, esi_provider),

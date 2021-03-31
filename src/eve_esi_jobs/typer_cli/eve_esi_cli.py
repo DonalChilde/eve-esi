@@ -66,7 +66,7 @@ def eve_esi(
         )
     ctx.obj["esi_provider"] = esi_provider
     typer.echo(
-        f"Loaded ESI schema version {esi_provider.schema_version()} from app data\n"
+        f"Loaded ESI schema version {esi_provider.schema_version} from app data\n"
     )
 
 
