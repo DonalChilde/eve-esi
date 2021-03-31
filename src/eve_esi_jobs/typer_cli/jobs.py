@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 def run(
     ctx: typer.Context,
     path_in: str = typer.Argument(..., help="Path to Esi Work Order json"),
-    path_out: Optional[str] = typer.Option(
+    path_out: Optional[str] = typer.Argument(
         None, help="Path to be prepended to the Esi Work Order path."
     ),
     dry_run: bool = typer.Option(
