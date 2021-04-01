@@ -8,13 +8,13 @@ from pfmsoft.aiohttp_queue.callbacks import (
     ResponseContentToJson,
     ResponseContentToText,
     SaveJsonResultToFile,
+    SaveListOfDictResultToCSVFile,
 )
 
 from eve_esi_jobs.callbacks import (
     ResponseToEsiJob,
     ResultToEsiJob,
-    SaveEsiJobToJson,
-    SaveResultToCSVFile,
+    SaveEsiJobToJsonFile,
 )
 
 logger = logging.getLogger(__name__)
@@ -28,14 +28,14 @@ class CallbackManifestEntry:
 
 
 CALLBACK_MANIFEST: Dict[str, CallbackManifestEntry] = {
-    "save_result_to_json_file": CallbackManifestEntry(
+    "save_json_result_to_file": CallbackManifestEntry(
         callback=SaveJsonResultToFile, valid_targets=["success"]
     ),
-    "save_result_to_csv_file": CallbackManifestEntry(
-        callback=SaveResultToCSVFile, valid_targets=["success"]
+    "save_list_of_dict_result_to_csv_file": CallbackManifestEntry(
+        callback=SaveListOfDictResultToCSVFile, valid_targets=["success"]
     ),
     "save_esi_job_to_json_file": CallbackManifestEntry(
-        callback=SaveEsiJobToJson, valid_targets=["success", "fail"]
+        callback=SaveEsiJobToJsonFile, valid_targets=["success", "fail"]
     ),
     "result_to_esi_job": CallbackManifestEntry(
         callback=ResultToEsiJob, valid_targets=["success"]
@@ -43,10 +43,10 @@ CALLBACK_MANIFEST: Dict[str, CallbackManifestEntry] = {
     "response_to_esi_job": CallbackManifestEntry(
         callback=ResponseToEsiJob, valid_targets=["success", "fail"]
     ),
-    "result_to_json": CallbackManifestEntry(
+    "response_content_to_json": CallbackManifestEntry(
         callback=ResponseContentToJson, valid_targets=["success"]
     ),
-    "result_to_text": CallbackManifestEntry(
+    "response_content_to_text": CallbackManifestEntry(
         callback=ResponseContentToText, valid_targets=["success"]
     ),
 }

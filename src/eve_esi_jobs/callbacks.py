@@ -30,67 +30,67 @@ DEFAULT_CALLBACKS: ActionCallbacks = ActionCallbacks(
 )
 
 
-class SaveResultToCSVFile(AiohttpActionCallback):
-    """Save the result to a CSV file.
+# class SaveResultToCSVFile(AiohttpActionCallback):
+#     """Save the result to a CSV file.
 
-    Expects the result to be a List[Dict].
-    """
+#     Expects the result to be a List[Dict].
+#     """
 
-    # FIXME move this to Aiohttp-Queue
-    def __init__(
-        self,
-        file_path: str,
-        mode: str = "w",
-        field_names: Optional[List[str]] = None,
-        additional_fields: Dict = None,
-    ) -> None:
-        super().__init__()
-        self.file_path = Path(file_path)
-        self.mode = mode
-        self.field_names = field_names
-        self.additional_fields = additional_fields
+#     # FIXME move this to Aiohttp-Queue
+#     def __init__(
+#         self,
+#         file_path: str,
+#         mode: str = "w",
+#         field_names: Optional[List[str]] = None,
+#         additional_fields: Dict = None,
+#     ) -> None:
+#         super().__init__()
+#         self.file_path = Path(file_path)
+#         self.mode = mode
+#         self.field_names = field_names
+#         self.additional_fields = additional_fields
 
-    def refine_path(self, caller: AiohttpAction, *args, **kwargs):
-        """Refine the file path. Data from the AiohttpAction is available for use here."""
-        # pass
+#     def refine_path(self, caller: AiohttpAction, *args, **kwargs):
+#         """Refine the file path. Data from the AiohttpAction is available for use here."""
+#         # pass
 
-    def get_data(self, caller: AiohttpAction, *args, **kwargs) -> List[Dict]:
-        """expects caller.result to be a List[Dict]."""
-        _ = args
-        _ = kwargs
-        data = caller.result
-        if self.additional_fields is not None:
-            combined_data = []
-            for item in data:
-                combined_data.append(
-                    combine_dictionaries(item, [self.additional_fields])
-                )
-            return combined_data
-        return data
+#     def get_data(self, caller: AiohttpAction, *args, **kwargs) -> List[Dict]:
+#         """expects caller.result to be a List[Dict]."""
+#         _ = args
+#         _ = kwargs
+#         data = caller.result
+#         if self.additional_fields is not None:
+#             combined_data = []
+#             for item in data:
+#                 combined_data.append(
+#                     combine_dictionaries(item, [self.additional_fields])
+#                 )
+#             return combined_data
+#         return data
 
-    async def do_callback(self, caller: AiohttpAction, *args, **kwargs):
-        self.refine_path(caller, *args, **kwargs)
-        try:
-            self.file_path.parent.mkdir(parents=True, exist_ok=True)
-            data = self.get_data(caller, args, kwargs)
-            if self.field_names is None:
-                self.field_names = list(data[0].keys())
-            with open(str(self.file_path), mode=self.mode) as file:
-                writer = csv.DictWriter(file, fieldnames=self.field_names)
-                writer.writeheader()
-                for item in data:
-                    writer.writerow(item)
-        except Exception as ex:
-            logger.exception(
-                "Exception saving file to %s in action %s", self.file_path, caller
-            )
-            raise ex
+#     async def do_callback(self, caller: AiohttpAction, *args, **kwargs):
+#         self.refine_path(caller, *args, **kwargs)
+#         try:
+#             self.file_path.parent.mkdir(parents=True, exist_ok=True)
+#             data = self.get_data(caller, args, kwargs)
+#             if self.field_names is None:
+#                 self.field_names = list(data[0].keys())
+#             with open(str(self.file_path), mode=self.mode) as file:
+#                 writer = csv.DictWriter(file, fieldnames=self.field_names)
+#                 writer.writeheader()
+#                 for item in data:
+#                     writer.writerow(item)
+#         except Exception as ex:
+#             logger.exception(
+#                 "Exception saving file to %s in action %s", self.file_path, caller
+#             )
+#             raise ex
 
 
 # class SaveCsvResultToFile(SaveJsonResultToFile):
 #     def __init__(self, file_path: str, mode: str) -> None:
 #         super().__init__(file_path, mode=mode)
-class SaveEsiJobToJson(SaveJsonResultToFile):
+class SaveEsiJobToJsonFile(SaveJsonResultToFile):
     """Save an `EsiJob` to file after execution.
 
     Previous callbacks decide if the `EsiJob` contains the result data,
@@ -100,8 +100,15 @@ class SaveEsiJobToJson(SaveJsonResultToFile):
         self,
         file_path: str,
         mode: str = "w",
+        template_params: Optional[Dict[str, str]] = None,
+        file_ending: str = ".json",
     ) -> None:
-        super().__init__(file_path, mode=mode)
+        super().__init__(
+            file_path,
+            mode=mode,
+            template_params=template_params,
+            file_ending=file_ending,
+        )
 
     def get_data(self, caller: AiohttpAction, *args, **kwargs) -> str:
         """expects data (caller.result in super) to be json."""
@@ -114,6 +121,7 @@ class SaveEsiJobToJson(SaveJsonResultToFile):
                 job,
                 caller,
             )
+            data = {}
         # inspect(data)
         json_string = json.dumps(data, indent=2)
         return json_string
