@@ -8,9 +8,9 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 
-def response_to_job():
+def response_to_job_json_file():
     work_order = models.EsiWorkOrder(
-        name="response_to_job",
+        name="response_to_job_json_file",
         parent_path_template="samples/order_output/${ewo_name}",
         description=(
             "An example of saving a completed job to a json file,"
@@ -39,9 +39,9 @@ def response_to_job():
     return work_order
 
 
-def result_to_job():
+def result_to_job_json_file():
     work_order = models.EsiWorkOrder(
-        name="result_to_job",
+        name="result_to_job_json_file",
         parent_path_template="samples/order_output/${ewo_name}",
         description=(
             "An example of saving a completed job to a json file, with result data"
@@ -69,9 +69,9 @@ def result_to_job():
     return work_order
 
 
-def result_to_file_and_response_to_json():
+def result_to_json_file_and_response_to_json_file():
     work_order = models.EsiWorkOrder(
-        name="result_to_file_and_response_to_job",
+        name="result_to_json_file_and_response_to_json_file",
         parent_path_template="samples/order_output/${ewo_name}",
         description=(
             "An example of saving the raw results to a json file,"
@@ -108,9 +108,9 @@ def result_to_file_and_response_to_json():
     return work_order
 
 
-def result_and_response_to_job():
+def result_and_response_to_job_json_file():
     work_order = models.EsiWorkOrder(
-        name="result_and_response_to_job",
+        name="result_and_response_to_job_json_file",
         parent_path_template="samples/order_output/${ewo_name}",
         description=(
             "An example of saving a completed job to a json file,"
@@ -142,9 +142,9 @@ def result_and_response_to_job():
     return work_order
 
 
-def result_to_file():
+def result_to_json_file():
     work_order = models.EsiWorkOrder(
-        name="result_to_file",
+        name="result_to_json_file",
         parent_path_template="samples/order_output/${ewo_name}",
         description=("An example of saving the raw results to a json file."),
     )
@@ -166,3 +166,57 @@ def result_to_file():
         )
     )
     return work_order
+
+
+def result_to_csv_file():
+    work_order = models.EsiWorkOrder(
+        name="result_to_csv_file",
+        parent_path_template="samples/order_output/${ewo_name}",
+        description=(
+            "An example of saving the json results to a csv file. Also, shows "
+            "reordering columns, and adding additional columns"
+        ),
+    )
+    job = models.EsiJob(
+        op_id="get_markets_region_id_history",
+        parameters={"region_id": 10000002, "type_id": 34},
+    )
+    work_order.jobs.append(job)
+    job.result_callbacks.success.append(
+        models.JobCallback(callback_id="result_to_json")
+    )
+
+    job.result_callbacks.success.append(
+        models.JobCallback(
+            callback_id="save_result_to_csv_file",
+            config={
+                "file_path_template": "data/market-history/${region_id}-${type_id}.csv"
+            },
+            kwargs={
+                "additional_fields": {"region_id": 10000002, "type_id": 34},
+                "field_names": [
+                    "date",
+                    "average",
+                    "highest",
+                    "lowest",
+                    "order_count",
+                    "volume",
+                    "region_id",
+                    "type_id",
+                ],
+            },
+        )
+    )
+    return work_order
+
+
+# "field_names": [
+#                     "average",
+#                     "date",
+#                     "highest",
+#                     "lowest",
+#                     "order_count",
+#                     "volume",
+#                     "region_id",
+#                     "type_id",
+#                 ]
