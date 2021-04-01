@@ -10,7 +10,12 @@ from pfmsoft.aiohttp_queue.callbacks import (
     SaveJsonResultToFile,
 )
 
-from eve_esi_jobs.callbacks import ResponseToEsiJob, ResultToEsiJob, SaveEsiJobToJson
+from eve_esi_jobs.callbacks import (
+    ResponseToEsiJob,
+    ResultToEsiJob,
+    SaveEsiJobToJson,
+    SaveResultToCSVFile,
+)
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -25,6 +30,9 @@ class CallbackManifestEntry:
 CALLBACK_MANIFEST: Dict[str, CallbackManifestEntry] = {
     "save_result_to_json_file": CallbackManifestEntry(
         callback=SaveJsonResultToFile, valid_targets=["success"]
+    ),
+    "save_result_to_csv_file": CallbackManifestEntry(
+        callback=SaveResultToCSVFile, valid_targets=["success"]
     ),
     "save_esi_job_to_json_file": CallbackManifestEntry(
         callback=SaveEsiJobToJson, valid_targets=["success", "fail"]
