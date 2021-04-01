@@ -1,15 +1,20 @@
 """Running work orders"""
-import json
+
 import logging
 from pathlib import Path
 from time import perf_counter_ns
-from typing import Dict, Optional
+from typing import Optional
 
 import typer
 
 from eve_esi_jobs import sample_work_orders
 from eve_esi_jobs.eve_esi_jobs import deserialize_json_work_order, do_work_order
-from eve_esi_jobs.typer_cli.cli_helpers import load_json, save_json
+from eve_esi_jobs.typer_cli.cli_helpers import (
+    load_esi_work_order_json,
+    save_json,
+    validate_input_path,
+    validate_output_path,
+)
 
 app = typer.Typer(help="""Work with Esi Jobs and Work Orders.\n\nmore info.""")
 logger = logging.getLogger(__name__)
@@ -37,7 +42,7 @@ not find mistakes that can only be checked on the server, eg. a non-existant typ
     http requests. This will detect some missed settings and parameters, but does
     not find mistakes that can only be checked on the server, eg. a non-existant type_id.
     """
-    # TODO make validators
+
     if dry_run:
         typer.BadParameter("not implemented yet.")
     template_overrides = {}
@@ -56,12 +61,6 @@ not find mistakes that can only be checked on the server, eg. a non-existant typ
     end = perf_counter_ns()
     seconds = (end - start) / 1000000000
     typer.echo(f"Task completed in {seconds:0.2f} seconds")
-    # logger.info(
-    #     "%s Actions sequentially completed -  took %s seconds, %s actions per second.",
-    #     len(actions),
-    #     f"{seconds:9f}",
-    #     f"{len(actions)/seconds:1f}",
-    # )
 
 
 @app.command()
@@ -95,74 +94,3 @@ def samples(
     #     f"{seconds:9f}",
     #     f"{len(actions)/seconds:1f}",
     # )
-
-
-def validate_input_path(path_in: str) -> str:
-    """
-    Ensure the input path exists, raise an error and exit the script if it does not.
-
-    Args:
-        path_in: The path as a string
-
-    Raises:
-        typer.BadParameter:
-
-    Returns:
-        The path string as a Path.
-    """
-    input_path: Path = Path(path_in)
-    if not input_path.exists():
-        raise typer.BadParameter(f"Input path {input_path.resolve()} does not exist.")
-    return str(input_path)
-
-
-def validate_output_path(path_out: str) -> str:
-    """
-    Checks to see if the path is a file.
-
-    Does not check to see if it is a directory, or if it exists.
-
-    Args:
-        path_out: the path as a string.
-
-    Raises:
-        typer.BadParameter:
-
-    Returns:
-        The path string as a Path
-    """
-    output_path: Path = Path(path_out)
-    if output_path.is_file():
-        raise typer.BadParameter(
-            f"Output path {output_path.resolve()} is not a directory."
-        )
-    return str(output_path)
-
-
-def load_esi_work_order_json(file_path: Path) -> Dict:
-    """
-    Load a json file. Exit script on error.
-
-    Args:
-        file_path: Path to be loaded.
-
-    Raises:
-        typer.BadParameter: [description]
-        typer.BadParameter: [description]
-
-    Returns:
-        The json file.
-    """
-    try:
-        json_data = load_json(file_path)
-    except json.decoder.JSONDecodeError as ex:
-        raise typer.BadParameter(
-            f"Error loading json file at {file_path.resolve()} "
-            "are you sure it is a json file?"
-        )
-    except Exception as ex:
-        raise typer.BadParameter(
-            f"Error loading json file at {file_path.resolve()}\n"
-            f"The error reported was {ex.__class__} with msg {ex}"
-        )
-    return json_data
