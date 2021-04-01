@@ -19,6 +19,7 @@ logger.addHandler(logging.NullHandler())
 def do_jobs(
     esi_jobs: Sequence[EsiJob],
     esi_provider: EsiProvider,
+    template_overrides: Dict,
     worker_count: Optional[int] = None,
     max_workers: int = 100,
 ):
@@ -28,7 +29,7 @@ def do_jobs(
         factories.append(AiohttpQueueWorkerFactory())
     actions = []
     for esi_job in esi_jobs:
-        action = make_action_from_job(esi_job, esi_provider)
+        action = make_action_from_job(esi_job, esi_provider, template_overrides)
         actions.append(action)
     asyncio.run(queue_runner(actions, factories))
     return esi_jobs
@@ -42,7 +43,7 @@ def do_work_order(
 ):
     pre_process_work_order(ewo)
     worker_count = get_worker_count(len(ewo.jobs), worker_count, max_workers)
-    do_jobs(ewo.jobs, esi_provider, worker_count)
+    do_jobs(ewo.jobs, esi_provider, ewo.get_template_overrides(), worker_count)
 
 
 def get_worker_count(job_count, workers: Optional[int], max_workers: int = 100) -> int:
