@@ -73,11 +73,12 @@ def samples(
     output_path_string = validate_output_path(path_out)
     output_path = Path(output_path_string) / Path("samples")
     sample_list = [
-        sample_work_orders.response_to_job,
-        sample_work_orders.result_to_job,
-        sample_work_orders.result_to_file_and_response_to_json,
-        sample_work_orders.result_and_response_to_job,
-        sample_work_orders.result_to_file,
+        sample_work_orders.response_to_job_json_file,
+        sample_work_orders.result_to_job_json_file,
+        sample_work_orders.result_to_json_file_and_response_to_json_file,
+        sample_work_orders.result_and_response_to_job_json_file,
+        sample_work_orders.result_to_json_file,
+        sample_work_orders.result_to_csv_file,
     ]
     typer.echo(f"Sample Esi Work Orders will be saved to {output_path.resolve()}")
     for sample in sample_list:
