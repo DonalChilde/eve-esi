@@ -31,8 +31,11 @@ def response_to_job_json_file():
     job.result_callbacks.success.append(
         models.JobCallback(
             callback_id="save_esi_job_to_json_file",
-            config={
-                "file_path_template": "data/market-history/${region_id}-${type_id}-esi-job.json"
+            # config={
+            #     "file_path_template": "data/market-history/${region_id}-${type_id}-esi-job.json"
+            # },
+            kwargs={
+                "file_path": "data/market-history/${region_id}-${type_id}-esi-job.json"
             },
         )
     )
@@ -61,8 +64,11 @@ def result_to_job_json_file():
     job.result_callbacks.success.append(
         models.JobCallback(
             callback_id="save_esi_job_to_json_file",
-            config={
-                "file_path_template": "data/market-history/${region_id}-${type_id}-esi-job.json"
+            # config={
+            #     "file_path_template": "data/market-history/${region_id}-${type_id}-esi-job.json"
+            # },
+            kwargs={
+                "file_path": "data/market-history/${region_id}-${type_id}-esi-job.json"
             },
         )
     )
@@ -92,17 +98,21 @@ def result_to_json_file_and_response_to_json_file():
     job.result_callbacks.success.append(
         models.JobCallback(
             callback_id="save_esi_job_to_json_file",
-            config={
-                "file_path_template": "data/market-history/${region_id}-${type_id}-esi-job.json"
+            # config={
+            #     "file_path_template": "data/market-history/${region_id}-${type_id}-esi-job.json"
+            # },
+            kwargs={
+                "file_path": "data/market-history/${region_id}-${type_id}-esi-job.json"
             },
         )
     )
     job.result_callbacks.success.append(
         models.JobCallback(
             callback_id="save_json_result_to_file",
-            config={
-                "file_path_template": "data/market-history/${region_id}-${type_id}.json"
-            },
+            # config={
+            #     "file_path_template": "data/market-history/${region_id}-${type_id}.json"
+            # },
+            kwargs={"file_path": "data/market-history/${region_id}-${type_id}.json"},
         )
     )
     return work_order
@@ -134,8 +144,11 @@ def result_and_response_to_job_json_file():
     job.result_callbacks.success.append(
         models.JobCallback(
             callback_id="save_esi_job_to_json_file",
-            config={
-                "file_path_template": "data/market-history/${region_id}-${type_id}-esi-job.json"
+            # config={
+            #     "file_path_template": "data/market-history/${region_id}-${type_id}-esi-job.json"
+            # },
+            kwargs={
+                "file_path": "data/market-history/${region_id}-${type_id}-esi-job.json"
             },
         )
     )
@@ -160,9 +173,7 @@ def result_to_json_file():
     job.result_callbacks.success.append(
         models.JobCallback(
             callback_id="save_json_result_to_file",
-            config={
-                "file_path_template": "data/market-history/${region_id}-${type_id}.json"
-            },
+            kwargs={"file_path": "data/market-history/${region_id}-${type_id}.json"},
         )
     )
     return work_order
