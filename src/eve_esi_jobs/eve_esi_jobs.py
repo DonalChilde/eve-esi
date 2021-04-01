@@ -2,13 +2,13 @@
 import asyncio
 import logging
 from math import ceil
-from typing import Dict, Optional, Sequence
+from typing import Any, Dict, Optional, Sequence
 
 from pfmsoft.aiohttp_queue import AiohttpQueueWorkerFactory
 from pfmsoft.aiohttp_queue.runners import queue_runner
 
 from eve_esi_jobs.esi_provider import EsiProvider
-from eve_esi_jobs.job_to_action import make_action_from_job
+from eve_esi_jobs.job_to_action import JobsToActions
 from eve_esi_jobs.model_helpers import pre_process_work_order
 from eve_esi_jobs.models import EsiJob, EsiWorkOrder
 
@@ -19,7 +19,7 @@ logger.addHandler(logging.NullHandler())
 def do_jobs(
     esi_jobs: Sequence[EsiJob],
     esi_provider: EsiProvider,
-    template_overrides: Dict,
+    template_overrides: Dict[str, Any],
     worker_count: Optional[int] = None,
     max_workers: int = 100,
 ):
@@ -27,10 +27,8 @@ def do_jobs(
     factories = []
     for _ in range(worker_count):
         factories.append(AiohttpQueueWorkerFactory())
-    actions = []
-    for esi_job in esi_jobs:
-        action = make_action_from_job(esi_job, esi_provider, template_overrides)
-        actions.append(action)
+    jobs_to_actions = JobsToActions()
+    actions = jobs_to_actions.make_actions(esi_jobs, esi_provider, template_overrides)
     asyncio.run(queue_runner(actions, factories))
     return esi_jobs
 

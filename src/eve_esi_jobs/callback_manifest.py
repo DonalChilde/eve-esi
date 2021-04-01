@@ -17,7 +17,7 @@ from eve_esi_jobs.callbacks import (
     SaveEsiJobToJsonFile,
 )
 from eve_esi_jobs.helpers import combine_dictionaries, optional_object
-from eve_esi_jobs.models import EsiJob, JobCallback
+from eve_esi_jobs.models import JobCallback
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
