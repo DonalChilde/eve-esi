@@ -68,6 +68,8 @@ class EsiJob(BaseModel):
         params = {
             "esi_job_name": self.name,
             "esi_job_id": self.id_,
+            "esi_job_op_id": self.op_id,
+            "esi_job_retry_limit": self.retry_limit,
         }
         return params
 
