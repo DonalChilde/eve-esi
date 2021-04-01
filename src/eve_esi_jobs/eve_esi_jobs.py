@@ -9,7 +9,7 @@ from pfmsoft.aiohttp_queue.runners import queue_runner
 
 from eve_esi_jobs.esi_provider import EsiProvider
 from eve_esi_jobs.job_to_action import JobsToActions
-from eve_esi_jobs.model_helpers import pre_process_work_order
+from eve_esi_jobs.model_helpers import WorkOrderPreprocessor
 from eve_esi_jobs.models import EsiJob, EsiWorkOrder
 
 logger = logging.getLogger(__name__)
@@ -22,7 +22,7 @@ def do_jobs(
     template_overrides: Dict[str, Any],
     worker_count: Optional[int] = None,
     max_workers: int = 100,
-):
+) -> Sequence[EsiJob]:
     worker_count = get_worker_count(len(esi_jobs), worker_count, max_workers)
     factories = []
     for _ in range(worker_count):
@@ -38,10 +38,12 @@ def do_work_order(
     esi_provider: EsiProvider,
     worker_count: Optional[int] = None,
     max_workers: int = 100,
-):
-    pre_process_work_order(ewo)
+) -> EsiWorkOrder:
+    pre_processor = WorkOrderPreprocessor()
+    pre_processor.pre_process_work_order(ewo)
     worker_count = get_worker_count(len(ewo.jobs), worker_count, max_workers)
     do_jobs(ewo.jobs, esi_provider, ewo.get_template_overrides(), worker_count)
+    return ewo
 
 
 def get_worker_count(job_count, workers: Optional[int], max_workers: int = 100) -> int:
