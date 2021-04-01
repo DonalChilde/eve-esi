@@ -7,7 +7,7 @@ from eve_esi_jobs.eve_esi_jobs import (
     serialize_job,
     serialize_work_order,
 )
-from eve_esi_jobs.sample_work_orders import result_and_response_to_job
+from eve_esi_jobs.sample_work_orders import result_and_response_to_job_json_file
 
 # import pytest
 # from rich import inspect, print
@@ -55,7 +55,7 @@ def test_roundtrip_json_job(test_app_dir):
 
 
 def test_roundtrip_work_order():
-    ewo = result_and_response_to_job()
+    ewo = result_and_response_to_job_json_file()
     serialized = serialize_work_order(ewo)
     deserialized = deserialize_json_work_order(serialized)
     assert ewo == deserialized

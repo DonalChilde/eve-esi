@@ -20,7 +20,9 @@ def test_make_action_from_json(esi_provider, caplog):
         "retry_limit": 1,
         "parameters": {"region_id": 10000002, "type_id": 34},
         "result_callbacks": {
-            "success": [{"callback_id": "result_to_json", "args": [], "kwargs": {}}],
+            "success": [
+                {"callback_id": "response_content_to_json", "args": [], "kwargs": {}}
+            ],
             "retry": [],
             "fail": [],
         },
