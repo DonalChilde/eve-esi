@@ -18,7 +18,11 @@ from eve_esi_jobs.typer_cli.app_config import EveEsiJobConfig
 
 # from eve_esi_jobs.app_config import SCHEMA_URL
 from eve_esi_jobs.typer_cli.app_data import save_json_to_app_data
-from eve_esi_jobs.typer_cli.cli_helpers import completion_op_id, save_json
+from eve_esi_jobs.typer_cli.cli_helpers import (
+    check_for_op_id,
+    completion_op_id,
+    save_json,
+)
 
 logger = logging.getLogger(__name__)
 app = typer.Typer(
@@ -37,14 +41,6 @@ app = typer.Typer(
 # def complete_op_id_2(ctx: typer.Context):
 
 #     return OPID
-
-
-def check_for_op_id(ctx: typer.Context, value: str):
-    esi_provider = ctx.obj["esi_provider"]
-    op_id_keys = list(esi_provider.op_id_lookup.keys())
-    if value not in op_id_keys:
-        raise typer.BadParameter(f"Only op_ids are allowed, tried: {value}")
-    return value
 
 
 @app.command()
@@ -102,7 +98,8 @@ def download(
     if schema is None:
         typer.BadParameter(f"Unable to download schema from {url}")
     if destination == "app-data":
-        version = schema["info"]["version"]
+        # pylint: disable=unsubscriptable-object
+        version = schema["info"]["version"]  # type: ignore
         params = {"version": version}
         file_path = save_json_to_app_data(schema, config.app_dir, "schema", params)
         typer.echo(f"Schema saved to {file_path}")

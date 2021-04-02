@@ -154,6 +154,14 @@ def completion_op_id(ctx: typer.Context, incomplete: str):
     return completion
 
 
+def check_for_op_id(ctx: typer.Context, value: str):
+    esi_provider = ctx.obj["esi_provider"]
+    op_id_keys = list(esi_provider.op_id_lookup.keys())
+    if value not in op_id_keys:
+        raise typer.BadParameter(f"Only op_ids are allowed, tried: {value}")
+    return value
+
+
 OPID = [
     "delete_characters_character_id_contacts",
     "delete_characters_character_id_fittings_fitting_id",
