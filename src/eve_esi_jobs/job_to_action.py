@@ -5,7 +5,7 @@ from pfmsoft.aiohttp_queue import ActionCallbacks, AiohttpAction, AiohttpActionC
 
 from eve_esi_jobs.callback_manifest import CALLBACK_MANIFEST
 from eve_esi_jobs.esi_provider import EsiProvider
-from eve_esi_jobs.helpers import combine_dictionaries
+from eve_esi_jobs.helpers import combine_dictionaries, optional_object
 from eve_esi_jobs.models import EsiJob, JobCallback
 
 logger = logging.getLogger(__name__)
@@ -27,9 +27,10 @@ class JobsToActions:
         self,
         esi_jobs: Sequence[EsiJob],
         esi_provider: EsiProvider,
-        template_overrides: Dict[str, str],
+        template_overrides: Optional[Dict[str, str]],
     ) -> List[AiohttpAction]:
         actions = []
+        template_overrides = optional_object(template_overrides, dict)
         for esi_job in esi_jobs:
             action = esi_provider.build_action_from_op_id(
                 op_id=esi_job.op_id,
