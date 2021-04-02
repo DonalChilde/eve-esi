@@ -26,7 +26,7 @@ def test_schema():
     assert help_result.exit_code == 0
     assert "Usage: eve-esi schema [OPTIONS] COMMAND [ARGS]" in help_result.output
     print(os.getenv("PFMSOFT_eve_esi_jobs_TESTING", "Not set"))
-    assert False
+    # assert False
 
 
 def test_download(test_app_dir, monkeypatch):
@@ -39,7 +39,7 @@ def test_download(test_app_dir, monkeypatch):
     help_result = runner.invoke(app, ["schema", "download", "--help"])
     assert help_result.exit_code == 0
     assert "eve-esi schema download [OPTIONS]" in help_result.output
-    assert False
+    # assert False
 
 
 def set_env(test_app_dir, monkeypatch):
