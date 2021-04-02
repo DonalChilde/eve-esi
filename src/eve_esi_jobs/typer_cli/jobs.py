@@ -88,9 +88,34 @@ def samples(
     end = perf_counter_ns()
     seconds = (end - start) / 1000000000
     typer.echo(f"Task completed in {seconds:0.2f} seconds")
-    # logger.info(
-    #     "%s Actions sequentially completed -  took %s seconds, %s actions per second.",
-    #     len(actions),
-    #     f"{seconds:9f}",
-    #     f"{len(actions)/seconds:1f}",
-    # )
+
+
+def create(
+    ctx: typer.Context,
+    op_id: str,
+    param_string: Optional[str],
+    explain: bool,
+    create: bool,
+):
+    """Create a job from op_id and json string
+
+    options - create, explain maybe if not create then explain?
+    """
+    pass
+
+
+def combine(ctx: typer.Context, source_path: Path, out_path: Path):
+    """combine all the jobs in a dir into one workorder."""
+    pass
+
+
+def bulk_create(ctx: typer.Context, op_id, input_file: Path, file_type: str):
+    """Bulk create jobs from json or csv files.
+
+    json must be in list of dicts of valid params for op_id
+    csv must read into a list of dicts that contain the required params
+    extra params are ok.
+    should be able to read previous csv output that contains required fields
+    identical inputs will be consolidated. (dict to json.dumps, set, and back)
+    """
+    pass
