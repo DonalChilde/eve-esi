@@ -13,7 +13,7 @@ logger.addHandler(logging.NullHandler())
 
 
 @dataclass
-class Op_IdLookup:
+class OpIdLookup:
     method: str
     description: str
     path: str
@@ -38,14 +38,14 @@ class EsiProvider:
     def __init__(self, schema):
         self.schema = schema
         self.schema_version = schema["info"]["version"]
-        self.op_id_lookup: Dict[str, Op_IdLookup] = self.make_op_id_lookup(self.schema)
+        self.op_id_lookup: Dict[str, OpIdLookup] = self.make_op_id_lookup(self.schema)
         # for op_id in self.op_id_lookup:
         #     self.op_id_lookup[op_id].parameters = self.make_op_id_params(op_id)
 
     # def schema_version(self) -> str:
     #     return self.schema["info"]["version"]
 
-    def make_op_id_lookup(self, schema) -> Dict[str, Op_IdLookup]:
+    def make_op_id_lookup(self, schema) -> Dict[str, OpIdLookup]:
         lookup = {}
         host = schema["host"]
         base_path = schema["basePath"]
@@ -56,7 +56,7 @@ class EsiProvider:
                 url_template = self.make_url_template(host, base_path, path_template)
                 alternate_routes = self.make_alternate_routes("")
 
-                lookup[op_id] = Op_IdLookup(
+                lookup[op_id] = OpIdLookup(
                     method=method,
                     description=method_schema["description"],
                     path=path,
@@ -77,7 +77,7 @@ class EsiProvider:
         return response_200
 
     def possible_parameters(self, op_id: str):
-        op_id_info: Op_IdLookup = self.op_id_lookup.get(op_id, None)
+        op_id_info: OpIdLookup = self.op_id_lookup.get(op_id, None)
         if op_id_info is None:
             return {}
         else:

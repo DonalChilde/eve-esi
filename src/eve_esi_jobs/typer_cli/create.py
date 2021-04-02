@@ -4,7 +4,7 @@ from typing import Optional
 
 import typer
 
-from eve_esi_jobs.esi_provider import EsiProvider, Op_IdLookup
+from eve_esi_jobs.esi_provider import EsiProvider, OpIdLookup
 from eve_esi_jobs.typer_cli.cli_helpers import check_for_op_id, completion_op_id
 
 app = typer.Typer()
@@ -33,7 +33,7 @@ def from_op_id(
 
 
 def explain_out(op_id, esi_provider: EsiProvider):
-    op_id_info: Optional[Op_IdLookup] = esi_provider.op_id_lookup.get(op_id, None)
+    op_id_info: Optional[OpIdLookup] = esi_provider.op_id_lookup.get(op_id, None)
     if op_id_info is None:
         typer.BadParameter(f"{op_id} is not Valid.")
     possible_parameters = op_id_info.parameters
