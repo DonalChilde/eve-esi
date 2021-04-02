@@ -21,6 +21,7 @@ class Op_IdLookup:
     url_template: str
     alternate_routes: List[str] = field(default_factory=list)
     parameters: Dict = field(default_factory=dict)
+    response: Dict = field(default_factory=dict)
 
 
 class EsiProvider:
@@ -54,6 +55,7 @@ class EsiProvider:
                 path_template = self.make_path_template(path)
                 url_template = self.make_url_template(host, base_path, path_template)
                 alternate_routes = self.make_alternate_routes("")
+
                 lookup[op_id] = Op_IdLookup(
                     method=method,
                     description=method_schema["description"],
@@ -62,8 +64,25 @@ class EsiProvider:
                     url_template=url_template,
                     alternate_routes=alternate_routes,
                     parameters=self.make_op_id_params(path, method),
+                    response=self._make_successful_response(path, method),
                 )
         return lookup
+
+    def _make_successful_response(self, path, method) -> Dict:
+        paths_schema = self.schema.get("paths", {})
+        path_schema = paths_schema.get(path, {})
+        method_schema = path_schema.get(method, {})
+        response_schema = method_schema.get("responses", {})
+        response_200 = response_schema.get("200", {})
+        return response_200
+
+    def possible_parameters(self, op_id: str):
+        op_id_info: Op_IdLookup = self.op_id_lookup.get(op_id, None)
+        if op_id_info is None:
+            return {}
+        else:
+            params = op_id_info.parameters
+            return params
 
     def make_op_id_params(self, path: str, method: str) -> Dict:
         # params_example = {
@@ -96,7 +115,10 @@ class EsiProvider:
         return self.schema["parameters"]
 
     def operation_parameters(self, path, method) -> List[Dict]:
-        parameters = self.schema["paths"][path][method]["parameters"]
+        paths_schema = self.schema.get("paths", {})
+        path_schema = paths_schema.get(path, {})
+        method_schema = path_schema.get(method, {})
+        parameters = method_schema.get("parameters", {})
         return parameters
 
     def make_path_template(self, path: str) -> str:
