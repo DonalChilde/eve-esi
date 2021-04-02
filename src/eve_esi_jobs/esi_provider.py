@@ -6,7 +6,7 @@ from pfmsoft.aiohttp_queue import ActionCallbacks, AiohttpAction, AiohttpActionC
 
 # from eve_esi_jobs.app_config import SCHEMA_URL
 from eve_esi_jobs.callbacks import DEFAULT_CALLBACKS
-from eve_esi_jobs.helpers import optional_object
+from eve_esi_jobs.helpers import nested_dict, optional_object
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -38,14 +38,14 @@ class EsiProvider:
     def __init__(self, schema):
         self.schema = schema
         self.schema_version = schema["info"]["version"]
-        self.op_id_lookup: Dict[str, OpIdLookup] = self.make_op_id_lookup(self.schema)
+        self.op_id_lookup: Dict[str, OpIdLookup] = self._make_op_id_lookup(self.schema)
         # for op_id in self.op_id_lookup:
         #     self.op_id_lookup[op_id].parameters = self.make_op_id_params(op_id)
 
     # def schema_version(self) -> str:
     #     return self.schema["info"]["version"]
 
-    def make_op_id_lookup(self, schema) -> Dict[str, OpIdLookup]:
+    def _make_op_id_lookup(self, schema) -> Dict[str, OpIdLookup]:
         lookup = {}
         host = schema["host"]
         base_path = schema["basePath"]
@@ -63,63 +63,59 @@ class EsiProvider:
                     path_template=path_template,
                     url_template=url_template,
                     alternate_routes=alternate_routes,
-                    parameters=self.make_op_id_params(path, method),
-                    response=self._make_successful_response(path, method),
+                    parameters=self._schema_method_params_complete(path, method),
+                    response=self._schema_successful_response(path, method),
                 )
         return lookup
 
-    def _make_successful_response(self, path, method) -> Dict:
-        paths_schema = self.schema.get("paths", {})
-        path_schema = paths_schema.get(path, {})
-        method_schema = path_schema.get(method, {})
-        response_schema = method_schema.get("responses", {})
-        response_200 = response_schema.get("200", {})
-        return response_200
+    def _schema_successful_response(self, path, method) -> Dict:
+        keys = ["paths", path, method, "responses", "200"]
+        result = nested_dict(self.schema, keys)
+        result = optional_object(result, dict)
+        return result
 
     def possible_parameters(self, op_id: str):
-        op_id_info: OpIdLookup = self.op_id_lookup.get(op_id, None)
+        op_id_info: Optional[OpIdLookup] = self.op_id_lookup.get(op_id, None)
         if op_id_info is None:
             return {}
-        else:
-            params = op_id_info.parameters
-            return params
+        params = op_id_info.parameters
+        return params
 
-    def make_op_id_params(self, path: str, method: str) -> Dict:
+    def _schema_method_params_complete(self, path: str, method: str) -> Dict:
         # params_example = {
         # "param_name": {"attribute_name": "attribute value"}}
         # }
 
         op_id_params: Dict = {}
-        for param in self.operation_parameters(path, method):
+        for param in self._schema_method_params(path, method):
             ref_check = param.get("$ref", None)
             if ref_check is None:
                 op_id_params[param["name"]] = param
             else:
-                common_param = self.resolve_common_parameter(ref_check)
+                common_param = self._resolve_common_parameter(ref_check)
                 op_id_params[common_param["name"]] = common_param
         return op_id_params
 
-    def resolve_common_parameter(
+    def _resolve_common_parameter(
         self,
         ref_value: str,
     ):
         split_ref_value = ref_value.split(sep="/")
         param_id = split_ref_value[-1]
-        common_parameters = self.common_parameters()
+        common_parameters = self._schema_common_parameters()
         params = common_parameters.get(param_id, None)
         if params is None:
             raise ValueError(f"Ref value {ref_value} not found in common parameters.")
         return params
 
-    def common_parameters(self) -> Dict:
+    def _schema_common_parameters(self) -> Dict:
         return self.schema["parameters"]
 
-    def operation_parameters(self, path, method) -> List[Dict]:
-        paths_schema = self.schema.get("paths", {})
-        path_schema = paths_schema.get(path, {})
-        method_schema = path_schema.get(method, {})
-        parameters = method_schema.get("parameters", {})
-        return parameters
+    def _schema_method_params(self, path, method) -> List[Dict]:
+        keys = ["paths", path, method, "parameters"]
+        parameters = nested_dict(self.schema, keys)
+        parameters = optional_object(parameters, list, [{}])
+        return parameters  # type: ignore
 
     def make_path_template(self, path: str) -> str:
         return path.replace("{", "${")
