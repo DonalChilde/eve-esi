@@ -8,6 +8,7 @@ from time import perf_counter_ns
 from typing import Dict, List, Optional
 
 import typer
+import yaml
 from pfmsoft.aiohttp_queue import ActionCallbacks, AiohttpAction
 from pfmsoft.aiohttp_queue.callbacks import ResponseContentToJson
 from pfmsoft.aiohttp_queue.runners import do_action_runner
@@ -55,7 +56,7 @@ def browse(
     op_id_info = esi_provider.op_id_lookup.get(op_id, None)
     if op_id_info is None:
         typer.BadParameter(f"Invalid op_id: {op_id}")
-    typer.echo(json.dumps(dataclasses.asdict(op_id_info), indent=2))
+    typer.echo(yaml.dump(dataclasses.asdict(op_id_info)))
 
 
 @app.command()
