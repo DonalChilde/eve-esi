@@ -1,8 +1,9 @@
 import logging
 from itertools import chain
 from typing import Any, Dict, Iterable, List, Optional
+from uuid import UUID, uuid4
 
-from pydantic import BaseModel  # pylint: disable=no-name-in-module
+from pydantic import BaseModel, Field  # pylint: disable=no-name-in-module
 
 from eve_esi_jobs.helpers import combine_dictionaries
 
@@ -31,7 +32,8 @@ class EsiJobResult(BaseModel):
 
 
 class EsiJob(BaseModel):
-    id_: Optional[str]
+    id_: str = ""
+    uid: UUID = Field(default_factory=uuid4)
     name: Optional[str]
     op_id: str
     retry_limit: int = 5
@@ -75,8 +77,9 @@ class EsiJob(BaseModel):
 
 
 class EsiWorkOrder(BaseModel):
-    id_: Optional[str]
+    id_: str = ""
     name: str = ""
+    uid: UUID = Field(default_factory=uuid4)
     description: str = ""
     jobs: List[EsiJob] = []
     parent_path_template: str = ""
