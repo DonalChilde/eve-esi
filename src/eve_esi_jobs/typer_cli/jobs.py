@@ -90,20 +90,6 @@ def samples(
     typer.echo(f"Task completed in {seconds:0.2f} seconds")
 
 
-def create(
-    ctx: typer.Context,
-    op_id: str,
-    param_string: Optional[str],
-    explain: bool,
-    create: bool,
-):
-    """Create a job from op_id and json string
-
-    options - create, explain maybe if not create then explain?
-    """
-    pass
-
-
 def combine(ctx: typer.Context, source_path: Path, out_path: Path):
     """combine all the jobs in a dir into one workorder."""
     pass
