@@ -22,13 +22,13 @@ def test_env_settings():
     assert testing == "True"
 
 
-def test_load_schema_from_file(esi_schema_path, monkeypatch):
+def test_load_schema_from_file(esi_schema, monkeypatch):
     # Load from file
     runner = CliRunner()
-    result = runner.invoke(app, ["-s", esi_schema_path, "schema"])
+    result = runner.invoke(app, ["-s", esi_schema.file_path, "schema"])
     inspect(result)
     assert result.exit_code == 0
-    assert f"Loaded schema from {esi_schema_path}" in result.output
+    assert f"Loaded schema from {esi_schema.file_path}" in result.output
 
     # Fail to load from file
     runner = CliRunner()
