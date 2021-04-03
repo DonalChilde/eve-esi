@@ -5,7 +5,7 @@ from pfmsoft.aiohttp_queue import AiohttpAction, AiohttpQueueWorkerFactory
 from pfmsoft.aiohttp_queue.runners import queue_runner
 from rich import inspect
 
-from eve_esi_jobs.eve_esi_jobs import deserialize_json_job
+from eve_esi_jobs.eve_esi_jobs import deserialize_job_from_dict
 from eve_esi_jobs.job_to_action import JobsToActions
 
 
@@ -23,7 +23,7 @@ def test_make_action_from_json(esi_provider, caplog):
             "fail": [],
         },
     }
-    esi_job = deserialize_json_job(esi_job_json)
+    esi_job = deserialize_job_from_dict(esi_job_json)
     jobs_to_actions = JobsToActions()
     actions = jobs_to_actions.make_actions(
         [esi_job], esi_provider, template_overrides=None
@@ -47,7 +47,7 @@ def test_build_path_parameters(esi_provider):
         "result_callbacks": {},
         "additional_results": [],
     }
-    esi_job = deserialize_json_job(esi_job_json)
+    esi_job = deserialize_job_from_dict(esi_job_json)
     jobs_to_actions = JobsToActions()
     # pylint: disable=protected-access
     path_params = jobs_to_actions._build_path_params(esi_job, esi_provider)
@@ -64,7 +64,7 @@ def test_build_query_parameters(esi_provider):
         "result_callbacks": {},
         "additional_results": [],
     }
-    esi_job = deserialize_json_job(esi_job_json)
+    esi_job = deserialize_job_from_dict(esi_job_json)
     jobs_to_actions = JobsToActions()
     # pylint: disable=protected-access
     query_params = jobs_to_actions._build_query_params(esi_job, esi_provider)

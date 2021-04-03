@@ -15,7 +15,7 @@ class JobCallback(BaseModel):
     callback_id: str
     args: List[Any] = []
     kwargs: Dict[str, Any] = {}
-    config: Optional[Dict[str, Any]]
+    config: Dict[str, Any] = {}
 
 
 class CallbackCollection(BaseModel):
@@ -72,6 +72,7 @@ class EsiJob(BaseModel):
             "esi_job_id": self.id_,
             "esi_job_op_id": self.op_id,
             "esi_job_retry_limit": self.retry_limit,
+            "esi_job_uid": str(self.uid),
         }
         return params
 
@@ -104,5 +105,6 @@ class EsiWorkOrder(BaseModel):
             "ewo_name": self.name,
             "ewo_id": self.id_,
             "ewo_parent_path_template": self.parent_path_template,
+            "ewo_uid": str(self.uid),
         }
         return params
