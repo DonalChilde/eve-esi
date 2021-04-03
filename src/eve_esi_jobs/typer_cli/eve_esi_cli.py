@@ -38,6 +38,7 @@ def eve_esi(
 ):
     """
     Welcome to Eve Esi Jobs. Try one of the commands below.
+    Checkout the docs at: https://eve-esi-jobs.readthedocs.io/en/latest/
 
 
     """
