@@ -1,5 +1,6 @@
 """Main module."""
 import asyncio
+import json
 import logging
 from math import ceil
 from typing import Any, Dict, Optional, Sequence
@@ -56,21 +57,41 @@ def get_worker_count(job_count, workers: Optional[int], max_workers: int = 100) 
     return worker_calc
 
 
-def deserialize_json_job(esi_job_json: Dict) -> EsiJob:
-    esi_job = EsiJob(**esi_job_json)
+def deserialize_job_from_dict(esi_job_dict: Dict) -> EsiJob:
+    esi_job = EsiJob(**esi_job_dict)
     return esi_job
 
 
-def deserialize_json_work_order(esi_work_order_json: Dict) -> EsiWorkOrder:
-    esi_work_order = EsiWorkOrder(**esi_work_order_json)
+def deserialize_work_order_from_dict(esi_work_order_dict: Dict) -> EsiWorkOrder:
+    esi_work_order = EsiWorkOrder(**esi_work_order_dict)
     return esi_work_order
 
 
-def serialize_job(esi_job: EsiJob) -> Dict:
-    serialized = esi_job.dict()
+def deserialize_job_from_string(esi_job_string: str) -> EsiJob:
+    job_dict = json.loads(esi_job_string)
+    esi_job = deserialize_job_from_dict(job_dict)
+    return esi_job
+
+
+def deserialize_work_order_from_string(esi_work_order_string: str) -> EsiWorkOrder:
+    ewo_dict = json.loads(esi_work_order_string)
+    esi_work_order = deserialize_work_order_from_dict(ewo_dict)
+    return esi_work_order
+
+
+def serialize_job(esi_job: EsiJob) -> str:
+    serialized = esi_job.json(indent=2)
     return serialized
 
 
-def serialize_work_order(ewo: EsiWorkOrder) -> Dict:
-    serialized = ewo.dict()
+def serialize_work_order(ewo: EsiWorkOrder) -> str:
+    serialized = ewo.json(indent=2)
     return serialized
+
+
+def job_to_dict(esi_job: EsiJob) -> Dict:
+    return esi_job.dict()
+
+
+def work_order_to_dict(ewo: EsiWorkOrder) -> Dict:
+    return ewo.dict()
