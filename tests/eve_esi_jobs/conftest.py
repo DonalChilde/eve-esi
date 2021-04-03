@@ -106,17 +106,6 @@ def esi_schema_path():
 
 @pytest.fixture(autouse=True)
 def env_setup(monkeypatch, test_app_dir):
-    # app_logger.setLevel(APP_LOG_LEVEL)
-    # for handler in app_logger.handlers:
-    #     if isinstance(handler, logging.FileHandler):
-    #         app_logger.handlers.remove(handler)
-    #     handler.setLevel(APP_LOG_LEVEL)
-
-    # print("In test env setup")
     monkeypatch.setenv("PFMSOFT_eve_esi_jobs_TESTING", "True")
     monkeypatch.setenv("PFMSOFT_eve_esi_jobs_LOG_LEVEL", str(APP_LOG_LEVEL))
     monkeypatch.setenv("PFMSOFT_eve_esi_jobs_APP_DIR", str(test_app_dir))
-    # log_file_path = test_app_dir / Path("esi-test.log")
-    # new_handler = file_handler(log_file_path, log_level=APP_LOG_LEVEL)
-    # app_logger.addHandler(new_handler)
-    # inspect(app_logger)
