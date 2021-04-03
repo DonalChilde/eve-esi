@@ -1,5 +1,5 @@
 import logging
-from typing import Callable, Dict, Optional, Sequence, TypeVar, Union
+from typing import Any, Callable, Dict, Optional, Sequence, TypeVar, Union
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -69,3 +69,20 @@ def combine_dictionaries(base_dict: dict, overrides: Optional[Sequence[Dict]]) -
         for override in overrides:
             combined_dict.update(override)
     return combined_dict
+
+
+def nested_dict(top_dict: Dict, keys: list[str]) -> Optional[Any]:
+    result = top_dict
+    for key in keys:
+        result = result.get(key, None)
+        if result is None:
+            return result
+    return result
+    # current_dict = top_dict
+    # result = None
+    # for key in keys:
+    #     result = current_dict.get(key, None)
+    #     if result is None:
+    #         return result
+    #     current_dict = result
+    # return result
