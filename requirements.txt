@@ -5,3 +5,4 @@ rich
 pydantic
 pfmsoft-aiohttp-queue
 typer[all]
+pyyaml
