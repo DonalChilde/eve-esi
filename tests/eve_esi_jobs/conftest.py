@@ -13,6 +13,8 @@ from eve_esi_jobs import logger as app_logger
 from eve_esi_jobs.esi_provider import EsiProvider
 
 APP_LOG_LEVEL = logging.INFO
+resource_path: str = "tests.eve_esi_jobs.resources.schema"
+resource_name: str = "esi_schema_1.7.15.json"
 
 
 @pytest.fixture(scope="session", name="logger")
@@ -81,8 +83,6 @@ def test_app_dir_(tmp_path_factory):
 @pytest.fixture(scope="session", name="esi_schema")
 def esi_schema_(logger) -> dict:
     try:
-        resource_path: str = "tests.eve_esi_jobs.resources.schema"
-        resource_name: str = "esi_schema_1.7.15.json"
         with resources.open_text(resource_path, resource_name) as schema_file:
             schema = json.load(schema_file)
             logger.info("Loaded resource file %s from %s", resource_name, resource_path)
@@ -95,6 +95,13 @@ def esi_schema_(logger) -> dict:
             ex,
         )
         raise ex
+
+
+@pytest.fixture(scope="session")
+def esi_schema_path():
+    with resources.path(resource_path, resource_name) as path:
+        schema_path = path
+    return schema_path
 
 
 @pytest.fixture(autouse=True)
