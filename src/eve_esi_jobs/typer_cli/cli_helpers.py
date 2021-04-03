@@ -30,6 +30,46 @@ def load_json(file_path: Path, **kwargs) -> Any:
         raise error
 
 
+def save_string(
+    data: str,
+    file_path: Path,
+    mode: str = "w",
+    parents: bool = False,
+    exist_ok: bool = True,
+    **kwargs,
+) -> int:
+    """
+    Save a string. Makes parent directories if they don't exist.
+
+    'w' for writing (truncating the file if it already exists), 'x' for exclusive
+    creation and 'a' for appending
+
+    :param data: The string to save.
+    :param file_path: :py:class:`pathlib.Path` to saved file.
+    :param mode: File mode to use. As used in :func:`open()`. Limited to 'w','x', or 'a'. Defaults to 'w'.
+    :param parents: Make parent directories if they don't exist. As used by :func:`pathlib.Path.mkdir()`. Defaults to ``False``.
+    :param exist_ok: Suppress exception if parent directory exists as directory. As used by :func:`pathlib.Path.mkdir()`. Defaults to ``True``.
+    :param `**kwargs`: Additional key word arguments supplied to :func:`open()`.
+    :raises ValueError: If unsupported file mode is used.
+    :raises Exception: Any exception raised during the saving of the file.
+    :return: return number of characters written.
+    """
+    try:
+
+        if mode not in ["w", "x", "a"]:
+            raise ValueError(f"Unsupported file mode '{mode}'.")
+        if parents:
+            file_path.parent.mkdir(parents=parents, exist_ok=exist_ok)
+        with file_path.open(mode, **kwargs) as file_out:
+            count = file_out.write(data)
+        return count
+    except Exception as error:
+        logger.exception(
+            "Error trying to save string data to %s", file_path, exc_info=True
+        )
+        raise error
+
+
 def save_json(
     data: Any,
     file_path: Path,
