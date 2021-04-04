@@ -5,13 +5,14 @@ from dataclasses import dataclass
 from importlib import resources
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import pytest
 from rich import inspect
 
 from eve_esi_jobs import logger as app_logger
 from eve_esi_jobs.esi_provider import EsiProvider
+from eve_esi_jobs.helpers import optional_object
 
 APP_LOG_LEVEL = logging.INFO
 
@@ -80,47 +81,30 @@ def test_app_dir_(tmp_path_factory):
 
 
 @pytest.fixture(scope="session", name="sample_data")
-def sample_data_(logger) -> Dict[str, FileResource]:
+def sample_data_() -> Dict[str, FileResource]:
     resource_path: str = "tests.eve_esi_jobs.resources.data"
-    resource_names = [
-        "3-market-history-params-extras.csv",
-        "3-market-history-params-extras.json",
-        "3-market-history-params.csv",
-        "3-market-history-params.json",
-        "3-type-ids.csv",
-        "3-type-ids.json",
-        "3-wrong-params.csv",
-        "3-wrong-params.json",
-        "json-dict.json",
-        "empty-list.json",
-    ]
-    sample_data = {}
-    for resource_name in resource_names:
-        file_resource = make_file_resource(
-            resource_path=resource_path, resource_name=resource_name, logger=logger
-        )
-        sample_data[file_resource.file_path.name] = file_resource
+    sample_data = make_file_resources_from_resource_path(resource_path)
     return sample_data
 
 
 @pytest.fixture(scope="session", name="work_orders")
-def work_orders_(logger) -> Dict[str, FileResource]:
+def work_orders_() -> Dict[str, FileResource]:
     resource_path: str = "tests.eve_esi_jobs.resources.work_orders"
-    resource_names = [
-        "response_to_job_json_file.json",
-        "result_and_response_to_job_json_file.json",
-        "result_to_csv_file.json",
-        "result_to_job_json_file.json",
-        "result_to_json_file_and_response_to_json_file.json",
-        "result_to_json_file.json",
-    ]
-    sample_data = {}
-    for resource_name in resource_names:
-        file_resource = make_file_resource(
-            resource_path=resource_path, resource_name=resource_name, logger=logger
-        )
-        sample_data[file_resource.file_path.name] = file_resource
+    sample_data = make_file_resources_from_resource_path(resource_path)
     return sample_data
+
+
+def make_file_resources_from_resource_path(
+    resource_path, exclude_suffixes: Optional[List[str]] = None
+):
+    file_paths = collect_resource_paths(resource_path, exclude_suffixes)
+    file_resources = {}
+    for file_path in file_paths:
+        data = file_path.read_text()
+        file_resource = FileResource(file_path=file_path, data=data)
+        file_resources[file_path.name] = file_resource
+    assert "__init__.py" not in file_resources
+    return file_resources
 
 
 def make_file_resource(resource_path, resource_name, logger) -> FileResource:
@@ -139,6 +123,20 @@ def make_file_resource(resource_path, resource_name, logger) -> FileResource:
             ex,
         )
         raise ex
+
+
+def collect_resource_paths(
+    resource_path: str,
+    exclude_suffixes: Optional[List[str]] = None,
+) -> List[Path]:
+    exclude_suffixes = optional_object(exclude_suffixes, list)
+    result = []
+    with resources.path(resource_path, "__init__.py") as data_path:
+        files = data_path.parent.glob("*.*")
+        for file in files:
+            if file.name != "__init__.py" and file.suffix not in exclude_suffixes:
+                result.append(file)
+    return result
 
 
 @pytest.fixture(scope="session", name="esi_schema")
