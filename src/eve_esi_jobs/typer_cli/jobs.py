@@ -15,9 +15,12 @@ from eve_esi_jobs.typer_cli.cli_helpers import (
     validate_input_path,
     validate_output_path,
 )
+from eve_esi_jobs.typer_cli.create import app as create_app
 
 app = typer.Typer(help="""Work with Esi Jobs and Work Orders.\n\nmore info.""")
 logger = logging.getLogger(__name__)
+
+app.add_typer(create_app, name="create")
 
 
 @app.command()

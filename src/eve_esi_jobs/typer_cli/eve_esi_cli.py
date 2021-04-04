@@ -12,7 +12,9 @@ from eve_esi_jobs.esi_provider import EsiProvider
 from eve_esi_jobs.typer_cli.app_config import make_config_from_env
 from eve_esi_jobs.typer_cli.app_data import load_schema
 from eve_esi_jobs.typer_cli.cli_helpers import load_json
-from eve_esi_jobs.typer_cli.create import app as create_app
+from eve_esi_jobs.typer_cli.collect import app as collect_app
+
+# from eve_esi_jobs.typer_cli.create import app as create_app
 from eve_esi_jobs.typer_cli.jobs import app as jobs_app
 from eve_esi_jobs.typer_cli.schema import app as schema_app
 from eve_esi_jobs.typer_cli.schema import download_json
@@ -20,7 +22,7 @@ from eve_esi_jobs.typer_cli.schema import download_json
 app = typer.Typer()
 app.add_typer(jobs_app, name="jobs")
 app.add_typer(schema_app, name="schema")
-app.add_typer(create_app, name="create")
+# app.add_typer(create_app, name="create")
 logger = logging.getLogger(__name__)
 
 

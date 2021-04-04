@@ -17,7 +17,7 @@ from eve_esi_jobs.typer_cli.cli_helpers import (
     save_string,
 )
 
-app = typer.Typer()
+app = typer.Typer(help="Create Jobs")
 logger = logging.getLogger(__name__)
 
 DEFAULT_CALLBACK_STRING = """

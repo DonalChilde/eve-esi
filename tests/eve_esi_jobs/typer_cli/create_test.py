@@ -25,9 +25,9 @@ def test_create():
     result = runner.invoke(app)
     assert result.exit_code == 0
     assert "Welcome to Eve Esi Jobs" in result.output
-    help_result = runner.invoke(app, ["create", "from-op-id", "--help"])
+    help_result = runner.invoke(app, ["jobs", "create", "from-op-id", "--help"])
     assert help_result.exit_code == 0
-    assert "eve-esi create from-op-id [OPTIONS] OP_ID" in help_result.output
+    assert "eve-esi jobs create from-op-id [OPTIONS] OP_ID" in help_result.output
 
 
 def test_create_job(esi_provider):
@@ -184,6 +184,7 @@ def test_from_op_id_save_created_job(test_app_dir: Path, esi_schema: FileResourc
         [
             "-s",
             str(esi_schema.file_path),
+            "jobs",
             "create",
             "from-op-id",
             op_id,
@@ -223,6 +224,7 @@ def test_from_op_id_custom_callback(test_app_dir: Path, esi_schema: FileResource
         [
             "-s",
             str(esi_schema.file_path),
+            "jobs",
             "create",
             "from-op-id",
             op_id,
@@ -250,6 +252,7 @@ def test_from_op_id_custom_callback(test_app_dir: Path, esi_schema: FileResource
         [
             "-s",
             str(esi_schema.file_path),
+            "jobs",
             "create",
             "from-op-id",
             op_id,
@@ -283,6 +286,7 @@ def test_from_op_id_path_in_full_data(
         [
             "-s",
             str(esi_schema.file_path),
+            "jobs",
             "create",
             "from-op-id",
             op_id,
@@ -314,6 +318,7 @@ def test_from_op_id_path_in_partial_data(
         [
             "-s",
             str(esi_schema.file_path),
+            "jobs",
             "create",
             "from-op-id",
             op_id,
@@ -347,6 +352,7 @@ def test_from_op_id_path_in_extra_data(
         [
             "-s",
             str(esi_schema.file_path),
+            "jobs",
             "create",
             "from-op-id",
             op_id,
@@ -380,6 +386,7 @@ def test_from_op_id_path_in_bad_data(
         [
             "-s",
             str(esi_schema.file_path),
+            "jobs",
             "create",
             "from-op-id",
             op_id,
@@ -433,6 +440,7 @@ def test_data_from_csv(
         [
             "-s",
             str(esi_schema.file_path),
+            "jobs",
             "create",
             "from-op-id",
             op_id,
