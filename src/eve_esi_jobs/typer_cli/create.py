@@ -1,27 +1,20 @@
 import csv
-import dataclasses
 import json
 import logging
 from pathlib import Path
 from string import Template
 from typing import Dict, List, Optional
-from uuid import uuid4
 
 import typer
-import yaml
-from rich import inspect
 
-from eve_esi_jobs import callbacks as EJC
-from eve_esi_jobs.esi_provider import EsiProvider, OpIdLookup
-from eve_esi_jobs.eve_esi_jobs import serialize_job, serialize_work_order
+from eve_esi_jobs.esi_provider import EsiProvider
+from eve_esi_jobs.eve_esi_jobs import serialize_job
 from eve_esi_jobs.helpers import optional_object
-from eve_esi_jobs.models import CallbackCollection, EsiJob, JobCallback
+from eve_esi_jobs.models import CallbackCollection, EsiJob
 from eve_esi_jobs.typer_cli.cli_helpers import (
     check_for_op_id,
     completion_op_id,
-    save_json,
     save_string,
-    validate_output_path,
 )
 
 app = typer.Typer()
@@ -218,6 +211,7 @@ def filter_extra_params(
 
 
 def validate_job(job: EsiJob, esi_provider):
+    _, _ = job, esi_provider
     return True
 
 
