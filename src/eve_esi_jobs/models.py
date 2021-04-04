@@ -86,6 +86,7 @@ class EsiJob(BaseModel):
             "esi_job_op_id": self.op_id,
             "esi_job_retry_limit": self.retry_limit,
             "esi_job_uid": str(self.uid),
+            "esi_job_iso_date_time": datetime.now().isoformat().replace(":", "-"),
         }
         return params
 
@@ -122,6 +123,6 @@ class EsiWorkOrder(BaseModel):
             "ewo_id": self.id_,
             "ewo_parent_path_template": self.parent_path_template,
             "ewo_uid": str(self.uid),
-            "eqo_iso_date_time": datetime.now().isoformat().replace(":", "-"),
+            "ewo_iso_date_time": datetime.now().isoformat().replace(":", "-"),
         }
         return params
