@@ -1,0 +1,55 @@
+{
+  "id_": "",
+  "name": "result_and_response_to_job_json_file",
+  "uid": "54d536e8-76f4-457b-b8d3-4733d8dca0ff",
+  "description": "An example of saving a completed job to a json file, with result and response data",
+  "jobs": [
+    {
+      "id_": "",
+      "uid": "7d69f08f-7b75-4b73-a5d9-e56791154f30",
+      "name": null,
+      "op_id": "get_markets_region_id_history",
+      "retry_limit": 5,
+      "parameters": {
+        "region_id": 10000002,
+        "type_id": 34
+      },
+      "result_callbacks": {
+        "success": [
+          {
+            "callback_id": "response_content_to_json",
+            "args": [],
+            "kwargs": {},
+            "config": {}
+          },
+          {
+            "callback_id": "result_to_esi_job",
+            "args": [],
+            "kwargs": {},
+            "config": {}
+          },
+          {
+            "callback_id": "response_to_esi_job",
+            "args": [],
+            "kwargs": {},
+            "config": {}
+          },
+          {
+            "callback_id": "save_esi_job_to_json_file",
+            "args": [],
+            "kwargs": {
+              "file_path": "data/market-history/${region_id}-${type_id}-esi-job.json"
+            },
+            "config": {}
+          }
+        ],
+        "retry": [],
+        "fail": []
+      },
+      "template_overrides": {},
+      "result": null
+    }
+  ],
+  "parent_path_template": "samples/order_output/${ewo_name}",
+  "template_overrides": {}
+}

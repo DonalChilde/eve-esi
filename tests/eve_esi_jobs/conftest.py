@@ -103,6 +103,26 @@ def sample_data_(logger) -> Dict[str, FileResource]:
     return sample_data
 
 
+@pytest.fixture(scope="session", name="work_orders")
+def work_orders_(logger) -> Dict[str, FileResource]:
+    resource_path: str = "tests.eve_esi_jobs.resources.work_orders"
+    resource_names = [
+        "response_to_job_json_file.json",
+        "result_and_response_to_job_json_file.json",
+        "result_to_csv_file.json",
+        "result_to_job_json_file.json",
+        "result_to_json_file_and_response_to_json_file.json",
+        "result_to_json_file.json",
+    ]
+    sample_data = {}
+    for resource_name in resource_names:
+        file_resource = make_file_resource(
+            resource_path=resource_path, resource_name=resource_name, logger=logger
+        )
+        sample_data[file_resource.file_path.name] = file_resource
+    return sample_data
+
+
 def make_file_resource(resource_path, resource_name, logger) -> FileResource:
     try:
         with resources.path(resource_path, resource_name) as data_path:
