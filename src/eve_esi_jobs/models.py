@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from itertools import chain
 from typing import Any, Dict, Iterable, List, Optional
 from uuid import UUID, uuid4
@@ -17,11 +18,17 @@ class JobCallback(BaseModel):
     kwargs: Dict[str, Any] = {}
     config: Dict[str, Any] = {}
 
+    class Config:
+        extra = "forbid"
+
 
 class CallbackCollection(BaseModel):
     success: List[JobCallback] = []
     retry: List[JobCallback] = []
     fail: List[JobCallback] = []
+
+    class Config:
+        extra = "forbid"
 
 
 class EsiJobResult(BaseModel):
@@ -29,6 +36,9 @@ class EsiJobResult(BaseModel):
     work_order_id: Optional[str] = None
     data: Optional[Any] = None
     response: Optional[Any] = None
+
+    class Config:
+        extra = "forbid"
 
 
 class EsiJob(BaseModel):
@@ -41,6 +51,9 @@ class EsiJob(BaseModel):
     result_callbacks: CallbackCollection = CallbackCollection()
     template_overrides: Dict[str, Any] = {}
     result: Optional[EsiJobResult] = None
+
+    class Config:
+        extra = "forbid"
 
     def callback_iter(self) -> Iterable:
         """An iterator that chains all the callbacks"""
@@ -86,6 +99,9 @@ class EsiWorkOrder(BaseModel):
     parent_path_template: str = ""
     template_overrides: Dict[str, Any] = {}
 
+    class Config:
+        extra = "forbid"
+
     def add_template_overrides(self, override: Dict):
         """Update EsiWorkOrder template_overrides with additional values"""
         self.template_overrides.update(override)
@@ -106,5 +122,6 @@ class EsiWorkOrder(BaseModel):
             "ewo_id": self.id_,
             "ewo_parent_path_template": self.parent_path_template,
             "ewo_uid": str(self.uid),
+            "eqo_iso_date_time": datetime.now().isoformat().replace(":", "-"),
         }
         return params
