@@ -8,19 +8,25 @@ from typing import Optional
 import typer
 
 from eve_esi_jobs import sample_work_orders
-from eve_esi_jobs.eve_esi_jobs import deserialize_work_order_from_dict, do_work_order
+from eve_esi_jobs.eve_esi_jobs import (
+    deserialize_work_order_from_dict,
+    do_work_order,
+    serialize_work_order,
+)
 from eve_esi_jobs.typer_cli.cli_helpers import (
     load_esi_work_order_json,
-    save_json,
+    save_string,
     validate_input_path,
     validate_output_path,
 )
+from eve_esi_jobs.typer_cli.collect import app as collect_app
 from eve_esi_jobs.typer_cli.create import app as create_app
 
 app = typer.Typer(help="""Work with Esi Jobs and Work Orders.\n\nmore info.""")
 logger = logging.getLogger(__name__)
 
 app.add_typer(create_app, name="create")
+app.add_typer(collect_app, name="collect")
 
 
 @app.command()
@@ -69,7 +75,7 @@ not find mistakes that can only be checked on the server, eg. a non-existant typ
 @app.command()
 def samples(
     ctx: typer.Context,
-    path_out: str = typer.Argument(..., help="Path to output directory."),
+    path_out: str = typer.Argument("./tmp", help="Path to output directory."),
 ):
     """"""
     output_path_string = validate_output_path(path_out)
@@ -86,7 +92,9 @@ def samples(
     for sample in sample_list:
         ewo = sample()
         file_path = output_path / Path(ewo.name).with_suffix(".json")
-        save_json(ewo.dict(), file_path, parents=True)
+        ewo_string = serialize_work_order(ewo)
+        save_string(ewo_string, file_path, parents=True)
+        # save_json(ewo.dict(), file_path, parents=True)
     start = ctx.obj.get("start_time", perf_counter_ns())
     end = perf_counter_ns()
     seconds = (end - start) / 1000000000
