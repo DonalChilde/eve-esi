@@ -219,15 +219,3 @@ def result_to_csv_file():
         )
     )
     return work_order
-
-
-# "field_names": [
-#                     "average",
-#                     "date",
-#                     "highest",
-#                     "lowest",
-#                     "order_count",
-#                     "volume",
-#                     "region_id",
-#                     "type_id",
-#                 ]

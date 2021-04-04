@@ -1,8 +1,10 @@
 import json
 import logging
+from datetime import datetime
 from pathlib import Path
 from uuid import UUID
 
+import pytz
 from rich import inspect
 
 import eve_esi_jobs.eve_esi_jobs as EJ
@@ -100,3 +102,7 @@ def test_job_callback():
     inspect(dict_1)
     inspect(dict_2)
     assert dict_1 == dict_2
+
+
+def test_get_iso_time():
+    print(datetime.now().isoformat().replace(":", "-"))
