@@ -1,7 +1,5 @@
 import logging
 
-from rich import inspect
-
 from eve_esi_jobs import models
 
 logger = logging.getLogger(__name__)
@@ -216,6 +214,34 @@ def result_to_csv_file():
                     "type_id",
                 ],
             },
+        )
+    )
+    return work_order
+
+
+def result_with_pages_to_json_file():
+    work_order = models.EsiWorkOrder(
+        name="result_with_pages_to_json_file",
+        parent_path_template="samples/order_output/${ewo_name}",
+        description=(
+            "An example of saving the raw results with a paged api to a json file."
+        ),
+    )
+    job = models.EsiJob(
+        op_id="get_contracts_public_region_id",
+        parameters={"region_id": 10000002},
+    )
+    work_order.jobs.append(job)
+    job.result_callbacks.success.append(
+        models.JobCallback(callback_id="response_content_to_json")
+    )
+    job.result_callbacks.success.append(
+        models.JobCallback(callback_id="check_for_pages")
+    )
+    job.result_callbacks.success.append(
+        models.JobCallback(
+            callback_id="save_json_result_to_file",
+            kwargs={"file_path": "data/public-contracts/${region_id}.json"},
         )
     )
     return work_order

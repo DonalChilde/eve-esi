@@ -5,6 +5,7 @@ from typing import Callable, Dict, List, Optional, Type
 
 from pfmsoft.aiohttp_queue import AiohttpActionCallback
 from pfmsoft.aiohttp_queue.callbacks import (
+    CheckForPages,
     ResponseContentToJson,
     ResponseContentToText,
     SaveJsonResultToFile,
@@ -88,7 +89,19 @@ def build_response_content_to_text(
     return ResponseContentToText()
 
 
+def build_check_for_pages(
+    job_callback, template_overrides: Optional[Dict] = None
+) -> CheckForPages:
+    _, _ = job_callback, template_overrides
+    return CheckForPages()
+
+
 CALLBACK_MANIFEST: Dict[str, CallbackManifestEntry] = {
+    "check_for_pages": CallbackManifestEntry(
+        callback=CheckForPages,
+        valid_targets=["success"],
+        config_function=build_check_for_pages,
+    ),
     "save_json_result_to_file": CallbackManifestEntry(
         callback=SaveJsonResultToFile,
         valid_targets=["success"],
