@@ -140,12 +140,10 @@ CALLBACK_MANIFEST: Dict[str, CallbackManifestEntry] = {
 }
 
 
-def update_callback_path_values(kwargs, template_overrides: Optional[Dict] = None):
-    # TODO make this function specific to updating file callbacks
-    template_params = kwargs.get("template_params", {})
-    template_overrides = optional_object(template_overrides, dict)
-    callback_template_overrides = combine_dictionaries(
-        template_params, [template_overrides]
-    )
-    kwargs["template_params"] = callback_template_overrides
+def update_callback_path_values(kwargs, additional_values: Optional[Dict] = None):
+
+    path_values = kwargs.get("path_values", {})
+    additional_values = optional_object(additional_values, dict)
+    updated_path_values = combine_dictionaries(path_values, [additional_values])
+    kwargs["path_values"] = updated_path_values
     return kwargs
