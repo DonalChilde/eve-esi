@@ -44,7 +44,7 @@ class EsiJobResult(BaseModel):
 class EsiJob(BaseModel):
     id_: str = ""
     uid: UUID = Field(default_factory=uuid4)
-    name: Optional[str]
+    name: str = ""
     op_id: str
     retry_limit: int = 5
     parameters: Dict[str, Any] = {}
