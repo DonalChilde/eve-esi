@@ -4,7 +4,6 @@ from datetime import datetime
 from pathlib import Path
 from uuid import UUID
 
-import pytz
 from rich import inspect
 
 import eve_esi_jobs.eve_esi_jobs as EJ
