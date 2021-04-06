@@ -45,7 +45,6 @@ def test_build_path_parameters(esi_provider):
         "retry_limit": 1,
         "parameters": {"region_id": 10000002, "type_id": 34},
         "result_callbacks": {},
-        "additional_results": [],
     }
     esi_job = deserialize_job_from_dict(esi_job_json)
     jobs_to_actions = JobsToActions()
@@ -62,7 +61,6 @@ def test_build_query_parameters(esi_provider):
         "retry_limit": 1,
         "parameters": {"region_id": 10000002, "type_id": 34},
         "result_callbacks": {},
-        "additional_results": [],
     }
     esi_job = deserialize_job_from_dict(esi_job_json)
     jobs_to_actions = JobsToActions()
