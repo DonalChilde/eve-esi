@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 from itertools import chain
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, Union
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field  # pylint: disable=no-name-in-module
@@ -64,13 +64,13 @@ class EsiJob(BaseModel):
         )
 
     def update_attributes(self, override: Dict):
-        """Update esi_job.template_over_rides with additional values"""
+        """Update esi_job.additional_attributes with additional values"""
         self.additional_attributes.update(override)
 
     def attributes(self):
-        """return a new combined dict of esi_job parameters, and additional_attributes.
+        """return a new combined dict of esi_job attributes, and additional_attributes.
 
-        Overrides will overwrite local parameters.
+        additional_attributes will overwrite local attributes in new dict.
         """
         params = combine_dictionaries(
             self.parameters, [self._job_attributes(), self.additional_attributes]
@@ -78,9 +78,9 @@ class EsiJob(BaseModel):
 
         return params
 
-    def _job_attributes(self):
-        """make a dict of all the esi_job parameters usable in templates"""
-        params = {
+    def _job_attributes(self) -> Dict[str, Union[int, str, None]]:
+        """make a dict of all the esi_job attributes usable in templates"""
+        params: Dict[str, Union[int, str, None]] = {
             "esi_job_name": self.name,
             "esi_job_id": self.id_,
             "esi_job_op_id": self.op_id,
@@ -108,17 +108,17 @@ class EsiWorkOrder(BaseModel):
         self.additional_attributes.update(override)
 
     def attributes(self):
-        """return a new combined dict of EsiWorkOrder parameters and and additional_attributes.
+        """return a new combined dict of EsiWorkOrder attributes and and additional_attributes.
 
-        additional_attributes will overwrite parameters.
+        additional_attributes will overwrite local attributes in new dict.
         """
         params = self._ewo_atributes()
         params.update(self.additional_attributes)
         return params
 
-    def _ewo_atributes(self):
-        """make a dict of all the EsiWorkOrder parameters usable in templates"""
-        params = {
+    def _ewo_atributes(self) -> Dict[str, Union[int, str, None]]:
+        """make a dict of all the EsiWorkOrder attributes usable in templates"""
+        params: Dict[str, Union[int, str, None]] = {
             "ewo_name": self.name,
             "ewo_id": self.id_,
             "ewo_parent_path_template": self.parent_path_template,

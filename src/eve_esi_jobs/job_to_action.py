@@ -87,17 +87,17 @@ class JobsToActions:
         self, esi_job: EsiJob, additional_attributes: Dict
     ) -> ActionCallbacks:
         callbacks: ActionCallbacks = ActionCallbacks()
-        combined_overrides = combine_dictionaries(
+        combined_attributes = combine_dictionaries(
             esi_job.attributes(), [additional_attributes]
         )
         callbacks.success = self._build_target_callbacks(
-            "success", esi_job.callbacks.success, combined_overrides
+            "success", esi_job.callbacks.success, combined_attributes
         )
         callbacks.retry = self._build_target_callbacks(
-            "retry", esi_job.callbacks.retry, combined_overrides
+            "retry", esi_job.callbacks.retry, combined_attributes
         )
         callbacks.fail = self._build_target_callbacks(
-            "fail", esi_job.callbacks.fail, combined_overrides
+            "fail", esi_job.callbacks.fail, combined_attributes
         )
         return callbacks
 

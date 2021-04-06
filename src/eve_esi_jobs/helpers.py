@@ -61,12 +61,15 @@ def optional_object(
     return argument
 
 
-def combine_dictionaries(base_dict: dict, overrides: Optional[Sequence[Dict]]) -> Dict:
-    # TODO move this to collection util - NB makes a new dict with optional overrides
+def combine_dictionaries(
+    base_dict: dict, additional_dicts: Optional[Sequence[Dict]]
+) -> Dict:
+    # TODO move this to collection util - NB makes a new dict with
+    # optional additional dicts, each overwriting the previous keys
     combined_dict: Dict = {}
     combined_dict.update(base_dict)
-    if overrides is not None:
-        for override in overrides:
+    if additional_dicts is not None:
+        for override in additional_dicts:
             combined_dict.update(override)
     return combined_dict
 

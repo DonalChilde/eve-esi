@@ -36,7 +36,7 @@ def build_save_json_result_to_file(
 ) -> SaveJsonResultToFile:
     args = [*job_callback.args]
     kwargs = {**job_callback.kwargs}
-    kwargs = update_callback_path_values(kwargs, additional_attributes)
+    kwargs = update_file_callback_path_values(kwargs, additional_attributes)
     callback = SaveJsonResultToFile(*args, **kwargs)
     return callback
 
@@ -46,7 +46,7 @@ def build_save_list_of_dict_result_to_csv_file(
 ) -> SaveListOfDictResultToCSVFile:
     args = [*job_callback.args]
     kwargs = {**job_callback.kwargs}
-    kwargs = update_callback_path_values(kwargs, additional_attributes)
+    kwargs = update_file_callback_path_values(kwargs, additional_attributes)
     callback = SaveListOfDictResultToCSVFile(*args, **kwargs)
     return callback
 
@@ -56,7 +56,7 @@ def build_save_esi_job_to_json_file(
 ) -> SaveEsiJobToJsonFile:
     args = [*job_callback.args]
     kwargs = {**job_callback.kwargs}
-    kwargs = update_callback_path_values(kwargs, additional_attributes)
+    kwargs = update_file_callback_path_values(kwargs, additional_attributes)
     callback = SaveEsiJobToJsonFile(*args, **kwargs)
     return callback
 
@@ -140,7 +140,7 @@ CALLBACK_MANIFEST: Dict[str, CallbackManifestEntry] = {
 }
 
 
-def update_callback_path_values(kwargs, additional_values: Optional[Dict] = None):
+def update_file_callback_path_values(kwargs, additional_values: Optional[Dict] = None):
 
     path_values = kwargs.get("path_values", {})
     additional_values = optional_object(additional_values, dict)
