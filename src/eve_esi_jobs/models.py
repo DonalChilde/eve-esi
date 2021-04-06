@@ -63,22 +63,22 @@ class EsiJob(BaseModel):
             self.callbacks.fail,
         )
 
-    def add_template_overrides(self, override: Dict):
+    def update_attributes(self, override: Dict):
         """Update esi_job.template_over_rides with additional values"""
         self.template_overrides.update(override)
 
-    def get_template_overrides(self):
+    def attributes(self):
         """return a new combined dict of esi_job parameters, and template_overrides.
 
         Overrides will overwrite local parameters.
         """
         params = combine_dictionaries(
-            self.parameters, [self._build_parameters(), self.template_overrides]
+            self.parameters, [self._job_attributes(), self.template_overrides]
         )
 
         return params
 
-    def _build_parameters(self):
+    def _job_attributes(self):
         """make a dict of all the esi_job parameters usable in templates"""
         params = {
             "esi_job_name": self.name,
@@ -103,20 +103,20 @@ class EsiWorkOrder(BaseModel):
     class Config:
         extra = "forbid"
 
-    def add_template_overrides(self, override: Dict):
+    def update_attributes(self, override: Dict):
         """Update EsiWorkOrder template_overrides with additional values"""
         self.template_overrides.update(override)
 
-    def get_template_overrides(self):
+    def attributes(self):
         """return a new combined dict of EsiWorkOrder parameters and and template_overrides.
 
         template_overrides will overwrite parameters.
         """
-        params = self._build_parameters()
+        params = self._ewo_atributes()
         params.update(self.template_overrides)
         return params
 
-    def _build_parameters(self):
+    def _ewo_atributes(self):
         """make a dict of all the EsiWorkOrder parameters usable in templates"""
         params = {
             "ewo_name": self.name,

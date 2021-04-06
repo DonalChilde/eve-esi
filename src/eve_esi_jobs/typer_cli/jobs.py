@@ -62,7 +62,7 @@ not find mistakes that can only be checked on the server, eg. a non-existant typ
         path_out = validate_output_path(path_out)
         output_path_string = str(path_out / Path(esi_work_order.parent_path_template))
         template_overrides["ewo_parent_path_template"] = output_path_string
-    esi_work_order.add_template_overrides(template_overrides)
+    esi_work_order.update_attributes(template_overrides)
     esi_provider = ctx.obj["esi_provider"]
     do_work_order(esi_work_order, esi_provider)
     typer.echo(f"Completed {len(esi_work_order.jobs)} jobs!")

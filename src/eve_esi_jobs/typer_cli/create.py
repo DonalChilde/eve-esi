@@ -216,7 +216,7 @@ def validate_job(job: EsiJob, esi_provider):
 
 
 def save_job(job: EsiJob, file_path_template: str, path_out: Path):
-    template_args = job.get_template_overrides()
+    template_args = job.attributes()
     combined_template_string = str(Path(path_out) / Path(file_path_template))
     template = Template(combined_template_string)
     file_path_string = template.substitute(template_args)

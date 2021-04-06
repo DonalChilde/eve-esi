@@ -88,7 +88,7 @@ class JobsToActions:
     ) -> ActionCallbacks:
         callbacks: ActionCallbacks = ActionCallbacks()
         combined_overrides = combine_dictionaries(
-            esi_job.get_template_overrides(), [template_overrides]
+            esi_job.attributes(), [template_overrides]
         )
         callbacks.success = self._build_target_callbacks(
             "success", esi_job.callbacks.success, combined_overrides

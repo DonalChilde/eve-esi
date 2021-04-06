@@ -60,7 +60,7 @@ def jobs(
         )
     ewo.jobs.extend(loaded_jobs)
     out_template = Template(str(path_out))
-    out_string = out_template.substitute(ewo.get_template_overrides())
+    out_string = out_template.substitute(ewo.attributes())
     out_path_from_template = Path(out_string)
     if out_path_from_template.is_file():
         raise typer.BadParameter(

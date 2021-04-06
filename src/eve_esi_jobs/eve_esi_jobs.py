@@ -43,7 +43,7 @@ def do_work_order(
     pre_processor = WorkOrderPreprocessor()
     pre_processor.pre_process_work_order(ewo)
     worker_count = get_worker_count(len(ewo.jobs), worker_count, max_workers)
-    do_jobs(ewo.jobs, esi_provider, ewo.get_template_overrides(), worker_count)
+    do_jobs(ewo.jobs, esi_provider, ewo.attributes(), worker_count)
     return ewo
 
 
