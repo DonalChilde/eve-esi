@@ -49,7 +49,7 @@ class EsiJob(BaseModel):
     retry_limit: int = 5
     parameters: Dict[str, Any] = {}
     callbacks: CallbackCollection = CallbackCollection()
-    template_overrides: Dict[str, Any] = {}
+    additional_attributes: Dict[str, Any] = {}
     result: Optional[EsiJobResult] = None
 
     class Config:
@@ -65,15 +65,15 @@ class EsiJob(BaseModel):
 
     def update_attributes(self, override: Dict):
         """Update esi_job.template_over_rides with additional values"""
-        self.template_overrides.update(override)
+        self.additional_attributes.update(override)
 
     def attributes(self):
-        """return a new combined dict of esi_job parameters, and template_overrides.
+        """return a new combined dict of esi_job parameters, and additional_attributes.
 
         Overrides will overwrite local parameters.
         """
         params = combine_dictionaries(
-            self.parameters, [self._job_attributes(), self.template_overrides]
+            self.parameters, [self._job_attributes(), self.additional_attributes]
         )
 
         return params
@@ -98,22 +98,22 @@ class EsiWorkOrder(BaseModel):
     description: str = ""
     jobs: List[EsiJob] = []
     parent_path_template: str = ""
-    template_overrides: Dict[str, Any] = {}
+    additional_attributes: Dict[str, Any] = {}
 
     class Config:
         extra = "forbid"
 
     def update_attributes(self, override: Dict):
-        """Update EsiWorkOrder template_overrides with additional values"""
-        self.template_overrides.update(override)
+        """Update EsiWorkOrder additional_attributes with additional values"""
+        self.additional_attributes.update(override)
 
     def attributes(self):
-        """return a new combined dict of EsiWorkOrder parameters and and template_overrides.
+        """return a new combined dict of EsiWorkOrder parameters and and additional_attributes.
 
-        template_overrides will overwrite parameters.
+        additional_attributes will overwrite parameters.
         """
         params = self._ewo_atributes()
-        params.update(self.template_overrides)
+        params.update(self.additional_attributes)
         return params
 
     def _ewo_atributes(self):

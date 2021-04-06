@@ -18,11 +18,11 @@ class WorkOrderPreprocessor:
             self._add_file_path_prefix_to_callbacks(esi_job, ewo.attributes())
 
     def _add_file_path_prefix_to_callbacks(
-        self, esi_job: EsiJob, template_overrides: Optional[Dict[str, str]] = None
+        self, esi_job: EsiJob, additional_attributes: Optional[Dict[str, str]] = None
     ):
-        if template_overrides is not None:
+        if additional_attributes is not None:
             template_values = combine_dictionaries(
-                esi_job.attributes(), [template_overrides]
+                esi_job.attributes(), [additional_attributes]
             )
         else:
             template_values = esi_job.attributes()

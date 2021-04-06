@@ -20,7 +20,7 @@ logger.addHandler(logging.NullHandler())
 def do_jobs(
     esi_jobs: Sequence[EsiJob],
     esi_provider: EsiProvider,
-    template_overrides: Dict[str, Any],
+    additional_attributes: Dict[str, Any],
     worker_count: Optional[int] = None,
     max_workers: int = 100,
 ) -> Sequence[EsiJob]:
@@ -29,7 +29,9 @@ def do_jobs(
     for _ in range(worker_count):
         factories.append(AiohttpQueueWorkerFactory())
     jobs_to_actions = JobsToActions()
-    actions = jobs_to_actions.make_actions(esi_jobs, esi_provider, template_overrides)
+    actions = jobs_to_actions.make_actions(
+        esi_jobs, esi_provider, additional_attributes
+    )
     asyncio.run(queue_runner(actions, factories))
     return esi_jobs
 

@@ -27,17 +27,17 @@ class JobsToActions:
         self,
         esi_jobs: Sequence[EsiJob],
         esi_provider: EsiProvider,
-        template_overrides: Optional[Dict[str, str]],
+        additional_attributes: Optional[Dict[str, str]],
     ) -> List[AiohttpAction]:
         actions = []
-        template_overrides = optional_object(template_overrides, dict)
+        additional_attributes = optional_object(additional_attributes, dict)
         for esi_job in esi_jobs:
             action = esi_provider.build_action_from_op_id(
                 op_id=esi_job.op_id,
                 path_params=self._build_path_params(esi_job, esi_provider),
                 query_params=self._build_query_params(esi_job, esi_provider),
                 # callbacks=build_action_callbacks(esi_job, esi_provider),
-                callbacks=self._build_action_callbacks(esi_job, template_overrides),
+                callbacks=self._build_action_callbacks(esi_job, additional_attributes),
                 retry_limit=esi_job.retry_limit,
                 request_kwargs=self._build_request_kwargs(esi_job, esi_provider),
                 context=self._build_context(esi_job, esi_provider),
@@ -84,11 +84,11 @@ class JobsToActions:
         return path_params
 
     def _build_action_callbacks(
-        self, esi_job: EsiJob, template_overrides: Dict
+        self, esi_job: EsiJob, additional_attributes: Dict
     ) -> ActionCallbacks:
         callbacks: ActionCallbacks = ActionCallbacks()
         combined_overrides = combine_dictionaries(
-            esi_job.attributes(), [template_overrides]
+            esi_job.attributes(), [additional_attributes]
         )
         callbacks.success = self._build_target_callbacks(
             "success", esi_job.callbacks.success, combined_overrides
@@ -102,9 +102,9 @@ class JobsToActions:
         return callbacks
 
     def _build_target_callbacks(
-        self, target: str, job_callbacks: List[JobCallback], template_overrides: Dict
+        self, target: str, job_callbacks: List[JobCallback], additional_attributes: Dict
     ) -> List[AiohttpActionCallback]:
-        logger.info("template_overrides %s", template_overrides)
+        logger.info("additional_attributes %s", additional_attributes)
         callbacks: List[AiohttpActionCallback] = []
         for job_callback in job_callbacks:
             callback_id = job_callback.callback_id
@@ -123,7 +123,7 @@ class JobsToActions:
             try:
                 callback = manifest_entry.config_function(
                     job_callback=job_callback,
-                    template_overrides=template_overrides,
+                    additional_attributes=additional_attributes,
                 )
 
                 callbacks.append(callback)

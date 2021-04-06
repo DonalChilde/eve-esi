@@ -26,7 +26,7 @@ def test_make_action_from_json(esi_provider, caplog):
     esi_job = deserialize_job_from_dict(esi_job_json)
     jobs_to_actions = JobsToActions()
     actions = jobs_to_actions.make_actions(
-        [esi_job], esi_provider, template_overrides=None
+        [esi_job], esi_provider, additional_attributes=None
     )
     action = actions[0]
     assert action.url_parameters == {"region_id": 10000002}

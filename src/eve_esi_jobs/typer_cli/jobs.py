@@ -54,15 +54,15 @@ not find mistakes that can only be checked on the server, eg. a non-existant typ
 
     if dry_run:
         typer.BadParameter("not implemented yet.")
-    template_overrides = {}
+    additional_attributes = {}
     path_in = validate_input_path(path_in)
     esi_work_order_json = load_esi_work_order_json(Path(path_in))
     esi_work_order = deserialize_work_order_from_dict(esi_work_order_json)
     if path_out is not None:
         path_out = validate_output_path(path_out)
         output_path_string = str(path_out / Path(esi_work_order.parent_path_template))
-        template_overrides["ewo_parent_path_template"] = output_path_string
-    esi_work_order.update_attributes(template_overrides)
+        additional_attributes["ewo_parent_path_template"] = output_path_string
+    esi_work_order.update_attributes(additional_attributes)
     esi_provider = ctx.obj["esi_provider"]
     do_work_order(esi_work_order, esi_provider)
     typer.echo(f"Completed {len(esi_work_order.jobs)} jobs!")

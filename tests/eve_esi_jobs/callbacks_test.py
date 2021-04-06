@@ -28,7 +28,7 @@ def test_save_job_to_file(esi_provider, test_app_dir):
     esi_job = deserialize_job_from_dict(esi_job_json)
     jobs_to_actions = JobsToActions()
     actions = jobs_to_actions.make_actions(
-        [esi_job], esi_provider, template_overrides=None
+        [esi_job], esi_provider, additional_attributes=None
     )
     action = actions[0]
     worker = AiohttpQueueWorkerFactory()

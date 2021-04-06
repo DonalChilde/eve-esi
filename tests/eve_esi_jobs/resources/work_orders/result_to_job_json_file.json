@@ -40,10 +40,10 @@
         "retry": [],
         "fail": []
       },
-      "template_overrides": {},
+      "additional_attributes": {},
       "result": null
     }
   ],
   "parent_path_template": "samples/order_output/${ewo_name}",
-  "template_overrides": {}
+  "additional_attributes": {}
 }

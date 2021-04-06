@@ -32,67 +32,67 @@ class CallbackManifestEntry:
 
 
 def build_save_json_result_to_file(
-    job_callback: JobCallback, template_overrides: Optional[Dict] = None
+    job_callback: JobCallback, additional_attributes: Optional[Dict] = None
 ) -> SaveJsonResultToFile:
     args = [*job_callback.args]
     kwargs = {**job_callback.kwargs}
-    kwargs = update_callback_path_values(kwargs, template_overrides)
+    kwargs = update_callback_path_values(kwargs, additional_attributes)
     callback = SaveJsonResultToFile(*args, **kwargs)
     return callback
 
 
 def build_save_list_of_dict_result_to_csv_file(
-    job_callback: JobCallback, template_overrides: Optional[Dict] = None
+    job_callback: JobCallback, additional_attributes: Optional[Dict] = None
 ) -> SaveListOfDictResultToCSVFile:
     args = [*job_callback.args]
     kwargs = {**job_callback.kwargs}
-    kwargs = update_callback_path_values(kwargs, template_overrides)
+    kwargs = update_callback_path_values(kwargs, additional_attributes)
     callback = SaveListOfDictResultToCSVFile(*args, **kwargs)
     return callback
 
 
 def build_save_esi_job_to_json_file(
-    job_callback: JobCallback, template_overrides: Optional[Dict] = None
+    job_callback: JobCallback, additional_attributes: Optional[Dict] = None
 ) -> SaveEsiJobToJsonFile:
     args = [*job_callback.args]
     kwargs = {**job_callback.kwargs}
-    kwargs = update_callback_path_values(kwargs, template_overrides)
+    kwargs = update_callback_path_values(kwargs, additional_attributes)
     callback = SaveEsiJobToJsonFile(*args, **kwargs)
     return callback
 
 
 def build_result_to_esi_job(
-    job_callback: JobCallback, template_overrides: Optional[Dict] = None
+    job_callback: JobCallback, additional_attributes: Optional[Dict] = None
 ) -> ResultToEsiJob:
-    _, _ = job_callback, template_overrides
+    _, _ = job_callback, additional_attributes
     return ResultToEsiJob()
 
 
 def build_response_to_esi_job(
-    job_callback: JobCallback, template_overrides: Optional[Dict] = None
+    job_callback: JobCallback, additional_attributes: Optional[Dict] = None
 ) -> ResponseToEsiJob:
-    _, _ = job_callback, template_overrides
+    _, _ = job_callback, additional_attributes
     return ResponseToEsiJob()
 
 
 def build_response_content_to_json(
-    job_callback: JobCallback, template_overrides: Optional[Dict] = None
+    job_callback: JobCallback, additional_attributes: Optional[Dict] = None
 ) -> ResponseContentToJson:
-    _, _ = job_callback, template_overrides
+    _, _ = job_callback, additional_attributes
     return ResponseContentToJson()
 
 
 def build_response_content_to_text(
-    job_callback: JobCallback, template_overrides: Optional[Dict] = None
+    job_callback: JobCallback, additional_attributes: Optional[Dict] = None
 ) -> ResponseContentToText:
-    _, _ = job_callback, template_overrides
+    _, _ = job_callback, additional_attributes
     return ResponseContentToText()
 
 
 def build_check_for_pages(
-    job_callback, template_overrides: Optional[Dict] = None
+    job_callback, additional_attributes: Optional[Dict] = None
 ) -> CheckForPages:
-    _, _ = job_callback, template_overrides
+    _, _ = job_callback, additional_attributes
     return CheckForPages()
 
 
