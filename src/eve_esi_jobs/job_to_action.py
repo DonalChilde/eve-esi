@@ -152,7 +152,11 @@ class JobsToActions:
         # data/json - sent in the body of the request
         # headers
         # auth? expect to use oauth token
+
         request_kwargs: Dict[str, Any] = {}
+        json_data = esi_job.parameters.get("json", [])
+        if json_data:
+            request_kwargs["json"] = json_data
         request_kwargs["params"] = self._build_query_params(esi_job, esi_provider)
         request_kwargs["headers"] = self._build_headers(esi_job, esi_provider)
         return request_kwargs
