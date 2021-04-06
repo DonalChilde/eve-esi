@@ -9,7 +9,7 @@ example_1 = {
     "op_id": "example_1",
     "retry_limit": 5,
     "parameters": {},
-    "result_callbacks": {
+    "callbacks": {
         "success": [
             {"callback_id": "response_content_to_json"},
             {
@@ -28,7 +28,7 @@ def get_industry_facilities() -> models.EsiJob:
         "op_id": "get_industry_facilities",
         "retry_limit": 5,
         "parameters": {},
-        "result_callbacks": {
+        "callbacks": {
             "success": [
                 {"callback_id": "response_content_to_json"},
                 {
@@ -49,7 +49,7 @@ def get_industry_systems() -> models.EsiJob:
         "op_id": "get_industry_systems",
         "retry_limit": 5,
         "parameters": {},
-        "result_callbacks": {
+        "callbacks": {
             "success": [
                 {"callback_id": "response_content_to_json"},
                 {
@@ -70,7 +70,7 @@ def get_markets_region_id_types(region_id: int) -> models.EsiJob:
         "op_id": "get_markets_region_id_types",
         "retry_limit": 5,
         "parameters": {"region_id": region_id},
-        "result_callbacks": {
+        "callbacks": {
             "success": [
                 {"callback_id": "response_content_to_json"},
                 {
@@ -92,7 +92,7 @@ def post_universe_names(type_ids: List[int]) -> models.EsiJob:
         "op_id": "post_universe_names",
         "retry_limit": 5,
         "parameters": {"data": type_ids},
-        "result_callbacks": {
+        "callbacks": {
             "success": [
                 {"callback_id": "response_content_to_json"},
                 {

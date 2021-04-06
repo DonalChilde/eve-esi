@@ -91,13 +91,13 @@ class JobsToActions:
             esi_job.get_template_overrides(), [template_overrides]
         )
         callbacks.success = self._build_target_callbacks(
-            "success", esi_job.result_callbacks.success, combined_overrides
+            "success", esi_job.callbacks.success, combined_overrides
         )
         callbacks.retry = self._build_target_callbacks(
-            "retry", esi_job.result_callbacks.retry, combined_overrides
+            "retry", esi_job.callbacks.retry, combined_overrides
         )
         callbacks.fail = self._build_target_callbacks(
-            "fail", esi_job.result_callbacks.fail, combined_overrides
+            "fail", esi_job.callbacks.fail, combined_overrides
         )
         return callbacks
 

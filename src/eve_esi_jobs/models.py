@@ -48,7 +48,7 @@ class EsiJob(BaseModel):
     op_id: str
     retry_limit: int = 5
     parameters: Dict[str, Any] = {}
-    result_callbacks: CallbackCollection = CallbackCollection()
+    callbacks: CallbackCollection = CallbackCollection()
     template_overrides: Dict[str, Any] = {}
     result: Optional[EsiJobResult] = None
 
@@ -58,9 +58,9 @@ class EsiJob(BaseModel):
     def callback_iter(self) -> Iterable:
         """An iterator that chains all the callbacks"""
         return chain(
-            self.result_callbacks.success,
-            self.result_callbacks.retry,
-            self.result_callbacks.fail,
+            self.callbacks.success,
+            self.callbacks.retry,
+            self.callbacks.fail,
         )
 
     def add_template_overrides(self, override: Dict):

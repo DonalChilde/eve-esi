@@ -15,7 +15,7 @@ def test_save_job_to_file(esi_provider, test_app_dir):
         "op_id": "get_markets_region_id_history",
         "retry_limit": 1,
         "parameters": {"region_id": 10000002, "type_id": 34},
-        "result_callbacks": {
+        "callbacks": {
             "success": [
                 {"callback_id": "response_content_to_json"},
                 {

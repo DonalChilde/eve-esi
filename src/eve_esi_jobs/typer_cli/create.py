@@ -171,7 +171,7 @@ def create_job(
         "op_id": op_id,
         "name": "",
         "parameters": filtered_params,
-        "result_callbacks": job_callbacks,
+        "callbacks": job_callbacks,
     }
     job = EsiJob(**job_dict)
 

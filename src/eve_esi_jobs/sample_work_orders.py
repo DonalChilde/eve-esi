@@ -20,13 +20,11 @@ def response_to_job_json_file():
         parameters={"region_id": 10000002, "type_id": 34},
     )
     work_order.jobs.append(job)
-    job.result_callbacks.success.append(
+    job.callbacks.success.append(
         models.JobCallback(callback_id="response_content_to_json")
     )
-    job.result_callbacks.success.append(
-        models.JobCallback(callback_id="response_to_esi_job")
-    )
-    job.result_callbacks.success.append(
+    job.callbacks.success.append(models.JobCallback(callback_id="response_to_esi_job"))
+    job.callbacks.success.append(
         models.JobCallback(
             callback_id="save_esi_job_to_json_file",
             # config={
@@ -53,13 +51,11 @@ def result_to_job_json_file():
         parameters={"region_id": 10000002, "type_id": 34},
     )
     work_order.jobs.append(job)
-    job.result_callbacks.success.append(
+    job.callbacks.success.append(
         models.JobCallback(callback_id="response_content_to_json")
     )
-    job.result_callbacks.success.append(
-        models.JobCallback(callback_id="result_to_esi_job")
-    )
-    job.result_callbacks.success.append(
+    job.callbacks.success.append(models.JobCallback(callback_id="result_to_esi_job"))
+    job.callbacks.success.append(
         models.JobCallback(
             callback_id="save_esi_job_to_json_file",
             # config={
@@ -87,13 +83,11 @@ def result_to_json_file_and_response_to_json_file():
         parameters={"region_id": 10000002, "type_id": 34},
     )
     work_order.jobs.append(job)
-    job.result_callbacks.success.append(
+    job.callbacks.success.append(
         models.JobCallback(callback_id="response_content_to_json")
     )
-    job.result_callbacks.success.append(
-        models.JobCallback(callback_id="response_to_esi_job")
-    )
-    job.result_callbacks.success.append(
+    job.callbacks.success.append(models.JobCallback(callback_id="response_to_esi_job"))
+    job.callbacks.success.append(
         models.JobCallback(
             callback_id="save_esi_job_to_json_file",
             # config={
@@ -104,7 +98,7 @@ def result_to_json_file_and_response_to_json_file():
             },
         )
     )
-    job.result_callbacks.success.append(
+    job.callbacks.success.append(
         models.JobCallback(
             callback_id="save_json_result_to_file",
             # config={
@@ -130,16 +124,12 @@ def result_and_response_to_job_json_file():
         parameters={"region_id": 10000002, "type_id": 34},
     )
     work_order.jobs.append(job)
-    job.result_callbacks.success.append(
+    job.callbacks.success.append(
         models.JobCallback(callback_id="response_content_to_json")
     )
-    job.result_callbacks.success.append(
-        models.JobCallback(callback_id="result_to_esi_job")
-    )
-    job.result_callbacks.success.append(
-        models.JobCallback(callback_id="response_to_esi_job")
-    )
-    job.result_callbacks.success.append(
+    job.callbacks.success.append(models.JobCallback(callback_id="result_to_esi_job"))
+    job.callbacks.success.append(models.JobCallback(callback_id="response_to_esi_job"))
+    job.callbacks.success.append(
         models.JobCallback(
             callback_id="save_esi_job_to_json_file",
             # config={
@@ -164,11 +154,11 @@ def result_to_json_file():
         parameters={"region_id": 10000002, "type_id": 34},
     )
     work_order.jobs.append(job)
-    job.result_callbacks.success.append(
+    job.callbacks.success.append(
         models.JobCallback(callback_id="response_content_to_json")
     )
 
-    job.result_callbacks.success.append(
+    job.callbacks.success.append(
         models.JobCallback(
             callback_id="save_json_result_to_file",
             kwargs={"file_path": "data/market-history/${region_id}-${type_id}.json"},
@@ -191,11 +181,11 @@ def result_to_csv_file():
         parameters={"region_id": 10000002, "type_id": 34},
     )
     work_order.jobs.append(job)
-    job.result_callbacks.success.append(
+    job.callbacks.success.append(
         models.JobCallback(callback_id="response_content_to_json")
     )
 
-    job.result_callbacks.success.append(
+    job.callbacks.success.append(
         models.JobCallback(
             callback_id="save_list_of_dict_result_to_csv_file",
             config={
@@ -232,13 +222,11 @@ def result_with_pages_to_json_file():
         parameters={"region_id": 10000002},
     )
     work_order.jobs.append(job)
-    job.result_callbacks.success.append(
+    job.callbacks.success.append(
         models.JobCallback(callback_id="response_content_to_json")
     )
-    job.result_callbacks.success.append(
-        models.JobCallback(callback_id="check_for_pages")
-    )
-    job.result_callbacks.success.append(
+    job.callbacks.success.append(models.JobCallback(callback_id="check_for_pages"))
+    job.callbacks.success.append(
         models.JobCallback(
             callback_id="save_json_result_to_file",
             kwargs={"file_path": "data/public-contracts/${region_id}.json"},

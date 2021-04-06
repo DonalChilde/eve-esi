@@ -24,7 +24,7 @@ def test_roundtrip_json_job(test_app_dir):
         "op_id": "get_markets_region_id_history",
         "retry_limit": 1,
         "parameters": {"region_id": "10000002", "type_id": 34},
-        "result_callbacks": {
+        "callbacks": {
             "success": [
                 {
                     "callback_id": "result_to_json",
@@ -47,12 +47,12 @@ def test_roundtrip_json_job(test_app_dir):
     assert deserialized.op_id == action_json["op_id"]
     assert deserialized.retry_limit == action_json["retry_limit"]
     assert deserialized.parameters == action_json["parameters"]
-    assert deserialized.result_callbacks == action_json["result_callbacks"]
+    assert deserialized.callbacks == action_json["callbacks"]
     serialized = EJ.serialize_job(deserialized)
     print(serialized)
     as_job = EJ.deserialize_job_from_string(serialized)
     assert as_job.op_id == deserialized.op_id
-    assert as_job.result_callbacks == deserialized.result_callbacks
+    assert as_job.callbacks == deserialized.callbacks
     assert as_job.uid == deserialized.uid
     assert isinstance(as_job.uid, UUID)
 
