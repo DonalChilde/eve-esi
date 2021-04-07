@@ -139,8 +139,7 @@ def collect_resource_paths(
     exclude_suffixes = optional_object(exclude_suffixes, list)
     result = []
     with resources.path(resource_path, "__init__.py") as data_path:
-        files = data_path.parent.glob("*.*")
-        for file in files:
+        for file in data_path.parent.glob("*.*"):
             if file.name != "__init__.py" and file.suffix not in exclude_suffixes:
                 result.append(file)
     return result
