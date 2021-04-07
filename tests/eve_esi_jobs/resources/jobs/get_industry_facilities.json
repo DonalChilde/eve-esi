@@ -1,0 +1,30 @@
+{
+  "id_": "",
+  "uid": "0366e373-401e-4d4e-9a97-9b34632a4050",
+  "name": "get_industry_facilities",
+  "op_id": "get_industry_facilities",
+  "retry_limit": 5,
+  "parameters": {},
+  "callbacks": {
+    "success": [
+      {
+        "callback_id": "response_content_to_json",
+        "args": [],
+        "kwargs": {},
+        "config": {}
+      },
+      {
+        "callback_id": "save_esi_job_to_json_file",
+        "args": [],
+        "kwargs": {
+          "file_path": "data/industry-facilities.json"
+        },
+        "config": {}
+      }
+    ],
+    "retry": [],
+    "fail": []
+  },
+  "additional_attributes": {},
+  "result": null
+}

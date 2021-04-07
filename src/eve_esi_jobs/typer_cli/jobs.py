@@ -7,13 +7,14 @@ from typing import Callable, Optional, Sequence
 
 import typer
 
-from eve_esi_jobs import sample_work_orders
 from eve_esi_jobs.eve_esi_jobs import (
     deserialize_work_order_from_dict,
     do_work_order,
     serialize_job,
     serialize_work_order,
 )
+from eve_esi_jobs.examples import jobs as example_jobs
+from eve_esi_jobs.examples import work_orders as example_work_orders
 from eve_esi_jobs.models import EsiJob, EsiWorkOrder
 from eve_esi_jobs.typer_cli.cli_helpers import (
     load_esi_work_order_json,
@@ -84,13 +85,13 @@ def samples(
     output_path = Path(output_path_string) / Path("samples")
     typer.echo(f"Samples will be saved to {output_path.resolve()}")
     ewo_list = [
-        sample_work_orders.response_to_job_json_file,
-        sample_work_orders.result_to_job_json_file,
-        sample_work_orders.result_to_json_file_and_response_to_json_file,
-        sample_work_orders.result_and_response_to_job_json_file,
-        sample_work_orders.result_to_json_file,
-        sample_work_orders.result_to_csv_file,
-        sample_work_orders.result_with_pages_to_json_file,
+        example_work_orders.response_to_job_json_file,
+        example_work_orders.result_to_job_json_file,
+        example_work_orders.result_to_json_file_and_response_to_json_file,
+        example_work_orders.result_and_response_to_job_json_file,
+        example_work_orders.result_to_json_file,
+        example_work_orders.result_to_csv_file,
+        example_work_orders.result_with_pages_to_json_file,
     ]
     for sample in ewo_list:
         ewo: EsiWorkOrder = sample()
@@ -99,7 +100,11 @@ def samples(
         )
         ewo_string = serialize_work_order(ewo)
         save_string(ewo_string, file_path, parents=True)
-    jobs_list: Sequence[Callable] = []
+    jobs_list: Sequence[Callable] = [
+        example_jobs.get_industry_facilities,
+        example_jobs.get_industry_systems,
+        example_jobs.post_universe_names,
+    ]
     for sample in jobs_list:
         job: EsiJob = sample()
         file_path = output_path / Path("jobs") / Path(job.name).with_suffix(".json")

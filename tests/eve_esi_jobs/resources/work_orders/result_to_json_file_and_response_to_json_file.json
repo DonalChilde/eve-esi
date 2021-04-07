@@ -1,13 +1,13 @@
 {
   "id_": "",
   "name": "result_to_json_file_and_response_to_json_file",
-  "uid": "8d420dbc-40ea-4a09-848f-93eb1375bc03",
+  "uid": "5c87bda3-99a5-4d46-807d-277e7d19c298",
   "description": "An example of saving the raw results to a json file, and the job with response data to a separate json file",
   "jobs": [
     {
       "id_": "",
-      "uid": "fa569910-35d7-4e8c-b960-c96b945d4c94",
-      "name": null,
+      "uid": "0465e9f3-f8bc-43ec-922e-c30c98c97ee5",
+      "name": "",
       "op_id": "get_markets_region_id_history",
       "retry_limit": 5,
       "parameters": {

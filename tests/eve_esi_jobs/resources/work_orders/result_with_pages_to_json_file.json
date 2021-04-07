@@ -1,18 +1,17 @@
 {
   "id_": "",
-  "name": "response_to_job_json_file",
-  "uid": "559501bf-063b-45a3-882a-24fc1a9f9111",
-  "description": "An example of saving a completed job to a json file, including the response data. Result data intentionaly left out.",
+  "name": "result_with_pages_to_json_file",
+  "uid": "1491e442-41f3-4a3b-b342-95fa11c5b54e",
+  "description": "An example of saving the raw results with a paged api to a json file.",
   "jobs": [
     {
       "id_": "",
-      "uid": "66b16a5a-a416-48a6-a3af-aa3cba9d6a04",
+      "uid": "12e54ce5-414b-44f3-b2ce-1ded52392f1e",
       "name": "",
-      "op_id": "get_markets_region_id_history",
+      "op_id": "get_contracts_public_region_id",
       "retry_limit": 5,
       "parameters": {
-        "region_id": 10000002,
-        "type_id": 34
+        "region_id": 10000002
       },
       "callbacks": {
         "success": [
@@ -23,16 +22,16 @@
             "config": {}
           },
           {
-            "callback_id": "response_to_esi_job",
+            "callback_id": "check_for_pages",
             "args": [],
             "kwargs": {},
             "config": {}
           },
           {
-            "callback_id": "save_esi_job_to_json_file",
+            "callback_id": "save_json_result_to_file",
             "args": [],
             "kwargs": {
-              "file_path": "data/market-history/${region_id}-${type_id}-esi-job.json"
+              "file_path": "data/public-contracts/${region_id}.json"
             },
             "config": {}
           }

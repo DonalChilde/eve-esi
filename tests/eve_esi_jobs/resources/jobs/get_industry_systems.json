@@ -1,0 +1,30 @@
+{
+  "id_": "",
+  "uid": "5ceca4d4-33c5-43e3-9089-c7eeb436db90",
+  "name": "get_industry_systems",
+  "op_id": "get_industry_systems",
+  "retry_limit": 5,
+  "parameters": {},
+  "callbacks": {
+    "success": [
+      {
+        "callback_id": "response_content_to_json",
+        "args": [],
+        "kwargs": {},
+        "config": {}
+      },
+      {
+        "callback_id": "save_esi_job_to_json_file",
+        "args": [],
+        "kwargs": {
+          "file_path": "data/industry-systems.json"
+        },
+        "config": {}
+      }
+    ],
+    "retry": [],
+    "fail": []
+  },
+  "additional_attributes": {},
+  "result": null
+}

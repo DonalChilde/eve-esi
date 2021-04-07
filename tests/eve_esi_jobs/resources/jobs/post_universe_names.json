@@ -1,0 +1,35 @@
+{
+  "id_": "",
+  "uid": "81457aa1-a8d5-4c70-a3bf-eb8022b30ca3",
+  "name": "post_universe_names",
+  "op_id": "post_universe_names",
+  "retry_limit": 5,
+  "parameters": {
+    "ids": [
+      95465499,
+      30000142
+    ]
+  },
+  "callbacks": {
+    "success": [
+      {
+        "callback_id": "response_content_to_json",
+        "args": [],
+        "kwargs": {},
+        "config": {}
+      },
+      {
+        "callback_id": "save_esi_job_to_json_file",
+        "args": [],
+        "kwargs": {
+          "file_path": "data/post_universe_names-${esi_job_uid}.json"
+        },
+        "config": {}
+      }
+    ],
+    "retry": [],
+    "fail": []
+  },
+  "additional_attributes": {},
+  "result": null
+}
