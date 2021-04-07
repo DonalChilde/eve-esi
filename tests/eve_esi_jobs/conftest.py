@@ -94,6 +94,13 @@ def work_orders_() -> Dict[str, FileResource]:
     return sample_data
 
 
+@pytest.fixture(scope="session", name="jobs")
+def jobs_() -> Dict[str, FileResource]:
+    resource_path: str = "tests.eve_esi_jobs.resources.jobs"
+    sample_data = make_file_resources_from_resource_path(resource_path)
+    return sample_data
+
+
 def make_file_resources_from_resource_path(
     resource_path, exclude_suffixes: Optional[List[str]] = None
 ):
