@@ -6,6 +6,7 @@ from typing import Callable, Dict, List, Optional, Type
 from pfmsoft.aiohttp_queue import AiohttpActionCallback
 from pfmsoft.aiohttp_queue.callbacks import (
     CheckForPages,
+    LogFail,
     ResponseContentToJson,
     ResponseContentToText,
     SaveJsonResultToFile,
@@ -13,6 +14,7 @@ from pfmsoft.aiohttp_queue.callbacks import (
 )
 
 from eve_esi_jobs.callbacks import (
+    LogJobFailure,
     ResponseToEsiJob,
     ResultToEsiJob,
     SaveEsiJobToJsonFile,
@@ -96,7 +98,19 @@ def build_check_for_pages(
     return CheckForPages()
 
 
+def build_log_job_failure(
+    job_callback, additional_attributes: Optional[Dict] = None
+) -> LogJobFailure:
+    _, _ = job_callback, additional_attributes
+    return LogJobFailure()
+
+
 CALLBACK_MANIFEST: Dict[str, CallbackManifestEntry] = {
+    "log_job_failure": CallbackManifestEntry(
+        callback=LogJobFailure,
+        valid_targets=["fail"],
+        config_function=build_log_job_failure,
+    ),
     "check_for_pages": CallbackManifestEntry(
         callback=CheckForPages,
         valid_targets=["success"],

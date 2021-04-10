@@ -13,10 +13,13 @@ from pfmsoft.aiohttp_queue.callbacks import (
     LogSuccess,
     ResponseContentToJson,
     SaveJsonResultToFile,
+    SaveResultToFile,
 )
 from rich import inspect
 
 from eve_esi_jobs.helpers import combine_dictionaries
+
+# from eve_esi_jobs.eve_esi_jobs import serialize_job
 from eve_esi_jobs.models import EsiJob, EsiJobResult
 
 logger = logging.getLogger(__name__)
@@ -90,7 +93,7 @@ DEFAULT_CALLBACKS: ActionCallbacks = ActionCallbacks(
 # class SaveCsvResultToFile(SaveJsonResultToFile):
 #     def __init__(self, file_path: str, mode: str) -> None:
 #         super().__init__(file_path, mode=mode)
-class SaveEsiJobToJsonFile(SaveJsonResultToFile):
+class SaveEsiJobToJsonFile(SaveResultToFile):
     """Save an `EsiJob` to file after execution.
 
     Previous callbacks decide if the `EsiJob` contains the result data,
@@ -100,13 +103,13 @@ class SaveEsiJobToJsonFile(SaveJsonResultToFile):
         self,
         file_path: str,
         mode: str = "w",
-        template_params: Optional[Dict[str, str]] = None,
+        path_values: Optional[Dict[str, str]] = None,
         file_ending: str = ".json",
     ) -> None:
         super().__init__(
             file_path,
             mode=mode,
-            template_params=template_params,
+            path_values=path_values,
             file_ending=file_ending,
         )
 
@@ -114,17 +117,20 @@ class SaveEsiJobToJsonFile(SaveJsonResultToFile):
         """expects data (caller.result in super) to be json."""
         job: EsiJob = caller.context.get("esi_job", None)
         if job is not None:
-            data = job.dict()
-        if data is None or not data:
-            logger.warning(
-                "Could not get result data from esi_job. job: %s action: %s",
-                job,
-                caller,
-            )
-            data = {}
+            data_string = job.json(indent=2)
+        else:
+            data_string = ""
+        # logger.info("response meta: %s", caller.response_meta_to_json())
+        # if data is None or not data:
+        #     logger.warning(
+        #         "Could not get result data from esi_job. job: %s action: %s",
+        #         job,
+        #         caller,
+        #     )
+        #     data = {}
         # inspect(data)
-        json_string = json.dumps(data, indent=2)
-        return json_string
+        # json_string = json.dumps(data, indent=2)
+        return data_string
 
 
 class ResultToEsiJob(AiohttpActionCallback):
@@ -140,8 +146,10 @@ class ResultToEsiJob(AiohttpActionCallback):
         if esi_job.result is None:
             esi_job.result = EsiJobResult()
         esi_job.result.data = caller.result
-        esi_job.result.work_order_id = esi_job.attributes().get("ewo_id", "")  # type: ignore
-        esi_job.result.work_order_name = esi_job.attributes().get("ewo_name", "")  # type: ignore
+        job_attributes = esi_job.attributes()
+        esi_job.result.work_order_id = job_attributes.get("ewo_id", "")  # type: ignore
+        esi_job.result.work_order_name = job_attributes.get("ewo_name", "")  # type: ignore
+        esi_job.result.work_order_uid = job_attributes.get("ewo_uid", "")
 
 
 class ResponseToEsiJob(AiohttpActionCallback):
@@ -151,7 +159,7 @@ class ResponseToEsiJob(AiohttpActionCallback):
         super().__init__(*args, **kwargs)
 
     async def do_callback(self, caller: AiohttpAction, *args, **kwargs):
-        esi_job: "EsiJob" = caller.context.get("esi_job", None)
+        esi_job: EsiJob = caller.context.get("esi_job", None)
         if esi_job is None:
             raise ValueError(f"EsiJob was not attatched to {caller}")
         # if caller.response is not None:
@@ -159,5 +167,21 @@ class ResponseToEsiJob(AiohttpActionCallback):
         if esi_job.result is None:
             esi_job.result = EsiJobResult()
         esi_job.result.response = caller.response_meta_to_json()
-        esi_job.result.work_order_id = esi_job.attributes().get("ewo_id", "")  # type: ignore
-        esi_job.result.work_order_name = esi_job.attributes().get("ewo_name", "")  # type: ignore
+        job_attributes = esi_job.attributes()
+        print(job_attributes)
+        esi_job.result.work_order_id = job_attributes.get("ewo_id", "")
+        esi_job.result.work_order_name = job_attributes.get("ewo_name", "")
+        esi_job.result.work_order_uid = job_attributes.get("ewo_uid", "")
+
+
+class LogJobFailure(AiohttpActionCallback):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
+    async def do_callback(self, caller: AiohttpAction, *args, **kwargs):
+        try:
+            esi_job: EsiJob = caller.context.get("esi_job", None)
+            job_string = esi_job.json(indent=2)
+            logger.warning("Job failed. %s", job_string)
+        except Exception as ex:
+            logger.exception("failure in callback %s", ex)
