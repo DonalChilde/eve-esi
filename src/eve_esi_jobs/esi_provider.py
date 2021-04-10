@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from pfmsoft.aiohttp_queue import ActionCallbacks, AiohttpAction, AiohttpActionCallback
+from rich import inspect
 
 # from eve_esi_jobs.app_config import SCHEMA_URL
 from eve_esi_jobs.callbacks import DEFAULT_CALLBACKS
@@ -129,20 +130,6 @@ class EsiProvider:
         # FIXME add parsing
         return [""]
 
-    # def lookup_url_template(self, op_id) -> Tuple[str, str]:
-    #     data = self.op_id_lookup.get(op_id, None)
-    #     if data is None:
-    #         raise NotImplementedError(f"missing data for {op_id}")
-    #     method = data.method
-    #     # TODO handle route version changes
-    #     url_template = (
-    #         "https://"
-    #         + self.schema["host"]
-    #         + self.schema["basePath"]
-    #         + data.path_template
-    #     )
-    #     return (method, url_template)
-
     def validate_params(self, op_id, path_params, query_params) -> bool:
         return True
 
@@ -193,6 +180,7 @@ class EsiProvider:
             callbacks=callbacks,
             context=context,
         )
+        # logger.info("action: %s", inspect(action))
         return action
 
 
