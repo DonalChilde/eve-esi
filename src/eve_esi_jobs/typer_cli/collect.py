@@ -18,7 +18,7 @@ app = typer.Typer()
 logger = logging.getLogger(__name__)
 
 DEFAULT_WORKORDER = EsiWorkOrder(
-    parent_path_template="workorders/${ewo_iso_date_time}/workorder-${ewo_uid}.json"
+    parent_path_template="workorders/${ewo_iso_date_time}/workorder-${ewo_uid}"
 )
 
 
