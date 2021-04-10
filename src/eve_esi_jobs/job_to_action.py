@@ -104,7 +104,7 @@ class JobsToActions:
     def _build_target_callbacks(
         self, target: str, job_callbacks: List[JobCallback], additional_attributes: Dict
     ) -> List[AiohttpActionCallback]:
-        logger.info("additional_attributes %s", additional_attributes)
+        # logger.info("additional_attributes %s", additional_attributes)
         callbacks: List[AiohttpActionCallback] = []
         for job_callback in job_callbacks:
             callback_id = job_callback.callback_id
@@ -154,12 +154,34 @@ class JobsToActions:
         # auth? expect to use oauth token
 
         request_kwargs: Dict[str, Any] = {}
-        json_data = esi_job.parameters.get("json", [])
-        if json_data:
-            request_kwargs["json"] = json_data
+        body_param = self._check_for_body_param(esi_job, esi_provider)
+        if body_param is not None:
+            json_data = esi_job.parameters.get(body_param, [])
+            if json_data:
+                request_kwargs["json"] = json_data
         request_kwargs["params"] = self._build_query_params(esi_job, esi_provider)
         request_kwargs["headers"] = self._build_headers(esi_job, esi_provider)
         return request_kwargs
+
+    def _check_for_body_param(
+        self, esi_job: EsiJob, esi_provider: EsiProvider
+    ) -> Optional[str]:
+        """Check to see if any of the schema params is a body param.
+
+        get this so that body param can be added to request_kwargs.
+        """
+        body_keys = []
+        op_info = esi_provider.op_id_lookup.get(esi_job.op_id, None)
+        if op_info is None:
+            raise ValueError("could not find opid %s", esi_job.op_id)
+        for param in op_info.parameters.values():
+            if param.get("in", "") == "body":
+                body_keys.append(param["name"])
+        if len(body_keys) > 1:
+            logger.warning("found more than one body param in %s", op_info)
+        if body_keys:
+            return body_keys[0]
+        return None
 
     def _build_context(self, esi_job: EsiJob, esi_provider: EsiProvider) -> Dict:
         _ = esi_provider
