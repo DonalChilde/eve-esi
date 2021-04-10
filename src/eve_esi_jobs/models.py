@@ -34,6 +34,7 @@ class CallbackCollection(BaseModel):
 class EsiJobResult(BaseModel):
     work_order_name: Optional[str] = None
     work_order_id: Optional[str] = None
+    work_order_uid: str = ""
     data: Optional[Any] = None
     response: Optional[Any] = None
 
