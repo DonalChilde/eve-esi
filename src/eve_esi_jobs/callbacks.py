@@ -147,6 +147,7 @@ class ResultToEsiJob(AiohttpActionCallback):
             esi_job.result = EsiJobResult()
         esi_job.result.data = caller.result
         job_attributes = esi_job.attributes()
+        esi_job.result.attempts = caller.retry_count
         esi_job.result.work_order_id = job_attributes.get("ewo_id", "")  # type: ignore
         esi_job.result.work_order_name = job_attributes.get("ewo_name", "")  # type: ignore
         esi_job.result.work_order_uid = job_attributes.get("ewo_uid", "")
@@ -168,7 +169,8 @@ class ResponseToEsiJob(AiohttpActionCallback):
             esi_job.result = EsiJobResult()
         esi_job.result.response = caller.response_meta_to_json()
         job_attributes = esi_job.attributes()
-        print(job_attributes)
+        # print(job_attributes)
+        esi_job.result.attempts = caller.retry_count
         esi_job.result.work_order_id = job_attributes.get("ewo_id", "")
         esi_job.result.work_order_name = job_attributes.get("ewo_name", "")
         esi_job.result.work_order_uid = job_attributes.get("ewo_uid", "")

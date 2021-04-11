@@ -37,6 +37,7 @@ class EsiJobResult(BaseModel):
     work_order_uid: str = ""
     data: Optional[Any] = None
     response: Optional[Any] = None
+    attempts: int = 0
 
     class Config:
         extra = "forbid"
