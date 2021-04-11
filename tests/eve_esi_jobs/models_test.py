@@ -8,7 +8,7 @@ from rich import inspect
 
 import eve_esi_jobs.eve_esi_jobs as EJ
 from eve_esi_jobs import models
-from eve_esi_jobs.sample_work_orders import result_and_response_to_job_json_file
+from eve_esi_jobs.examples.work_orders import result_and_response_to_job_json_file
 
 # import pytest
 # from rich import inspect, print

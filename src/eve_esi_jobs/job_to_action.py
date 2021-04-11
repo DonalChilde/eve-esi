@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional, Sequence
 
 from pfmsoft.aiohttp_queue import ActionCallbacks, AiohttpAction, AiohttpActionCallback
 
-from eve_esi_jobs.callback_manifest import CALLBACK_MANIFEST
+from eve_esi_jobs.callback_manifest import CallbackProvider
 from eve_esi_jobs.esi_provider import EsiProvider
 from eve_esi_jobs.helpers import combine_dictionaries, optional_object
 from eve_esi_jobs.models import EsiJob, JobCallback
@@ -27,6 +27,7 @@ class JobsToActions:
         self,
         esi_jobs: Sequence[EsiJob],
         esi_provider: EsiProvider,
+        callback_provider: CallbackProvider,
         additional_attributes: Optional[Dict[str, str]],
     ) -> List[AiohttpAction]:
         actions = []
@@ -36,8 +37,9 @@ class JobsToActions:
                 op_id=esi_job.op_id,
                 path_params=self._build_path_params(esi_job, esi_provider),
                 query_params=self._build_query_params(esi_job, esi_provider),
-                # callbacks=build_action_callbacks(esi_job, esi_provider),
-                callbacks=self._build_action_callbacks(esi_job, additional_attributes),
+                callbacks=self._build_action_callbacks(
+                    esi_job, callback_provider, additional_attributes
+                ),
                 retry_limit=esi_job.retry_limit,
                 request_kwargs=self._build_request_kwargs(esi_job, esi_provider),
                 context=self._build_context(esi_job, esi_provider),
@@ -84,56 +86,66 @@ class JobsToActions:
         return path_params
 
     def _build_action_callbacks(
-        self, esi_job: EsiJob, additional_attributes: Dict
+        self,
+        esi_job: EsiJob,
+        callback_provider: CallbackProvider,
+        additional_attributes: Dict,
     ) -> ActionCallbacks:
-        callbacks: ActionCallbacks = ActionCallbacks()
+        action_callbacks = ActionCallbacks()
         combined_attributes = combine_dictionaries(
             esi_job.attributes(), [additional_attributes]
         )
-        callbacks.success = self._build_target_callbacks(
-            "success", esi_job.callbacks.success, combined_attributes
-        )
-        callbacks.retry = self._build_target_callbacks(
-            "retry", esi_job.callbacks.retry, combined_attributes
-        )
-        callbacks.fail = self._build_target_callbacks(
-            "fail", esi_job.callbacks.fail, combined_attributes
-        )
-        return callbacks
+        for job_callback in esi_job.callbacks.success:
+            action_callback = callback_provider.configure_action_callback(
+                "success", job_callback, combined_attributes
+            )
+            action_callbacks.success.append(action_callback)
+        for job_callback in esi_job.callbacks.retry:
+            action_callback = callback_provider.configure_action_callback(
+                "retry", job_callback, combined_attributes
+            )
+            action_callbacks.retry.append(action_callback)
+        for job_callback in esi_job.callbacks.fail:
+            action_callback = callback_provider.configure_action_callback(
+                "fail", job_callback, combined_attributes
+            )
+            action_callbacks.fail.append(action_callback)
 
-    def _build_target_callbacks(
-        self, target: str, job_callbacks: List[JobCallback], additional_attributes: Dict
-    ) -> List[AiohttpActionCallback]:
-        # logger.info("additional_attributes %s", additional_attributes)
-        callbacks: List[AiohttpActionCallback] = []
-        for job_callback in job_callbacks:
-            callback_id = job_callback.callback_id
-            manifest_entry = CALLBACK_MANIFEST.get(callback_id, None)
-            if manifest_entry is None:
-                raise ValueError(
-                    f"Unable to find {callback_id} in manifest. Is it a valid callback id?"
-                )
-            if target not in manifest_entry.valid_targets:
-                raise ValueError(
-                    (
-                        f"Invalid target for {callback_id}. Tried {target}, "
-                        "expected one of {manifest_entry.valid_targets}"
-                    )
-                )
-            try:
-                callback = manifest_entry.config_function(
-                    job_callback=job_callback,
-                    additional_attributes=additional_attributes,
-                )
+        return action_callbacks
 
-                callbacks.append(callback)
-            except Exception as ex:
-                logger.exception(
-                    "Failed to initialize callback with %s. Did you supply the correct arguments?",
-                    callback_id,
-                )
-                raise ex
-        return callbacks
+    # def _build_target_callbacks(
+    #     self, target: str, job_callbacks: List[JobCallback], additional_attributes: Dict
+    # ) -> List[AiohttpActionCallback]:
+    #     # logger.info("additional_attributes %s", additional_attributes)
+    #     callbacks: List[AiohttpActionCallback] = []
+    #     for job_callback in job_callbacks:
+    #         callback_id = job_callback.callback_id
+    #         manifest_entry = CALLBACK_MANIFEST.get(callback_id, None)
+    #         if manifest_entry is None:
+    #             raise ValueError(
+    #                 f"Unable to find {callback_id} in manifest. Is it a valid callback id?"
+    #             )
+    #         if target not in manifest_entry.valid_targets:
+    #             raise ValueError(
+    #                 (
+    #                     f"Invalid target for {callback_id}. Tried {target}, "
+    #                     "expected one of {manifest_entry.valid_targets}"
+    #                 )
+    #             )
+    #         try:
+    #             callback = manifest_entry.config_function(
+    #                 job_callback=job_callback,
+    #                 additional_attributes=additional_attributes,
+    #             )
+
+    #             callbacks.append(callback)
+    #         except Exception as ex:
+    #             logger.exception(
+    #                 "Failed to initialize callback with %s. Did you supply the correct arguments?",
+    #                 callback_id,
+    #             )
+    #             raise ex
+    #     return callbacks
 
     def _build_headers(
         self, esi_job: EsiJob, esi_provider: EsiProvider

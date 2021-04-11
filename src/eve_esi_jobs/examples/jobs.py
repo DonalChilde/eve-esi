@@ -6,6 +6,7 @@ def get_industry_facilities():
     job.callbacks.success.append(
         models.JobCallback(callback_id="response_content_to_json")
     )
+    job.callbacks.success.append(models.JobCallback(callback_id="response_to_esi_job"))
     job.callbacks.success.append(
         models.JobCallback(
             callback_id="save_esi_job_to_json_file",
@@ -28,6 +29,7 @@ def get_industry_systems():
     job.callbacks.success.append(
         models.JobCallback(callback_id="response_content_to_json")
     )
+    job.callbacks.success.append(models.JobCallback(callback_id="response_to_esi_job"))
     job.callbacks.success.append(
         models.JobCallback(
             callback_id="save_esi_job_to_json_file",
@@ -51,6 +53,7 @@ def post_universe_names():
     job.callbacks.success.append(
         models.JobCallback(callback_id="response_content_to_json")
     )
+    job.callbacks.success.append(models.JobCallback(callback_id="response_to_esi_job"))
     job.callbacks.success.append(
         models.JobCallback(
             callback_id="save_esi_job_to_json_file",

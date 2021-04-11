@@ -8,7 +8,9 @@ from typing import Any, Dict, Optional, Sequence
 from pfmsoft.aiohttp_queue import AiohttpQueueWorkerFactory
 from pfmsoft.aiohttp_queue.runners import queue_runner
 
+from eve_esi_jobs.callback_manifest import CallbackProvider
 from eve_esi_jobs.esi_provider import EsiProvider
+from eve_esi_jobs.helpers import combine_dictionaries, optional_object
 from eve_esi_jobs.job_to_action import JobsToActions
 from eve_esi_jobs.model_helpers import WorkOrderPreprocessor
 from eve_esi_jobs.models import EsiJob, EsiWorkOrder
@@ -20,17 +22,22 @@ logger.addHandler(logging.NullHandler())
 def do_jobs(
     esi_jobs: Sequence[EsiJob],
     esi_provider: EsiProvider,
-    additional_attributes: Dict[str, Any],
+    callback_provider: Optional[CallbackProvider] = None,
+    jobs_to_actions: Optional[JobsToActions] = None,
+    additional_attributes: Optional[Dict[str, Any]] = None,
     worker_count: Optional[int] = None,
     max_workers: int = 100,
 ) -> Sequence[EsiJob]:
+    callback_provider = optional_object(callback_provider, CallbackProvider)
+    jobs_to_actions = optional_object(jobs_to_actions, JobsToActions)
+    additional_attributes = optional_object(additional_attributes, dict)
     worker_count = get_worker_count(len(esi_jobs), worker_count, max_workers)
     factories = []
     for _ in range(worker_count):
         factories.append(AiohttpQueueWorkerFactory())
-    jobs_to_actions = JobsToActions()
+    # jobs_to_actions = JobsToActions()
     actions = jobs_to_actions.make_actions(
-        esi_jobs, esi_provider, additional_attributes
+        esi_jobs, esi_provider, callback_provider, additional_attributes
     )
     asyncio.run(queue_runner(actions, factories))
     return esi_jobs
@@ -40,12 +47,28 @@ def do_work_order(
     ewo: EsiWorkOrder,
     esi_provider: EsiProvider,
     worker_count: Optional[int] = None,
+    callback_provider: Optional[CallbackProvider] = None,
+    jobs_to_actions: Optional[JobsToActions] = None,
+    additional_attributes: Optional[Dict[str, Any]] = None,
     max_workers: int = 100,
 ) -> EsiWorkOrder:
+    callback_provider = optional_object(callback_provider, CallbackProvider)
+    jobs_to_actions = optional_object(jobs_to_actions, JobsToActions)
+    additional_attributes = optional_object(additional_attributes, dict)
+    combined_attributes = combine_dictionaries(
+        ewo.attributes(), [additional_attributes]
+    )
     pre_processor = WorkOrderPreprocessor()
     pre_processor.pre_process_work_order(ewo)
     worker_count = get_worker_count(len(ewo.jobs), worker_count, max_workers)
-    do_jobs(ewo.jobs, esi_provider, ewo.attributes(), worker_count)
+    do_jobs(
+        ewo.jobs,
+        esi_provider,
+        callback_provider,
+        jobs_to_actions,
+        combined_attributes,
+        worker_count,
+    )
     return ewo
 
 
