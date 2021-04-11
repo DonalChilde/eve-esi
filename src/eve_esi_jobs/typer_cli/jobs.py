@@ -7,6 +7,7 @@ from typing import Callable, Optional, Sequence
 
 import typer
 
+from eve_esi_jobs.callback_manifest import DefaultCallbackProvider
 from eve_esi_jobs.eve_esi_jobs import (
     deserialize_work_order_from_dict,
     do_work_order,
@@ -105,8 +106,9 @@ def samples(
         example_jobs.get_industry_systems,
         example_jobs.post_universe_names,
     ]
+    default_callbacks = DefaultCallbackProvider().default_callback_collection()
     for sample in jobs_list:
-        job: EsiJob = sample()
+        job: EsiJob = sample(default_callbacks)
         file_path = output_path / Path("jobs") / Path(job.name).with_suffix(".json")
         job_string = serialize_job(job)
         save_string(job_string, file_path, parents=True)
