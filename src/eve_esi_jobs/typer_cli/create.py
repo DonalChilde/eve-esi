@@ -7,10 +7,11 @@ from typing import Dict, List, Optional
 
 import typer
 
+from eve_esi_jobs.callback_manifest import DefaultCallbackProvider
 from eve_esi_jobs.esi_provider import EsiProvider
 from eve_esi_jobs.eve_esi_jobs import serialize_job
 from eve_esi_jobs.helpers import optional_object
-from eve_esi_jobs.models import CallbackCollection, EsiJob
+from eve_esi_jobs.models import CallbackCollection, EsiJob, JobCallback
 from eve_esi_jobs.typer_cli.cli_helpers import (
     check_for_op_id,
     completion_op_id,
@@ -20,21 +21,21 @@ from eve_esi_jobs.typer_cli.cli_helpers import (
 app = typer.Typer(help="Create Jobs")
 logger = logging.getLogger(__name__)
 
-DEFAULT_CALLBACK_STRING = """
-    {
-      "success": [
-       {
-        "callback_id": "response_content_to_json"
-       },
-       {
-        "callback_id": "save_json_result_to_file",
-        "kwargs": {
-         "file_path": "job_data/${esi_job_op_id}-${esi_job_uid}.json"
-        }
-       }
-      ]
-     }
-     """
+# DEFAULT_CALLBACK_STRING = """
+#     {
+#       "success": [
+#        {
+#         "callback_id": "response_content_to_json"
+#        },
+#        {
+#         "callback_id": "save_json_result_to_file",
+#         "kwargs": {
+#          "file_path": "job_data/${esi_job_op_id}-${esi_job_uid}.json"
+#         }
+#        }
+#       ]
+#      }
+#      """
 
 
 @app.command()
@@ -52,14 +53,11 @@ def from_op_id(
         "-p",
         help="Optional. Full or partial parameters as a json string.",
     ),
-    callback_string: Optional[str] = typer.Option(
+    callback_path: Optional[Path] = typer.Option(
         None,
         "-c",
         "--callbacks",
-        help=(
-            "Optional. Specify callbacks to be used. "
-            "Defaults to saving json data to file."
-        ),
+        help="Optional. Json file of callbacks to be used. ",
     ),
     file_name_template: str = typer.Option(
         "created-jobs/${esi_job_op_id}-${esi_job_uid}.json",
@@ -93,15 +91,19 @@ def from_op_id(
         typer.BadParameter("path_out must not be a file.")
     file_data: Optional[List[Dict]] = get_params_from_file(path_in)
     parameters: Dict = decode_param_string(param_string)
-    callbacks: Optional[CallbackCollection] = check_for_callbacks(callback_string)
+    if callback_path is None:
+        callback_collection = EveEsiDefaultCallbacks().default_callback_collection()
+    else:
+        callback_collection = load_callbacks(callback_path)
+    # callbacks: Optional[CallbackCollection] = check_for_callbacks(callback_string)
     if not file_data:
-        job = create_job(op_id, parameters, callbacks, esi_provider)
+        job = create_job(op_id, parameters, callback_collection, esi_provider)
         if validate_job(job, esi_provider):
             save_job(job, file_name_template, path_out)
     else:
         for params in file_data:
             params.update(parameters)
-            job = create_job(op_id, params, callbacks, esi_provider)
+            job = create_job(op_id, params, callback_collection, esi_provider)
             if validate_job(job, esi_provider):
                 save_job(job, file_name_template, path_out)
 
@@ -134,23 +136,35 @@ def get_params_from_file(file_path: Optional[Path]) -> Optional[List[Dict]]:
     return None
 
 
-def check_for_callbacks(callback_string: Optional[str]) -> Optional[CallbackCollection]:
-    if callback_string is not None:
-        try:
-            callback_dict = json.loads(callback_string)
-            callbacks = CallbackCollection(**callback_dict)
-            return callbacks
-        except Exception as ex:
-            raise typer.BadParameter(
-                f"Error decoding callback string. {ex.__class__.__name__}, {ex}"
-            )
-    return None
+# def check_for_callbacks(callback_string: Optional[str]) -> Optional[CallbackCollection]:
+#     if callback_string is not None:
+#         try:
+#             callback_dict = json.loads(callback_string)
+#             callbacks = CallbackCollection(**callback_dict)
+#             return callbacks
+#         except Exception as ex:
+#             raise typer.BadParameter(
+#                 f"Error decoding callback string. {ex.__class__.__name__}, {ex}"
+#             )
+#     return None
+
+
+def load_callbacks(file_path: Path) -> CallbackCollection:
+    try:
+        callback_collection_string = file_path.read_text()
+        callback_collection_json = json.loads(callback_collection_string)
+        callback_collection = CallbackCollection(**callback_collection_json)
+        return callback_collection
+    except Exception as ex:
+        raise typer.BadParameter(
+            f"Error decoding callback string. {ex.__class__.__name__}, {ex}"
+        )
 
 
 def create_job(
     op_id: str,
     parameters: Dict,
-    callbacks: Optional[CallbackCollection],
+    callbacks: CallbackCollection,
     esi_provider: EsiProvider,
 ):
 
@@ -159,19 +173,19 @@ def create_job(
             f"Missing required parameters for {op_id}, was given {parameters}"
         )
     filtered_params = filter_extra_params(op_id, parameters, esi_provider)
-    default_json = json.loads(DEFAULT_CALLBACK_STRING)
-    default_callbacks = CallbackCollection(**default_json)
+    # default_json = json.loads(DEFAULT_CALLBACK_STRING)
+    # default_callbacks = CallbackCollection(**default_json)
 
-    if callbacks is not None:
-        job_callbacks = callbacks
-    else:
-        job_callbacks = default_callbacks
+    # if callbacks is not None:
+    #     job_callbacks = callbacks
+    # else:
+    #     job_callbacks = default_callbacks
 
     job_dict = {
         "op_id": op_id,
         "name": "",
         "parameters": filtered_params,
-        "callbacks": job_callbacks,
+        "callbacks": callbacks,
     }
     job = EsiJob(**job_dict)
 
@@ -242,3 +256,26 @@ def load_json_or_csv(file_path: Path):
             csv_reader = csv.DictReader(file)
             data = list(csv_reader)
             return data
+
+
+class EveEsiDefaultCallbacks:
+    def __init__(self) -> None:
+        pass
+
+    def default_callback_collection(self) -> CallbackCollection:
+        callback_collection = CallbackCollection()
+        callback_collection.success.append(
+            JobCallback(callback_id="response_content_to_json")
+        )
+        callback_collection.success.append(
+            JobCallback(callback_id="response_to_esi_job")
+        )
+        callback_collection.success.append(
+            JobCallback(
+                callback_id="save_json_result_to_file",
+                kwargs={"file_path": "job_data/${esi_job_op_id}-${esi_job_uid}.json"},
+            )
+        )
+        callback_collection.fail.append(JobCallback(callback_id="response_to_esi_job"))
+        callback_collection.fail.append(JobCallback(callback_id="log_job_failure"))
+        return callback_collection

@@ -16,7 +16,7 @@ from eve_esi_jobs.typer_cli import create
 from eve_esi_jobs.typer_cli.eve_esi_cli import app
 
 # TODO load jobs from result directories, and validate
-# Needs jobs-to-workorder, and validate workorder functions
+# validate workorder functions
 
 
 def test_create():
@@ -88,52 +88,52 @@ def test_get_params_from_file(sample_data: Dict[str, FileResource]):
     assert result is None
 
 
-def test_check_for_callbacks():
-    callback_json = {
-        "success": [
-            {"callback_id": "result_to_json"},
-            {"callback_id": "response_to_esi_job"},
-            {
-                "callback_id": "save_json_to_file",
-                "config": {
-                    "file_path_template": "data/market-history/${region_id}-${type_id}.json"
-                },
-            },
-        ]
-    }
-    callback_string = json.dumps(callback_json)
-    callback_collection = create.check_for_callbacks(callback_string)
-    assert isinstance(callback_collection, CallbackCollection)
+# def test_check_for_callbacks():
+#     callback_json = {
+#         "success": [
+#             {"callback_id": "result_to_json"},
+#             {"callback_id": "response_to_esi_job"},
+#             {
+#                 "callback_id": "save_json_to_file",
+#                 "config": {
+#                     "file_path_template": "data/market-history/${region_id}-${type_id}.json"
+#                 },
+#             },
+#         ]
+#     }
+#     callback_string = json.dumps(callback_json)
+#     callback_collection = create.check_for_callbacks(callback_string)
+#     assert isinstance(callback_collection, CallbackCollection)
 
-    # bad parameters
-    bad_json = {"success_bad": [{"callback_id": "result_to_json"}]}
-    callback_string_bad_json = json.dumps(bad_json)
-    with pytest.raises(typer.BadParameter) as ex:
-        callback_collection = create.check_for_callbacks(callback_string_bad_json)
-    inspect(ex)
-    assert "ValidationError" in str(ex.value)
+#     # bad parameters
+#     bad_json = {"success_bad": [{"callback_id": "result_to_json"}]}
+#     callback_string_bad_json = json.dumps(bad_json)
+#     with pytest.raises(typer.BadParameter) as ex:
+#         callback_collection = create.check_for_callbacks(callback_string_bad_json)
+#     inspect(ex)
+#     assert "ValidationError" in str(ex.value)
 
-    # malformed string
-    json_data = {"success": [{"callback_id": "result_to_json"}]}
-    callback_string_malformed = json.dumps(json_data)
-    callback_string_malformed = callback_string_malformed + "bad"
-    with pytest.raises(typer.BadParameter) as ex:
-        callback_collection = create.check_for_callbacks(callback_string_malformed)
-    inspect(ex)
-    assert "JSONDecodeError" in str(ex.value)
+#     # malformed string
+#     json_data = {"success": [{"callback_id": "result_to_json"}]}
+#     callback_string_malformed = json.dumps(json_data)
+#     callback_string_malformed = callback_string_malformed + "bad"
+#     with pytest.raises(typer.BadParameter) as ex:
+#         callback_collection = create.check_for_callbacks(callback_string_malformed)
+#     inspect(ex)
+#     assert "JSONDecodeError" in str(ex.value)
 
-    # None
-    result = create.check_for_callbacks(None)
-    assert result is None
+#     # None
+#     result = create.check_for_callbacks(None)
+#     assert result is None
 
 
 def test_default_file_path(esi_provider, test_app_dir):
     op_id = "get_markets_region_id_history"
     parameters = {"region_id": 10000002, "type_id": 34}
-    callback_config = None
+    callbacks = create.EveEsiDefaultCallbacks().default_callback_collection()
     default_template = "job_data/${esi_job_op_id}-${esi_job_uid}.json"
     template = Template(default_template)
-    job: EsiJob = create.create_job(op_id, parameters, callback_config, esi_provider)
+    job: EsiJob = create.create_job(op_id, parameters, callbacks, esi_provider)
     work_order = EsiWorkOrder(parent_path_template=str(test_app_dir))
 
     work_order.jobs.append(job)
@@ -201,75 +201,75 @@ def test_from_op_id_save_created_job(test_app_dir: Path, esi_schema: FileResourc
         assert file.stat().st_size > 10
 
 
-def test_from_op_id_custom_callback(test_app_dir: Path, esi_schema: FileResource):
-    runner = CliRunner()
-    op_id = "get_markets_region_id_history"
-    parameters = {"region_id": 10000002, "type_id": 34}
-    output_path = test_app_dir / Path("test_from_op_id_custom_callback")
-    callbacks = CallbackCollection()
-    callbacks.success.append(JobCallback(callback_id="response_content_to_json"))
-    callbacks.success.append(
-        JobCallback(
-            callback_id="save_json_result_to_file",
-            kwargs={
-                "file_path": "job_data_custom/${esi_job_op_id}-${esi_job_uid}.json"
-            },
-        )
-    )
-    callback_string = callbacks.json()
-    result = runner.invoke(
-        app,
-        [
-            "-s",
-            str(esi_schema.file_path),
-            "jobs",
-            "create",
-            "from-op-id",
-            op_id,
-            "-p",
-            json.dumps(parameters),
-            "-c",
-            callback_string,
-            "-o",
-            str(output_path),
-        ],
-        catch_exceptions=False,
-    )
-    assert result.exit_code == 0
-    sub_dir = output_path / Path("created-jobs")
-    json_files = list(sub_dir.glob("*.json"))
-    assert len(json_files) == 1
-    for file in json_files:
-        assert file.stat().st_size > 10
+# def test_from_op_id_custom_callback(test_app_dir: Path, esi_schema: FileResource):
+#     runner = CliRunner()
+#     op_id = "get_markets_region_id_history"
+#     parameters = {"region_id": 10000002, "type_id": 34}
+#     output_path = test_app_dir / Path("test_from_op_id_custom_callback")
+#     callbacks = CallbackCollection()
+#     callbacks.success.append(JobCallback(callback_id="response_content_to_json"))
+#     callbacks.success.append(
+#         JobCallback(
+#             callback_id="save_json_result_to_file",
+#             kwargs={
+#                 "file_path": "job_data_custom/${esi_job_op_id}-${esi_job_uid}.json"
+#             },
+#         )
+#     )
+#     callback_string = callbacks.json()
+#     result = runner.invoke(
+#         app,
+#         [
+#             "-s",
+#             str(esi_schema.file_path),
+#             "jobs",
+#             "create",
+#             "from-op-id",
+#             op_id,
+#             "-p",
+#             json.dumps(parameters),
+#             "-c",
+#             callback_string,
+#             "-o",
+#             str(output_path),
+#         ],
+#         catch_exceptions=False,
+#     )
+#     assert result.exit_code == 0
+#     sub_dir = output_path / Path("created-jobs")
+#     json_files = list(sub_dir.glob("*.json"))
+#     assert len(json_files) == 1
+#     for file in json_files:
+#         assert file.stat().st_size > 10
 
-    # Bad json string
-    callback_string_bad = callback_string + "bad_data"
-    output_path = test_app_dir / Path("test_from_op_id_custom_callback_fail")
-    bad_result = runner.invoke(
-        app,
-        [
-            "-s",
-            str(esi_schema.file_path),
-            "jobs",
-            "create",
-            "from-op-id",
-            op_id,
-            "-p",
-            json.dumps(parameters),
-            "-c",
-            callback_string_bad,
-            "-o",
-            str(test_app_dir),
-        ],
-        catch_exceptions=False,
-    )
+#     # Bad json string
+#     callback_string_bad = callback_string + "bad_data"
+#     output_path = test_app_dir / Path("test_from_op_id_custom_callback_fail")
+#     bad_result = runner.invoke(
+#         app,
+#         [
+#             "-s",
+#             str(esi_schema.file_path),
+#             "jobs",
+#             "create",
+#             "from-op-id",
+#             op_id,
+#             "-p",
+#             json.dumps(parameters),
+#             "-c",
+#             callback_string_bad,
+#             "-o",
+#             str(test_app_dir),
+#         ],
+#         catch_exceptions=False,
+#     )
 
-    assert bad_result.exit_code == 2
-    sub_dir = output_path / Path("created-jobs")
-    json_files = list(sub_dir.glob("*.json"))
-    assert len(json_files) == 0
-    for file in json_files:
-        assert file.stat().st_size > 10
+#     assert bad_result.exit_code == 2
+#     sub_dir = output_path / Path("created-jobs")
+#     json_files = list(sub_dir.glob("*.json"))
+#     assert len(json_files) == 0
+#     for file in json_files:
+#         assert file.stat().st_size > 10
 
 
 def test_from_op_id_path_in_full_data(
