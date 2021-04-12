@@ -1,0 +1,31 @@
+{
+  "success": [
+    {
+      "callback_id": "response_content_to_json",
+      "args": [],
+      "kwargs": {},
+      "config": {}
+    },
+    {
+      "callback_id": "response_to_esi_job",
+      "args": [],
+      "kwargs": {},
+      "config": {}
+    }
+  ],
+  "retry": [],
+  "fail": [
+    {
+      "callback_id": "response_to_esi_job",
+      "args": [],
+      "kwargs": {},
+      "config": {}
+    },
+    {
+      "callback_id": "log_job_failure",
+      "args": [],
+      "kwargs": {},
+      "config": {}
+    }
+  ]
+}

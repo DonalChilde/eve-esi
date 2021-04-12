@@ -101,6 +101,13 @@ def jobs_() -> Dict[str, FileResource]:
     return sample_data
 
 
+@pytest.fixture(scope="session", name="callback_collections")
+def callback_collections_() -> Dict[str, FileResource]:
+    resource_path: str = "tests.eve_esi_jobs.resources.callback_collections"
+    sample_data = make_file_resources_from_resource_path(resource_path)
+    return sample_data
+
+
 def make_file_resources_from_resource_path(
     resource_path, exclude_suffixes: Optional[List[str]] = None
 ):
@@ -136,6 +143,7 @@ def collect_resource_paths(
     resource_path: str,
     exclude_suffixes: Optional[List[str]] = None,
 ) -> List[Path]:
+    """Returns a list of Paths in a resource directory, excluding the __init__.py"""
     exclude_suffixes = optional_object(exclude_suffixes, list)
     result = []
     with resources.path(resource_path, "__init__.py") as data_path:
