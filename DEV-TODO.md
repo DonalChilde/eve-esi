@@ -7,10 +7,14 @@
 - DONE - load jsonfile of default callbacks - cli create job
   - DONE - use default callbacks if not supplied
   - alter tests to reflect new command
-  - add callback collection tests resources
-- test function to generate test resources from examples
-- tests for collect jobs to workorders
+  - DONE add callback collection tests resources
+- DONE test function to generate test resources from examples
+- collect jobs to workorders
+  - tests
+  - change workorder string arg to a path to json file. Allows adding job to an existing work order.
+  - DONE fix output path
 - test post jobs
+- make some jobs that will fail.
 - improve logging output and info.
 - validate jobs - create action?
 - run job or workorder flag
