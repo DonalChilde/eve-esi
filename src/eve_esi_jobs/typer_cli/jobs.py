@@ -93,7 +93,7 @@ def report_on_jobs(esi_jobs: List[EsiJob]):
     typer.echo(
         f"Successes: {successes}, Failures: {failures}, Not Reporting: {no_info}"
     )
-    typer.echo("see logs for deatils.")
+    typer.echo("see logs for details.")
     typer.echo(f"Completed {len(esi_jobs)} jobs!")
 
 
