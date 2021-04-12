@@ -3,7 +3,7 @@
 import logging
 from pathlib import Path
 from time import perf_counter_ns
-from typing import Callable, Optional, Sequence
+from typing import Callable, List, Optional, Sequence
 
 import typer
 
@@ -69,11 +69,32 @@ not find mistakes that can only be checked on the server, eg. a non-existant typ
     esi_work_order.update_attributes(additional_attributes)
     esi_provider = ctx.obj["esi_provider"]
     do_work_order(esi_work_order, esi_provider)
-    typer.echo(f"Completed {len(esi_work_order.jobs)} jobs!")
+    report_on_jobs(esi_work_order.jobs)
     start = ctx.obj.get("start_time", perf_counter_ns())
     end = perf_counter_ns()
     seconds = (end - start) / 1000000000
     typer.echo(f"Task completed in {seconds:0.2f} seconds")
+
+
+def report_on_jobs(esi_jobs: List[EsiJob]):
+    successes = 0
+    failures = 0
+    no_info = len(esi_jobs)
+    # jobs with retries?
+    for job in esi_jobs:
+        if job.result is not None and job.result.response is not None:
+            status = job.result.response.get("status", None)
+            if status == 200:
+                successes += 1
+                no_info -= 1
+            elif status != 200 and status is not None:
+                failures += 1
+                no_info -= 1
+    typer.echo(
+        f"Successes: {successes}, Failures: {failures}, Not Reporting: {no_info}"
+    )
+    typer.echo("see logs for deatils.")
+    typer.echo(f"Completed {len(esi_jobs)} jobs!")
 
 
 @app.command()
