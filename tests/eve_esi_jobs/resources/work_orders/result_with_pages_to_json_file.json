@@ -1,12 +1,12 @@
 {
   "id_": "",
   "name": "result_with_pages_to_json_file",
-  "uid": "1491e442-41f3-4a3b-b342-95fa11c5b54e",
+  "uid": "eb7422e8-bf35-4a69-bf11-f08b493bb761",
   "description": "An example of saving the raw results with a paged api to a json file.",
   "jobs": [
     {
       "id_": "",
-      "uid": "12e54ce5-414b-44f3-b2ce-1ded52392f1e",
+      "uid": "47c00389-0e08-43d4-b6d9-b81c094087c5",
       "name": "",
       "op_id": "get_contracts_public_region_id",
       "retry_limit": 5,
@@ -37,7 +37,20 @@
           }
         ],
         "retry": [],
-        "fail": []
+        "fail": [
+          {
+            "callback_id": "response_to_esi_job",
+            "args": [],
+            "kwargs": {},
+            "config": {}
+          },
+          {
+            "callback_id": "log_job_failure",
+            "args": [],
+            "kwargs": {},
+            "config": {}
+          }
+        ]
       },
       "additional_attributes": {},
       "result": null

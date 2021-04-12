@@ -1,12 +1,12 @@
 {
   "id_": "",
   "name": "result_to_csv_file",
-  "uid": "de198632-80e5-46f3-95ed-ef3e78467776",
+  "uid": "1d662887-c72f-436c-9efc-055a78549e8d",
   "description": "An example of saving the json results to a csv file. Also, shows reordering columns, and adding additional columns",
   "jobs": [
     {
       "id_": "",
-      "uid": "245177ce-1c46-458d-ba78-21b234d36990",
+      "uid": "c8de2e2a-551f-4f76-abe6-cdb80071001b",
       "name": "",
       "op_id": "get_markets_region_id_history",
       "retry_limit": 5,
@@ -47,7 +47,20 @@
           }
         ],
         "retry": [],
-        "fail": []
+        "fail": [
+          {
+            "callback_id": "response_to_esi_job",
+            "args": [],
+            "kwargs": {},
+            "config": {}
+          },
+          {
+            "callback_id": "log_job_failure",
+            "args": [],
+            "kwargs": {},
+            "config": {}
+          }
+        ]
       },
       "additional_attributes": {},
       "result": null

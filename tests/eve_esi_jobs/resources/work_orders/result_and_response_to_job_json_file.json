@@ -1,12 +1,12 @@
 {
   "id_": "",
   "name": "result_and_response_to_job_json_file",
-  "uid": "d0c0d385-37df-47b2-898f-3f1cf7a552c4",
+  "uid": "43c2da93-f9db-412f-8811-ca6ae4b10f95",
   "description": "An example of saving a completed job to a json file, with result and response data",
   "jobs": [
     {
       "id_": "",
-      "uid": "bbb0740e-81c1-424e-be86-6031aa1978e6",
+      "uid": "3a95b82d-d09f-4b03-94cd-2c287326dcda",
       "name": "",
       "op_id": "get_markets_region_id_history",
       "retry_limit": 5,
@@ -44,7 +44,20 @@
           }
         ],
         "retry": [],
-        "fail": []
+        "fail": [
+          {
+            "callback_id": "response_to_esi_job",
+            "args": [],
+            "kwargs": {},
+            "config": {}
+          },
+          {
+            "callback_id": "log_job_failure",
+            "args": [],
+            "kwargs": {},
+            "config": {}
+          }
+        ]
       },
       "additional_attributes": {},
       "result": null

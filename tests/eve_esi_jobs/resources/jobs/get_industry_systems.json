@@ -1,6 +1,6 @@
 {
   "id_": "",
-  "uid": "5ceca4d4-33c5-43e3-9089-c7eeb436db90",
+  "uid": "2360b8e7-1055-41e8-a8ba-80cbac32b959",
   "name": "get_industry_systems",
   "op_id": "get_industry_systems",
   "retry_limit": 5,
@@ -14,7 +14,21 @@
         "config": {}
       },
       {
+        "callback_id": "response_to_esi_job",
+        "args": [],
+        "kwargs": {},
+        "config": {}
+      },
+      {
         "callback_id": "save_esi_job_to_json_file",
+        "args": [],
+        "kwargs": {
+          "file_path": "data/industry-systems-esi-job.json"
+        },
+        "config": {}
+      },
+      {
+        "callback_id": "save_json_result_to_file",
         "args": [],
         "kwargs": {
           "file_path": "data/industry-systems.json"
@@ -23,7 +37,20 @@
       }
     ],
     "retry": [],
-    "fail": []
+    "fail": [
+      {
+        "callback_id": "response_to_esi_job",
+        "args": [],
+        "kwargs": {},
+        "config": {}
+      },
+      {
+        "callback_id": "log_job_failure",
+        "args": [],
+        "kwargs": {},
+        "config": {}
+      }
+    ]
   },
   "additional_attributes": {},
   "result": null
