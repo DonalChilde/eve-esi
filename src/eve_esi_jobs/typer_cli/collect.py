@@ -26,15 +26,16 @@ DEFAULT_WORKORDER = EsiWorkOrder(
 def jobs(
     ctx: typer.Context,
     path_in: Path = typer.Argument(...),
-    path_out: Path = typer.Option(
+    path_out: Path = typer.Argument("."),
+    file_name: Path = typer.Option(
         "workorders/${ewo_iso_date_time}/workorder-${ewo_uid}.json",
-        "-o",
-        "--output-path",
-        help="Output path for the work order.",
+        "-f",
+        "--file-name",
+        help="file name for the work order. Can include directories.",
     ),
-    ewo_params: str = typer.Option(None, "-w", "--work-order"),
+    ewo_string: Optional[str] = typer.Option(None, "-w", "--work-order"),
 ):
-
+    # TODO change ewo_string to a json file path
     if not path_in.exists():
         raise typer.BadParameter(f"{path_in} does not exist.")
     loaded_jobs = []
@@ -50,22 +51,24 @@ def jobs(
                 loaded_jobs.append(loaded_job)
     if not loaded_jobs:
         raise typer.BadParameter(f"No jobs found at {path_in}")
-    if ewo_params is None:
-        ewo_params = serialize_work_order(DEFAULT_WORKORDER)
-    try:
-        ewo = deserialize_work_order_from_string(ewo_params)
-    except Exception as ex:
-        raise typer.BadParameter(
-            f"Error decoding work order string. {ex.__class__.__name__}, {ex}"
-        )
+    if ewo_string is None:
+        ewo = DEFAULT_WORKORDER.copy()
+    else:
+        try:
+            ewo = deserialize_work_order_from_string(ewo_string)
+        except Exception as ex:
+            raise typer.BadParameter(
+                f"Error decoding work order string. {ex.__class__.__name__}, {ex}"
+            )
     ewo.jobs.extend(loaded_jobs)
-    out_template = Template(str(path_out))
+    output_path = path_out / file_name
+    out_template = Template(str(output_path))
     out_string = out_template.substitute(ewo.attributes())
     out_path_from_template = Path(out_string)
-    if out_path_from_template.is_file():
-        raise typer.BadParameter(
-            f"{out_path_from_template} is a file, should be a directory."
-        )
+    # if out_path_from_template.is_file():
+    #     raise typer.BadParameter(
+    #         f"{out_path_from_template} is a file, should be a directory."
+    #     )
     try:
         save_string(serialize_work_order(ewo), out_path_from_template, parents=True)
     except Exception as ex:
