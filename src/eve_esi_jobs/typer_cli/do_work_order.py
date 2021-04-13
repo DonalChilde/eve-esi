@@ -19,6 +19,7 @@ from eve_esi_jobs.examples import work_orders as example_work_orders
 from eve_esi_jobs.models import EsiJob, EsiWorkOrder
 from eve_esi_jobs.typer_cli.cli_helpers import (
     load_esi_work_order_json,
+    report_finished_task,
     save_string,
     validate_input_path,
     validate_output_path,
@@ -59,6 +60,7 @@ not find mistakes that can only be checked on the server, eg. a non-existant typ
     """
     if dry_run:
         typer.BadParameter("not implemented yet.")
+    typer.BadParameter("not implemented yet.")
 
 
 @app.command()
@@ -98,10 +100,7 @@ not find mistakes that can only be checked on the server, eg. a non-existant typ
     esi_provider = ctx.obj["esi_provider"]
     do_work_order(esi_work_order, esi_provider)
     report_on_jobs(esi_work_order.jobs)
-    start = ctx.obj.get("start_time", perf_counter_ns())
-    end = perf_counter_ns()
-    seconds = (end - start) / 1000000000
-    typer.echo(f"Task completed in {seconds:0.2f} seconds")
+    report_finished_task(ctx)
 
 
 def report_on_jobs(esi_jobs: List[EsiJob]):
@@ -125,46 +124,46 @@ def report_on_jobs(esi_jobs: List[EsiJob]):
     typer.echo(f"Completed {len(esi_jobs)} jobs!")
 
 
-@app.command()
-def samples(
-    ctx: typer.Context,
-    path_out: str = typer.Argument("./tmp", help="Path to output directory."),
-):
-    """Generate sample Work Orders and Jobs."""
-    output_path_string = validate_output_path(path_out)
-    output_path = Path(output_path_string) / Path("samples")
-    typer.echo(f"Samples will be saved to {output_path.resolve()}")
-    ewo_list = [
-        example_work_orders.response_to_job_json_file,
-        example_work_orders.result_to_job_json_file,
-        example_work_orders.result_to_json_file_and_response_to_json_file,
-        example_work_orders.result_and_response_to_job_json_file,
-        example_work_orders.result_to_json_file,
-        example_work_orders.result_to_csv_file,
-        example_work_orders.result_with_pages_to_json_file,
-    ]
-    for sample in ewo_list:
-        ewo_: EsiWorkOrder = sample()
-        file_path = (
-            output_path / Path("work-orders") / Path(ewo_.name).with_suffix(".json")
-        )
-        ewo_string = serialize_work_order(ewo_)
-        save_string(ewo_string, file_path, parents=True)
-    jobs_list: Sequence[Callable] = [
-        example_jobs.get_industry_facilities,
-        example_jobs.get_industry_systems,
-        example_jobs.post_universe_names,
-    ]
-    default_callbacks = DefaultCallbackProvider().default_callback_collection()
-    for sample in jobs_list:
-        job: EsiJob = sample(default_callbacks)
-        file_path = output_path / Path("jobs") / Path(job.name).with_suffix(".json")
-        job_string = serialize_job(job)
-        save_string(job_string, file_path, parents=True)
-    start = ctx.obj.get("start_time", perf_counter_ns())
-    end = perf_counter_ns()
-    seconds = (end - start) / 1000000000
-    typer.echo(f"Task completed in {seconds:0.2f} seconds")
+# @app.command()
+# def samples(
+#     ctx: typer.Context,
+#     path_out: str = typer.Argument("./tmp", help="Path to output directory."),
+# ):
+#     """Generate sample Work Orders and Jobs."""
+#     output_path_string = validate_output_path(path_out)
+#     output_path = Path(output_path_string) / Path("samples")
+#     typer.echo(f"Samples will be saved to {output_path.resolve()}")
+#     ewo_list = [
+#         example_work_orders.response_to_job_json_file,
+#         example_work_orders.result_to_job_json_file,
+#         example_work_orders.result_to_json_file_and_response_to_json_file,
+#         example_work_orders.result_and_response_to_job_json_file,
+#         example_work_orders.result_to_json_file,
+#         example_work_orders.result_to_csv_file,
+#         example_work_orders.result_with_pages_to_json_file,
+#     ]
+#     for sample in ewo_list:
+#         ewo_: EsiWorkOrder = sample()
+#         file_path = (
+#             output_path / Path("work-orders") / Path(ewo_.name).with_suffix(".json")
+#         )
+#         ewo_string = serialize_work_order(ewo_)
+#         save_string(ewo_string, file_path, parents=True)
+#     jobs_list: Sequence[Callable] = [
+#         example_jobs.get_industry_facilities,
+#         example_jobs.get_industry_systems,
+#         example_jobs.post_universe_names,
+#     ]
+#     default_callbacks = DefaultCallbackProvider().default_callback_collection()
+#     for sample in jobs_list:
+#         job: EsiJob = sample(default_callbacks)
+#         file_path = output_path / Path("jobs") / Path(job.name).with_suffix(".json")
+#         job_string = serialize_job(job)
+#         save_string(job_string, file_path, parents=True)
+#     start = ctx.obj.get("start_time", perf_counter_ns())
+#     end = perf_counter_ns()
+#     seconds = (end - start) / 1000000000
+#     typer.echo(f"Task completed in {seconds:0.2f} seconds")
 
 
 # def combine(ctx: typer.Context, source_path: Path, out_path: Path):

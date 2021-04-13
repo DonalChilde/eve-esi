@@ -83,6 +83,7 @@ def ewo(
     try:
         save_string(serialize_work_order(ewo_), out_path_from_template, parents=True)
         typer.echo(f"Workorder saved to {out_path_from_template}")
+        report_finished_task(ctx)
     except Exception as ex:
         raise typer.BadParameter(
             f"Error saving work order to {path_out}. {ex.__class__.__name__}, {ex}"

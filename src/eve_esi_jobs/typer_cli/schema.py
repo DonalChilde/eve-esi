@@ -22,6 +22,7 @@ from eve_esi_jobs.typer_cli.app_data import save_json_to_app_data
 from eve_esi_jobs.typer_cli.cli_helpers import (
     check_for_op_id,
     completion_op_id,
+    report_finished_task,
     save_json,
 )
 
@@ -57,6 +58,7 @@ def browse(
     if op_id_info is None:
         typer.BadParameter(f"Invalid op_id: {op_id}")
     typer.echo(yaml.dump(dataclasses.asdict(op_id_info)))
+    report_finished_task(ctx)
 
 
 @app.command()
@@ -73,6 +75,7 @@ def list_op_ids(
     else:
         op_ids = "\n".join(op_id_keys)
     typer.echo(op_ids)
+    report_finished_task(ctx)
 
 
 @app.command()
