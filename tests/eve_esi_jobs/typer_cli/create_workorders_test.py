@@ -1,9 +1,10 @@
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List
 
 from tests.eve_esi_jobs.conftest import FileResource
 from typer.testing import CliRunner
 
+from eve_esi_jobs.eve_esi_jobs import deserialize_work_order_from_string
 from eve_esi_jobs.typer_cli.eve_esi_cli import app
 
 
@@ -12,7 +13,6 @@ def test_create_workorder(test_app_dir, jobs: Dict[str, FileResource], esi_schem
     output_path = test_app_dir / Path("create_workorder_test_result/")
     keys = list(jobs.keys())
     path_in = jobs[keys[0]].file_path.parent
-    # path_in = sample_data["3-market-history-params.csv"].file_path
     result = runner.invoke(
         app,
         [
@@ -28,11 +28,14 @@ def test_create_workorder(test_app_dir, jobs: Dict[str, FileResource], esi_schem
     print(result.output)
     assert result.exit_code == 0
     sub_dir = test_app_dir / Path("create_workorder_test_result")
-    # NOTE: Expects to find only one json file in sub directories.
-    json_files = list(sub_dir.glob("**/*.json"))
+    # NOTE: Expects to find only one workorder json file in sub directories.
+    json_files: List[Path] = list(sub_dir.glob("**/*.json"))
     assert len(json_files) == 1
     for file in json_files:
         assert file.stat().st_size > 10
+        workorder_string = file.read_text()
+        workorder = deserialize_work_order_from_string(workorder_string)
+        assert len(workorder.jobs) == 3
     # assert False
 
 
