@@ -2,11 +2,22 @@
 import json
 import logging
 from pathlib import Path
-from typing import Any, Dict
+from time import perf_counter_ns
+from typing import Any, Dict, Optional
 
 import typer
 
+from eve_esi_jobs.eve_esi_jobs import deserialize_job_from_dict
+from eve_esi_jobs.models import EsiJob, EsiWorkOrder
+
 logger = logging.getLogger(__name__)
+
+
+def report_finished_task(ctx: typer.Context):
+    start = ctx.obj.get("start_time", perf_counter_ns())
+    end = perf_counter_ns()
+    seconds = (end - start) / 1000000000
+    typer.echo(f"Task completed in {seconds:0.2f} seconds")
 
 
 def load_json(file_path: Path, **kwargs) -> Any:
@@ -184,6 +195,21 @@ def load_esi_work_order_json(file_path: Path) -> Dict:
             f"The error reported was {ex.__class__} with msg {ex}"
         )
     return json_data
+
+
+def load_job(file_path: Path) -> Optional[EsiJob]:
+    try:
+        data = load_json(file_path)
+    except Exception as ex:  # pylint: disable=broad-except
+        typer.echo(f"Error loading job from {file_path}. {ex.__class__.__name__}, {ex}")
+        return None
+    try:
+        job = deserialize_job_from_dict(data)
+        return job
+    except Exception as ex:
+        raise typer.BadParameter(
+            f"{file_path} is not a valid EsiJob. {ex.__class__.__name__}, {ex}"
+        )
 
 
 def completion_op_id(ctx: typer.Context, incomplete: str):

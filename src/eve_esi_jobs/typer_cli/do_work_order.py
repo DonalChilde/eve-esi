@@ -23,18 +23,46 @@ from eve_esi_jobs.typer_cli.cli_helpers import (
     validate_input_path,
     validate_output_path,
 )
-from eve_esi_jobs.typer_cli.collect import app as collect_app
-from eve_esi_jobs.typer_cli.create import app as create_app
 
-app = typer.Typer(help="""Work with Esi Jobs and Work Orders.\n\nmore info.""")
+# from eve_esi_jobs.typer_cli.collect import app as collect_app
+
+# from eve_esi_jobs.typer_cli.create import app as create_app
+
+app = typer.Typer(help="""Do Jobs and Work Orders.\n\nmore info.""")
 logger = logging.getLogger(__name__)
 
-app.add_typer(create_app, name="create")
-app.add_typer(collect_app, name="collect")
+# app.add_typer(create_app, name="create")
+# app.add_typer(collect_app, name="collect")
 
 
 @app.command()
-def run(
+def job(
+    ctx: typer.Context,
+    path_in: str = typer.Argument(..., help="Path to Esi Work Order json"),
+    path_out: Optional[str] = typer.Argument(
+        None, help="Path to be prepended to the Esi Work Order path."
+    ),
+    dry_run: bool = typer.Option(
+        False,
+        help="""
+Dry-run will perform all operations up to but not including making the
+actual http requests. This will detect some missed settings and parameters, but does
+not find mistakes that can only be checked on the server, eg. a non-existant type_id.
+""",
+    ),
+):
+    """Load Work Orders and run them.
+
+    Dry-run will perform all operations up to but not including making the actual
+    http requests. This will detect some missed settings and parameters, but does
+    not find mistakes that can only be checked on the server, eg. a non-existant type_id.
+    """
+    if dry_run:
+        typer.BadParameter("not implemented yet.")
+
+
+@app.command()
+def ewo(
     ctx: typer.Context,
     path_in: str = typer.Argument(..., help="Path to Esi Work Order json"),
     path_out: Optional[str] = typer.Argument(
@@ -116,11 +144,11 @@ def samples(
         example_work_orders.result_with_pages_to_json_file,
     ]
     for sample in ewo_list:
-        ewo: EsiWorkOrder = sample()
+        ewo_: EsiWorkOrder = sample()
         file_path = (
-            output_path / Path("work-orders") / Path(ewo.name).with_suffix(".json")
+            output_path / Path("work-orders") / Path(ewo_.name).with_suffix(".json")
         )
-        ewo_string = serialize_work_order(ewo)
+        ewo_string = serialize_work_order(ewo_)
         save_string(ewo_string, file_path, parents=True)
     jobs_list: Sequence[Callable] = [
         example_jobs.get_industry_facilities,

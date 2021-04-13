@@ -9,16 +9,21 @@ import typer
 
 from eve_esi_jobs.callback_manifest import DefaultCallbackProvider
 from eve_esi_jobs.esi_provider import EsiProvider
-from eve_esi_jobs.eve_esi_jobs import serialize_job
+from eve_esi_jobs.eve_esi_jobs import (
+    deserialize_work_order_from_string,
+    serialize_job,
+    serialize_work_order,
+)
 from eve_esi_jobs.helpers import optional_object
-from eve_esi_jobs.models import CallbackCollection, EsiJob, JobCallback
+from eve_esi_jobs.models import CallbackCollection, EsiJob, EsiWorkOrder, JobCallback
 from eve_esi_jobs.typer_cli.cli_helpers import (
     check_for_op_id,
     completion_op_id,
+    load_job,
     save_string,
 )
 
-app = typer.Typer(help="Create Jobs")
+app = typer.Typer(help="Create Jobs and Workorders")
 logger = logging.getLogger(__name__)
 
 # DEFAULT_CALLBACK_STRING = """
@@ -36,10 +41,74 @@ logger = logging.getLogger(__name__)
 #       ]
 #      }
 #      """
+DEFAULT_WORKORDER = EsiWorkOrder(
+    parent_path_template="workorders/${ewo_iso_date_time}/workorder-${ewo_uid}"
+)
 
 
 @app.command()
-def from_op_id(
+def ewo(
+    ctx: typer.Context,
+    path_in: Path = typer.Argument(...),
+    path_out: Path = typer.Argument("."),
+    file_name: Path = typer.Option(
+        "workorders/${ewo_iso_date_time}/workorder-${ewo_uid}.json",
+        "-f",
+        "--file-name",
+        help="file name for the work order. Can include directories.",
+    ),
+    ewo_string: Optional[str] = typer.Option(None, "-w", "--work-order"),
+):
+    """Create a Workorder, and add existing jobs to it.
+
+    Can also add jobs to an existing Workorder.
+    """
+    _ = ctx
+    # TODO change ewo_string to a json file path
+    if not path_in.exists():
+        raise typer.BadParameter(f"{path_in} does not exist.")
+    loaded_jobs = []
+    if path_in.is_file():
+        loaded_job = load_job(path_in)
+        if loaded_job is not None:
+            loaded_jobs.append(loaded_job)
+    if path_in.is_dir():
+        maybe_jobs = path_in.glob("*.json")
+        for maybe_job in maybe_jobs:
+            loaded_job = load_job(maybe_job)
+            if loaded_job is not None:
+                loaded_jobs.append(loaded_job)
+    if not loaded_jobs:
+        raise typer.BadParameter(f"No jobs found at {path_in}")
+    if ewo_string is None:
+        ewo_ = DEFAULT_WORKORDER.copy()
+    else:
+        try:
+            ewo_ = deserialize_work_order_from_string(ewo_string)
+        except Exception as ex:
+            raise typer.BadParameter(
+                f"Error decoding work order string. {ex.__class__.__name__}, {ex}"
+            )
+    ewo_.jobs.extend(loaded_jobs)
+    output_path = path_out / file_name
+    out_template = Template(str(output_path))
+    out_string = out_template.substitute(ewo_.attributes())
+    out_path_from_template = Path(out_string)
+    # if out_path_from_template.is_file():
+    #     raise typer.BadParameter(
+    #         f"{out_path_from_template} is a file, should be a directory."
+    #     )
+    try:
+        save_string(serialize_work_order(ewo_), out_path_from_template, parents=True)
+        typer.echo(f"Workorder saved to {out_path_from_template}")
+    except Exception as ex:
+        raise typer.BadParameter(
+            f"Error saving work order to {path_out}. {ex.__class__.__name__}, {ex}"
+        )
+
+
+@app.command()
+def jobs(
     ctx: typer.Context,
     op_id: str = typer.Argument(
         ...,

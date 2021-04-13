@@ -10,7 +10,6 @@ from typing import Any, Dict, List, Optional
 import pytest
 from rich import inspect
 
-from eve_esi_jobs import logger as app_logger
 from eve_esi_jobs.esi_provider import EsiProvider
 from eve_esi_jobs.helpers import optional_object
 

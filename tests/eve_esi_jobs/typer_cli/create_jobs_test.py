@@ -182,9 +182,8 @@ def test_from_op_id_save_created_job(test_app_dir: Path, esi_schema: FileResourc
         [
             "-s",
             str(esi_schema.file_path),
-            "jobs",
             "create",
-            "from-op-id",
+            "jobs",
             op_id,
             "-p",
             json.dumps(parameters),
@@ -284,9 +283,8 @@ def test_from_op_id_path_in_full_data(
         [
             "-s",
             str(esi_schema.file_path),
-            "jobs",
             "create",
-            "from-op-id",
+            "jobs",
             op_id,
             "-i",
             str(path_in),
@@ -316,9 +314,8 @@ def test_from_op_id_path_in_partial_data(
         [
             "-s",
             str(esi_schema.file_path),
-            "jobs",
             "create",
-            "from-op-id",
+            "jobs",
             op_id,
             "-p",
             json.dumps(parameters),
@@ -350,9 +347,8 @@ def test_from_op_id_path_in_extra_data(
         [
             "-s",
             str(esi_schema.file_path),
-            "jobs",
             "create",
-            "from-op-id",
+            "jobs",
             op_id,
             "-p",
             json.dumps(parameters),
@@ -384,9 +380,8 @@ def test_from_op_id_path_in_bad_data(
         [
             "-s",
             str(esi_schema.file_path),
-            "jobs",
             "create",
-            "from-op-id",
+            "jobs",
             op_id,
             "-p",
             json.dumps(parameters),
@@ -418,6 +413,7 @@ def test_load_json_or_csv(sample_data: Dict[str, FileResource]):
 def test_data_from_csv(
     sample_data: Dict[str, FileResource], esi_schema, test_app_dir: Path
 ):
+    # FIXME use callback json file
     file_resource = sample_data["3-market-history-params.csv"]
     runner = CliRunner()
     op_id = "get_markets_region_id_history"
@@ -438,9 +434,8 @@ def test_data_from_csv(
         [
             "-s",
             str(esi_schema.file_path),
-            "jobs",
             "create",
-            "from-op-id",
+            "jobs",
             op_id,
             "-p",
             json.dumps(parameters),
@@ -453,4 +448,5 @@ def test_data_from_csv(
         ],
         catch_exceptions=False,
     )
+    print(result.output)
     assert result.exit_code == 0

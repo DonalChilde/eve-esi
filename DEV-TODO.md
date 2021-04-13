@@ -3,7 +3,9 @@
 ## before release
 
 - DONE - cli error reporting, success fail retry
+  - needs some failing jobs.
   - test for output.
+- Add async queue log level setting to env.
 - DONE - load jsonfile of default callbacks - cli create job
   - DONE - use default callbacks if not supplied
   - alter tests to reflect new command
@@ -19,7 +21,13 @@
 - validate jobs - create action?
 - run job or workorder flag
 - Docs
+  - oh so many docs
 - docs internal - write out program flow
+- decide, add workorder attribute to job, or submit as additional_attributes
+  - Decided
+  - remove additional_attributes param from do job and do work_orders.
+  - add any additional attributes to respective workorder or job before processing.
+  - can leave additional attribute param in callbacks, note that those attributes will not be added to job for later inspection.
 
 ## future releases
 
@@ -33,4 +41,3 @@
 - Aiohttp Queue
   - str and repr for action
   - logging, retry and fail
-- decide, add workorder attribute to job, or submit as additional_attributes

@@ -13,11 +13,11 @@
       "console": "integratedTerminal"
     },
     {
-      "name": "eve-esi samples",
+      "name": "eve-esi examples",
       "type": "python",
       "request": "launch",
       "program": "${workspaceFolder}/src/eve_esi_jobs/typer_cli/eve_esi_cli.py",
-      "args": ["jobs", "samples", "./tmp"],
+      "args": ["examples", "all-examples", "./tmp"],
       "console": "integratedTerminal"
     }
   ]
