@@ -1,0 +1,24 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "eve-esi",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/eve_esi_jobs/typer_cli/eve_esi_cli.py",
+      "args": ["--help", ""],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "eve-esi samples",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/eve_esi_jobs/typer_cli/eve_esi_cli.py",
+      "args": ["jobs", "samples", "./tmp"],
+      "console": "integratedTerminal"
+    }
+  ]
+}
