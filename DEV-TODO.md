@@ -7,12 +7,12 @@
   - test for output.
 - Add async queue log level setting to env.
 - DONE - load jsonfile of default callbacks - cli create job
-  - DONE - use default callbacks if not supplied
-  - alter tests to reflect new command
+  - DONE use default callbacks if not supplied
+  - DONE alter tests to reflect new command
   - DONE add callback collection tests resources
 - DONE test function to generate test resources from examples
 - collect jobs to workorders
-  - tests
+  - DONE tests
   - change workorder string arg to a path to json file. Allows adding job to an existing work order.
   - DONE fix output path
 - test post jobs
@@ -20,6 +20,7 @@
 - improve logging output and info.
 - validate jobs - create action?
 - run job or workorder flag
+  - make this separate commands
 - Docs
   - oh so many docs
 - docs internal - write out program flow
@@ -32,6 +33,7 @@
 ## future releases
 
 - custom exceptions?
+- switches for verbosity, support stdout, pipe to file
 - generate job methods from template
 - figure out auth
   - start with token in header? aquire manually and test function.
