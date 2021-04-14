@@ -105,12 +105,12 @@ def deserialize_work_order_from_string(esi_work_order_string: str) -> EsiWorkOrd
 
 
 def serialize_job(esi_job: EsiJob) -> str:
-    serialized = esi_job.json(indent=2)
+    serialized = esi_job.json(exclude_defaults=True, indent=2)
     return serialized
 
 
 def serialize_work_order(ewo: EsiWorkOrder) -> str:
-    serialized = ewo.json(indent=2)
+    serialized = ewo.json(exclude_defaults=True, indent=2)
     return serialized
 
 
