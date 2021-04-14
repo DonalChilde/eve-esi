@@ -35,23 +35,24 @@ class EsiJobResult(BaseModel):
     work_order_name: Optional[str] = None
     work_order_id: Optional[str] = None
     work_order_uid: str = ""
-    data: Optional[Any] = None
-    response: Optional[Any] = None
     attempts: int = 0
+    response: Optional[Any] = None
+    data: Optional[Any] = None
 
     class Config:
         extra = "forbid"
 
 
 class EsiJob(BaseModel):
+    name: str = ""
+    description: str = ""
     id_: str = ""
     uid: UUID = Field(default_factory=uuid4)
-    name: str = ""
     op_id: str
     retry_limit: int = 5
     parameters: Dict[str, Any] = {}
-    callbacks: CallbackCollection = CallbackCollection()
     additional_attributes: Dict[str, Any] = {}
+    callbacks: CallbackCollection = CallbackCollection()
     result: Optional[EsiJobResult] = None
 
     class Config:
@@ -94,13 +95,13 @@ class EsiJob(BaseModel):
 
 
 class EsiWorkOrder(BaseModel):
-    id_: str = ""
     name: str = ""
-    uid: UUID = Field(default_factory=uuid4)
     description: str = ""
-    jobs: List[EsiJob] = []
+    id_: str = ""
+    uid: UUID = Field(default_factory=uuid4)
     parent_path_template: str = ""
     additional_attributes: Dict[str, Any] = {}
+    jobs: List[EsiJob] = []
 
     class Config:
         extra = "forbid"
