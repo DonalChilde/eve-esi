@@ -20,8 +20,7 @@
   - DONE tests
   - DONE fix output path
 - DONE improve logging output and info.
-- CHANGE remove additional_attributes param from do job and do work_orders.
-  - add any additional attributes to respective workorder or job before processing.
+- DONE CHANGE remove additional_attributes param from do_work_orders, add any additional attributes to respective workorder before processing.
 - ADD repr for models?
 
 - Docs
