@@ -1,14 +1,46 @@
 from typing import Optional
 
 from eve_esi_jobs import models
-from eve_esi_jobs.callback_manifest import DefaultCallbackProvider
+from eve_esi_jobs.callback_manifest import DefaultCallbackFactory
+
+
+def get_markets_region_id_history(
+    region_id: int,
+    type_id: int,
+    callbacks: Optional[models.CallbackCollection] = None,
+):
+    if callbacks is None:
+        callbacks = DefaultCallbackFactory.default_callback_collection()
+        callbacks.success.append(
+            models.JobCallback(
+                callback_id="save_esi_job_to_json_file",
+                kwargs={
+                    "file_path": "data/market-history-${region_id}-${type_id}-esi-job.json"
+                },
+            )
+        )
+        callbacks.success.append(
+            models.JobCallback(
+                callback_id="save_json_result_to_file",
+                kwargs={
+                    "file_path": "data/market-history-${region_id}-${type_id}-esi-job.json"
+                },
+            )
+        )
+    job = models.EsiJob(
+        op_id="get_markets_region_id_history",
+        name="get_markets_region_id_history",
+        callbacks=callbacks,
+    )
+    job.parameters = {"region_id": region_id, "type_id": type_id}
+    return job
 
 
 def get_industry_facilities(
     callbacks: Optional[models.CallbackCollection] = None,
 ):
     if callbacks is None:
-        callbacks = DefaultCallbackProvider().default_callback_collection()
+        callbacks = DefaultCallbackFactory.default_callback_collection()
         callbacks.success.append(
             models.JobCallback(
                 callback_id="save_esi_job_to_json_file",
@@ -33,7 +65,7 @@ def get_industry_systems(
     callbacks: Optional[models.CallbackCollection] = None,
 ):
     if callbacks is None:
-        callbacks = DefaultCallbackProvider().default_callback_collection()
+        callbacks = DefaultCallbackFactory.default_callback_collection()
         callbacks.success.append(
             models.JobCallback(
                 callback_id="save_esi_job_to_json_file",
@@ -58,7 +90,7 @@ def post_universe_names(
     callbacks: Optional[models.CallbackCollection] = None,
 ):
     if callbacks is None:
-        callbacks = DefaultCallbackProvider().default_callback_collection()
+        callbacks = DefaultCallbackFactory.default_callback_collection()
         callbacks.success.append(
             models.JobCallback(
                 callback_id="save_esi_job_to_json_file",

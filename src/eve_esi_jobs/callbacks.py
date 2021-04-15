@@ -8,9 +8,6 @@ from typing import Any, Dict, List, Optional
 import aiofiles
 from pfmsoft.aiohttp_queue import ActionCallbacks, AiohttpAction, AiohttpActionCallback
 from pfmsoft.aiohttp_queue.callbacks import (
-    LogFail,
-    LogRetry,
-    LogSuccess,
     ResponseContentToJson,
     SaveJsonResultToFile,
     SaveResultToFile,
@@ -26,11 +23,11 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 # TODO callback to generate market history summary
 
-DEFAULT_CALLBACKS: ActionCallbacks = ActionCallbacks(
-    success=[ResponseContentToJson(), LogSuccess()],
-    retry=[LogRetry()],
-    fail=[LogFail()],
-)
+# DEFAULT_CALLBACKS: ActionCallbacks = ActionCallbacks(
+#     success=[ResponseContentToJson(), LogSuccess()],
+#     retry=[LogRetry()],
+#     fail=[LogFail()],
+# )
 
 
 # class SaveResultToCSVFile(AiohttpActionCallback):
@@ -177,6 +174,8 @@ class ResponseToEsiJob(AiohttpActionCallback):
 
 
 class LogJobFailure(AiohttpActionCallback):
+    """surplus to requirements? AiohttpAction will log a failure as well, just without the job info."""
+
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 

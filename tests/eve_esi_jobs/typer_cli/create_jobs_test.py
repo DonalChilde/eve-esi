@@ -91,7 +91,7 @@ def test_get_params_from_file(sample_data: Dict[str, FileResource]):
 def test_default_file_path(esi_provider, test_app_dir):
     op_id = "get_markets_region_id_history"
     parameters = {"region_id": 10000002, "type_id": 34}
-    callbacks = create.EveEsiDefaultCallbacks().default_callback_collection()
+    callbacks = create.EveEsiDefaultCallbackFactory().default_callback_collection()
     default_template = "job_data/${esi_job_op_id}-${esi_job_uid}.json"
     template = Template(default_template)
     job: EsiJob = create.create_job(op_id, parameters, callbacks, esi_provider)
@@ -148,11 +148,11 @@ def test_from_op_id_save_created_job(test_app_dir: Path, esi_schema: FileResourc
             op_id,
             "-p",
             json.dumps(parameters),
-            "-o",
             str(output_path),
         ],
         catch_exceptions=False,
     )
+    print(result.output)
     assert result.exit_code == 0
     sub_dir = output_path / Path("created-jobs")
     json_files = list(sub_dir.glob("*.json"))
@@ -161,7 +161,6 @@ def test_from_op_id_save_created_job(test_app_dir: Path, esi_schema: FileResourc
         assert file.stat().st_size > 10
 
 
-# FIXME test with callbacks test resource
 def test_create_job_custom_callback(
     test_app_dir: Path,
     esi_schema: FileResource,
@@ -216,7 +215,6 @@ def test_from_op_id_path_in_full_data(
             op_id,
             "-i",
             str(path_in),
-            "-o",
             str(output_path),
         ],
         catch_exceptions=False,
@@ -249,7 +247,6 @@ def test_from_op_id_path_in_partial_data(
             json.dumps(parameters),
             "-i",
             str(path_in),
-            "-o",
             str(output_path),
         ],
         catch_exceptions=False,
@@ -282,7 +279,6 @@ def test_from_op_id_path_in_extra_data(
             json.dumps(parameters),
             "-i",
             str(path_in),
-            "-o",
             str(output_path),
         ],
         catch_exceptions=False,

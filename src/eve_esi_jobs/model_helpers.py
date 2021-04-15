@@ -32,4 +32,4 @@ class WorkOrderPreprocessor:
             if file_path is not None:
                 full_path_string = str(Path(parent_path) / Path(file_path))
                 callback.kwargs["file_path"] = full_path_string
-                logger.info("file_path: %s", full_path_string)
+                # logger.info("file_path: %s", full_path_string)

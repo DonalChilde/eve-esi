@@ -7,7 +7,7 @@ from typing import Dict, List, Optional
 
 import typer
 
-from eve_esi_jobs.callback_manifest import DefaultCallbackProvider
+# from eve_esi_jobs.callback_manifest import DefaultCallbackFactory
 from eve_esi_jobs.esi_provider import EsiProvider
 from eve_esi_jobs.eve_esi_jobs import (
     deserialize_work_order_from_string,
@@ -43,7 +43,7 @@ def ewo(
         "--file-name",
         help="file name for the work order. Can include directories.",
     ),
-    ewo_string: Optional[str] = typer.Option(None, "-w", "--work-order"),
+    ewo_path: Optional[Path] = typer.Option(None, "-w", "--work-order"),
 ):
     """Create a Workorder, and add existing jobs to it.
 
@@ -66,10 +66,12 @@ def ewo(
                 loaded_jobs.append(loaded_job)
     if not loaded_jobs:
         raise typer.BadParameter(f"No jobs found at {path_in}")
-    if ewo_string is None:
+    if ewo_path is None:
+        # TODO change this?
         ewo_ = DEFAULT_WORKORDER.copy()
     else:
         try:
+            ewo_string = ewo_path.read_text()
             ewo_ = deserialize_work_order_from_string(ewo_string)
         except Exception as ex:
             raise typer.BadParameter(
@@ -144,7 +146,9 @@ def jobs(
     file_data: Optional[List[Dict]] = get_params_from_file(data_path)
     parameters: Dict = decode_param_string(param_string)
     if callback_path is None:
-        callback_collection = EveEsiDefaultCallbacks().default_callback_collection()
+        callback_collection = (
+            EveEsiDefaultCallbackFactory().default_callback_collection()
+        )
     else:
         callback_collection = load_callbacks(callback_path)
     jobs_ = []
@@ -292,7 +296,7 @@ def load_json_or_csv(file_path: Path):
             return data
 
 
-class EveEsiDefaultCallbacks:
+class EveEsiDefaultCallbackFactory:
     def __init__(self) -> None:
         pass
 

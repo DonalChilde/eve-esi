@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Callable, Sequence
 
 from eve_esi_jobs import models
-from eve_esi_jobs.callback_manifest import DefaultCallbackProvider
+from eve_esi_jobs.callback_manifest import DefaultCallbackFactory
 from eve_esi_jobs.eve_esi_jobs import serialize_job, serialize_work_order
 from eve_esi_jobs.examples import callback_collections, jobs, work_orders
 from eve_esi_jobs.typer_cli.cli_helpers import save_string

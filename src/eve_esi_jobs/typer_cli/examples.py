@@ -1,11 +1,10 @@
 import logging
 from pathlib import Path
-from time import perf_counter_ns
 from typing import Callable, Sequence
 
 import typer
 
-from eve_esi_jobs.callback_manifest import DefaultCallbackProvider
+from eve_esi_jobs.callback_manifest import DefaultCallbackFactory
 from eve_esi_jobs.eve_esi_jobs import serialize_job, serialize_work_order
 from eve_esi_jobs.examples import jobs as example_jobs
 from eve_esi_jobs.examples import work_orders as example_work_orders
@@ -66,7 +65,7 @@ def save_job_examples(output_path: Path):
         example_jobs.get_industry_systems,
         example_jobs.post_universe_names,
     ]
-    default_callbacks = DefaultCallbackProvider().default_callback_collection()
+    default_callbacks = DefaultCallbackFactory().default_callback_collection()
     for sample in jobs_list:
         job: EsiJob = sample(default_callbacks)
         file_path = output_path / Path("jobs") / Path(job.name).with_suffix(".json")
@@ -76,6 +75,7 @@ def save_job_examples(output_path: Path):
 
 def save_work_order_examples(output_path: Path):
     ewo_list = [
+        example_work_orders.example_workorder,
         example_work_orders.response_to_job_json_file,
         example_work_orders.result_to_job_json_file,
         example_work_orders.result_to_json_file_and_response_to_json_file,

@@ -7,7 +7,7 @@ from typing import Callable, List, Optional, Sequence
 
 import typer
 
-from eve_esi_jobs.callback_manifest import DefaultCallbackProvider
+from eve_esi_jobs.callback_manifest import DefaultCallbackFactory
 from eve_esi_jobs.eve_esi_jobs import (
     deserialize_work_order_from_dict,
     do_work_order,

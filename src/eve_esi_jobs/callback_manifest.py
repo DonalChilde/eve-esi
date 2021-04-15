@@ -6,7 +6,6 @@ from typing import Callable, Dict, List, Optional, Type
 from pfmsoft.aiohttp_queue import ActionCallbacks, AiohttpActionCallback
 from pfmsoft.aiohttp_queue.callbacks import (
     CheckForPages,
-    LogFail,
     ResponseContentToJson,
     ResponseContentToText,
     SaveJsonResultToFile,
@@ -105,53 +104,53 @@ def build_log_job_failure(
     return LogJobFailure()
 
 
-CALLBACK_MANIFEST: Dict[str, CallbackManifestEntry] = {
-    "log_job_failure": CallbackManifestEntry(
-        callback=LogJobFailure,
-        valid_targets=["fail"],
-        config_function=build_log_job_failure,
-    ),
-    "check_for_pages": CallbackManifestEntry(
-        callback=CheckForPages,
-        valid_targets=["success"],
-        config_function=build_check_for_pages,
-    ),
-    "save_json_result_to_file": CallbackManifestEntry(
-        callback=SaveJsonResultToFile,
-        valid_targets=["success"],
-        config_function=build_save_json_result_to_file,
-    ),
-    "save_list_of_dict_result_to_csv_file": CallbackManifestEntry(
-        callback=SaveListOfDictResultToCSVFile,
-        valid_targets=["success"],
-        config_function=build_save_list_of_dict_result_to_csv_file,
-    ),
-    "save_esi_job_to_json_file": CallbackManifestEntry(
-        callback=SaveEsiJobToJsonFile,
-        valid_targets=["success", "fail"],
-        config_function=build_save_esi_job_to_json_file,
-    ),
-    "result_to_esi_job": CallbackManifestEntry(
-        callback=ResultToEsiJob,
-        valid_targets=["success"],
-        config_function=build_result_to_esi_job,
-    ),
-    "response_to_esi_job": CallbackManifestEntry(
-        callback=ResponseToEsiJob,
-        valid_targets=["success", "fail"],
-        config_function=build_response_to_esi_job,
-    ),
-    "response_content_to_json": CallbackManifestEntry(
-        callback=ResponseContentToJson,
-        valid_targets=["success"],
-        config_function=build_response_content_to_json,
-    ),
-    "response_content_to_text": CallbackManifestEntry(
-        callback=ResponseContentToText,
-        valid_targets=["success"],
-        config_function=build_response_content_to_text,
-    ),
-}
+# CALLBACK_MANIFEST: Dict[str, CallbackManifestEntry] = {
+#     "log_job_failure": CallbackManifestEntry(
+#         callback=LogJobFailure,
+#         valid_targets=["fail"],
+#         config_function=build_log_job_failure,
+#     ),
+#     "check_for_pages": CallbackManifestEntry(
+#         callback=CheckForPages,
+#         valid_targets=["success"],
+#         config_function=build_check_for_pages,
+#     ),
+#     "save_json_result_to_file": CallbackManifestEntry(
+#         callback=SaveJsonResultToFile,
+#         valid_targets=["success"],
+#         config_function=build_save_json_result_to_file,
+#     ),
+#     "save_list_of_dict_result_to_csv_file": CallbackManifestEntry(
+#         callback=SaveListOfDictResultToCSVFile,
+#         valid_targets=["success"],
+#         config_function=build_save_list_of_dict_result_to_csv_file,
+#     ),
+#     "save_esi_job_to_json_file": CallbackManifestEntry(
+#         callback=SaveEsiJobToJsonFile,
+#         valid_targets=["success", "fail"],
+#         config_function=build_save_esi_job_to_json_file,
+#     ),
+#     "result_to_esi_job": CallbackManifestEntry(
+#         callback=ResultToEsiJob,
+#         valid_targets=["success"],
+#         config_function=build_result_to_esi_job,
+#     ),
+#     "response_to_esi_job": CallbackManifestEntry(
+#         callback=ResponseToEsiJob,
+#         valid_targets=["success", "fail"],
+#         config_function=build_response_to_esi_job,
+#     ),
+#     "response_content_to_json": CallbackManifestEntry(
+#         callback=ResponseContentToJson,
+#         valid_targets=["success"],
+#         config_function=build_response_content_to_json,
+#     ),
+#     "response_content_to_text": CallbackManifestEntry(
+#         callback=ResponseContentToText,
+#         valid_targets=["success"],
+#         config_function=build_response_content_to_text,
+#     ),
+# }
 
 
 def update_file_callback_path_values(kwargs, additional_values: Optional[Dict] = None):
@@ -163,11 +162,12 @@ def update_file_callback_path_values(kwargs, additional_values: Optional[Dict] =
     return kwargs
 
 
-class DefaultCallbackProvider:
+class DefaultCallbackFactory:
     def __init__(self) -> None:
         pass
 
-    def default_callback_collection(self) -> CallbackCollection:
+    @staticmethod
+    def default_callback_collection() -> CallbackCollection:
         callback_collection = CallbackCollection()
         callback_collection.success.append(
             JobCallback(callback_id="response_content_to_json")

@@ -6,7 +6,7 @@ from pfmsoft.aiohttp_queue import ActionCallbacks, AiohttpAction, AiohttpActionC
 from rich import inspect
 
 # from eve_esi_jobs.app_config import SCHEMA_URL
-from eve_esi_jobs.callbacks import DEFAULT_CALLBACKS
+# from eve_esi_jobs.callbacks import DEFAULT_CALLBACKS
 from eve_esi_jobs.helpers import nested_dict, optional_object
 
 logger = logging.getLogger(__name__)

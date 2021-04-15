@@ -11,7 +11,12 @@ import click
 
 class EveEsiJobConfig:
     def __init__(
-        self, app_name: str, app_dir: str, schema_url: str, log_level: Union[int, str]
+        self,
+        app_name: str,
+        app_dir: str,
+        schema_url: str,
+        log_level: Union[int, str],
+        aiohttp_queue_log_level: Union[int, str],
     ) -> None:
         self.app_name = app_name
         """The name of the app. Should be namespaced to prevent collision."""
@@ -20,9 +25,12 @@ class EveEsiJobConfig:
         self.schema_url = schema_url
         """The url to the current version of the Eve ESI schema."""
         self.log_level = int(log_level)
+        self.aiohttp_queue_log_level = int(aiohttp_queue_log_level)
         log_path = Path(app_dir) / Path("logs")
         self.log_path = log_path
-        self.logger = logger_(log_path, "eve_esi_jobs", int(log_level))
+        self.logger = logger_(
+            log_path, "eve_esi_jobs", self.log_level, self.aiohttp_queue_log_level
+        )
 
 
 def make_config_from_env():
@@ -39,14 +47,21 @@ def make_config_from_env():
         "https://esi.evetech.net/latest/swagger.json",
     )
     log_level = os.getenv("PFMSOFT_eve_esi_jobs_LOG_LEVEL", str(logging.INFO))
-    config = EveEsiJobConfig(app_name, app_dir, schema_url, log_level)
+    aiohttp_queue_log_level = os.getenv(
+        "PFMSOFT_eve_esi_jobs_aiohttp_queue_LOG_LEVEL", str(logging.WARNING)
+    )
+    config = EveEsiJobConfig(
+        app_name, app_dir, schema_url, log_level, aiohttp_queue_log_level
+    )
     return config
 
 
 logger = logging.getLogger(__name__)
 
 
-def logger_(test_log_path: Path, logger_name: str, log_level: int):
+def logger_(
+    test_log_path: Path, logger_name: str, log_level: int, aiohttp_queue_log_level: int
+):
     log_level = int(log_level)
     log_file_name = f"{logger_name}.log"
     _logger = logging.getLogger(logger_name)
@@ -69,5 +84,5 @@ def logger_(test_log_path: Path, logger_name: str, log_level: int):
     ############################################################
     async_logger = logging.getLogger("pfmsoft.aiohttp_queue")
     async_logger.addHandler(file_handler)
-    async_logger.setLevel(log_level)
+    async_logger.setLevel(aiohttp_queue_log_level)
     return _logger

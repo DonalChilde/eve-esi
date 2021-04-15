@@ -85,7 +85,7 @@ class EsiJob(BaseModel):
         """make a dict of all the esi_job attributes usable in templates"""
         params: Dict[str, Union[int, str, None]] = {
             "esi_job_name": self.name,
-            "esi_job_id": self.id_,
+            "esi_job_id_": self.id_,
             "esi_job_op_id": self.op_id,
             "esi_job_retry_limit": self.retry_limit,
             "esi_job_uid": str(self.uid),
