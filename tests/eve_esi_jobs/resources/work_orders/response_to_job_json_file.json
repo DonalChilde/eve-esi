@@ -1,15 +1,12 @@
 {
-  "id_": "",
   "name": "response_to_job_json_file",
-  "uid": "f21ce578-6522-4f64-8945-5549de07ca5b",
   "description": "An example of saving a completed job to a json file, including the response data. Result data intentionaly left out.",
+  "uid": "8e3f32b2-4949-4c44-9e8d-c997a852ecbe",
+  "output_path": "samples/order_output/${ewo_name}",
   "jobs": [
     {
-      "id_": "",
-      "uid": "c843625d-0ba8-424f-91eb-1c0bb0c54189",
-      "name": "",
+      "uid": "712cb6fe-a2a6-4e43-8369-5c32a3e46c57",
       "op_id": "get_markets_region_id_history",
-      "retry_limit": 5,
       "parameters": {
         "region_id": 10000002,
         "type_id": 34
@@ -17,46 +14,27 @@
       "callbacks": {
         "success": [
           {
-            "callback_id": "response_content_to_json",
-            "args": [],
-            "kwargs": {},
-            "config": {}
+            "callback_id": "response_content_to_json"
           },
           {
-            "callback_id": "response_to_esi_job",
-            "args": [],
-            "kwargs": {},
-            "config": {}
+            "callback_id": "response_to_esi_job"
           },
           {
             "callback_id": "save_esi_job_to_json_file",
-            "args": [],
             "kwargs": {
               "file_path": "data/market-history/${region_id}-${type_id}-esi-job.json"
-            },
-            "config": {}
+            }
           }
         ],
-        "retry": [],
         "fail": [
           {
-            "callback_id": "response_to_esi_job",
-            "args": [],
-            "kwargs": {},
-            "config": {}
+            "callback_id": "response_to_esi_job"
           },
           {
-            "callback_id": "log_job_failure",
-            "args": [],
-            "kwargs": {},
-            "config": {}
+            "callback_id": "log_job_failure"
           }
         ]
-      },
-      "additional_attributes": {},
-      "result": null
+      }
     }
-  ],
-  "parent_path_template": "samples/order_output/${ewo_name}",
-  "additional_attributes": {}
+  ]
 }

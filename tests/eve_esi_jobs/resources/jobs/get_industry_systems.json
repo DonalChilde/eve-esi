@@ -1,57 +1,23 @@
 {
-  "id_": "",
-  "uid": "2360b8e7-1055-41e8-a8ba-80cbac32b959",
   "name": "get_industry_systems",
+  "uid": "ae812b5d-5a98-4183-8c0a-3bd1fc8d5315",
   "op_id": "get_industry_systems",
-  "retry_limit": 5,
-  "parameters": {},
   "callbacks": {
     "success": [
       {
-        "callback_id": "response_content_to_json",
-        "args": [],
-        "kwargs": {},
-        "config": {}
+        "callback_id": "response_content_to_json"
       },
       {
-        "callback_id": "response_to_esi_job",
-        "args": [],
-        "kwargs": {},
-        "config": {}
-      },
-      {
-        "callback_id": "save_esi_job_to_json_file",
-        "args": [],
-        "kwargs": {
-          "file_path": "data/industry-systems-esi-job.json"
-        },
-        "config": {}
-      },
-      {
-        "callback_id": "save_json_result_to_file",
-        "args": [],
-        "kwargs": {
-          "file_path": "data/industry-systems.json"
-        },
-        "config": {}
+        "callback_id": "response_to_esi_job"
       }
     ],
-    "retry": [],
     "fail": [
       {
-        "callback_id": "response_to_esi_job",
-        "args": [],
-        "kwargs": {},
-        "config": {}
+        "callback_id": "response_to_esi_job"
       },
       {
-        "callback_id": "log_job_failure",
-        "args": [],
-        "kwargs": {},
-        "config": {}
+        "callback_id": "log_job_failure"
       }
     ]
-  },
-  "additional_attributes": {},
-  "result": null
+  }
 }

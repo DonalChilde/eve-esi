@@ -1,15 +1,12 @@
 {
-  "id_": "",
   "name": "result_to_json_file",
-  "uid": "a2d2affa-a056-4e60-b42e-255aa784917c",
   "description": "An example of saving the raw results to a json file.",
+  "uid": "ef9b5d6d-951a-402a-8301-ee5a0217825c",
+  "output_path": "samples/order_output/${ewo_name}",
   "jobs": [
     {
-      "id_": "",
-      "uid": "21a689ee-38a6-4e35-9304-31f6626f8db5",
-      "name": "",
+      "uid": "9e7338ff-f34a-4d4f-b455-882b2a49ee4f",
       "op_id": "get_markets_region_id_history",
-      "retry_limit": 5,
       "parameters": {
         "region_id": 10000002,
         "type_id": 34
@@ -17,40 +14,24 @@
       "callbacks": {
         "success": [
           {
-            "callback_id": "response_content_to_json",
-            "args": [],
-            "kwargs": {},
-            "config": {}
+            "callback_id": "response_content_to_json"
           },
           {
             "callback_id": "save_json_result_to_file",
-            "args": [],
             "kwargs": {
               "file_path": "data/market-history/${region_id}-${type_id}.json"
-            },
-            "config": {}
+            }
           }
         ],
-        "retry": [],
         "fail": [
           {
-            "callback_id": "response_to_esi_job",
-            "args": [],
-            "kwargs": {},
-            "config": {}
+            "callback_id": "response_to_esi_job"
           },
           {
-            "callback_id": "log_job_failure",
-            "args": [],
-            "kwargs": {},
-            "config": {}
+            "callback_id": "log_job_failure"
           }
         ]
-      },
-      "additional_attributes": {},
-      "result": null
+      }
     }
-  ],
-  "parent_path_template": "samples/order_output/${ewo_name}",
-  "additional_attributes": {}
+  ]
 }

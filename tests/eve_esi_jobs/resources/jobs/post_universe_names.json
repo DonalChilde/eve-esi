@@ -1,9 +1,7 @@
 {
-  "id_": "",
-  "uid": "aca705f4-f120-481f-9c51-115fdedcb6ae",
   "name": "post_universe_names",
+  "uid": "5816249a-ffe2-432b-b4e2-104df5007eb0",
   "op_id": "post_universe_names",
-  "retry_limit": 5,
   "parameters": {
     "ids": [
       95465499,
@@ -13,50 +11,19 @@
   "callbacks": {
     "success": [
       {
-        "callback_id": "response_content_to_json",
-        "args": [],
-        "kwargs": {},
-        "config": {}
+        "callback_id": "response_content_to_json"
       },
       {
-        "callback_id": "response_to_esi_job",
-        "args": [],
-        "kwargs": {},
-        "config": {}
-      },
-      {
-        "callback_id": "save_esi_job_to_json_file",
-        "args": [],
-        "kwargs": {
-          "file_path": "data/post_universe_names-${esi_job_uid}-esi-job.json"
-        },
-        "config": {}
-      },
-      {
-        "callback_id": "save_json_result_to_file",
-        "args": [],
-        "kwargs": {
-          "file_path": "data/post_universe_names-${esi_job_uid}.json"
-        },
-        "config": {}
+        "callback_id": "response_to_esi_job"
       }
     ],
-    "retry": [],
     "fail": [
       {
-        "callback_id": "response_to_esi_job",
-        "args": [],
-        "kwargs": {},
-        "config": {}
+        "callback_id": "response_to_esi_job"
       },
       {
-        "callback_id": "log_job_failure",
-        "args": [],
-        "kwargs": {},
-        "config": {}
+        "callback_id": "log_job_failure"
       }
     ]
-  },
-  "additional_attributes": {},
-  "result": null
+  }
 }
