@@ -1,6 +1,6 @@
 {
   "name": "get_industry_facilities",
-  "uid": "3559b072-9fc9-4b0c-80b9-e0e9c1aa0731",
+  "uid": "3386033d-da89-4607-996e-f48ae4dfb866",
   "op_id": "get_industry_facilities",
   "callbacks": {
     "success": [
@@ -9,6 +9,18 @@
       },
       {
         "callback_id": "response_to_esi_job"
+      },
+      {
+        "callback_id": "save_esi_job_to_json_file",
+        "kwargs": {
+          "file_path": "data/industry-facilities-esi-job.json"
+        }
+      },
+      {
+        "callback_id": "save_json_result_to_file",
+        "kwargs": {
+          "file_path": "data/industry-facilities.json"
+        }
       }
     ],
     "fail": [

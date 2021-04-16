@@ -1,6 +1,6 @@
 {
   "name": "get_industry_systems",
-  "uid": "ae812b5d-5a98-4183-8c0a-3bd1fc8d5315",
+  "uid": "3b2d9905-eccd-448e-8ca5-a8a18a6d06c9",
   "op_id": "get_industry_systems",
   "callbacks": {
     "success": [
@@ -9,6 +9,18 @@
       },
       {
         "callback_id": "response_to_esi_job"
+      },
+      {
+        "callback_id": "save_esi_job_to_json_file",
+        "kwargs": {
+          "file_path": "data/industry-systems-esi-job.json"
+        }
+      },
+      {
+        "callback_id": "save_json_result_to_file",
+        "kwargs": {
+          "file_path": "data/industry-systems.json"
+        }
       }
     ],
     "fail": [
