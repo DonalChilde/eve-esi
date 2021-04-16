@@ -19,9 +19,9 @@ from eve_esi_jobs.typer_cli.cli_helpers import save_string
 #         jobs.get_industry_systems,
 #         jobs.post_universe_names,
 #     ]
-#     default_callbacks = DefaultCallbackProvider().default_callback_collection()
+
 #     for sample in jobs_list:
-#         job: models.EsiJob = sample(default_callbacks)
+#         job: models.EsiJob = sample()
 #         file_path = output_path / Path(job.name).with_suffix(".json")
 #         job_string = serialize_job(job)
 #         save_string(job_string, file_path, parents=True)
@@ -31,6 +31,7 @@ from eve_esi_jobs.typer_cli.cli_helpers import save_string
 #     parent_path = Path(__file__).parent
 #     output_path = parent_path / Path("work_orders")
 #     ewo_list = [
+#         work_orders.example_workorder,
 #         work_orders.response_to_job_json_file,
 #         work_orders.result_to_job_json_file,
 #         work_orders.result_to_json_file_and_response_to_json_file,

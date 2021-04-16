@@ -29,7 +29,7 @@ def test_create_workorder(test_app_dir, jobs: Dict[str, FileResource], esi_schem
         ],
         catch_exceptions=False,
     )
-    # print(result.output)
+    print(result.output)
     assert result.exit_code == 0
     sub_dir = test_app_dir / Path("create_workorder_test_result")
     # NOTE: Expects to find only one workorder json file in sub directories.

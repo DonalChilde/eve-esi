@@ -49,12 +49,13 @@ def test_roundtrip_json_job(test_app_dir):
     assert deserialized.parameters == action_json["parameters"]
     assert deserialized.callbacks == action_json["callbacks"]
     serialized = EJ.serialize_job(deserialized)
-    print(serialized)
+    # print(serialized)
     as_job = EJ.deserialize_job_from_string(serialized)
     assert as_job.op_id == deserialized.op_id
     assert as_job.callbacks == deserialized.callbacks
     assert as_job.uid == deserialized.uid
     assert isinstance(as_job.uid, UUID)
+    # assert False
 
 
 def test_roundtrip_work_order():

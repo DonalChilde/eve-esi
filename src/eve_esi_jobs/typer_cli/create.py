@@ -10,16 +10,16 @@ import typer
 # from eve_esi_jobs.callback_manifest import DefaultCallbackFactory
 from eve_esi_jobs.esi_provider import EsiProvider
 from eve_esi_jobs.eve_esi_jobs import (
+    deserialize_job_from_string,
     deserialize_work_order_from_string,
     serialize_job,
     serialize_work_order,
 )
 from eve_esi_jobs.helpers import optional_object
 from eve_esi_jobs.models import CallbackCollection, EsiJob, EsiWorkOrder, JobCallback
-from eve_esi_jobs.typer_cli.cli_helpers import (
+from eve_esi_jobs.typer_cli.cli_helpers import (  # load_job,
     check_for_op_id,
     completion_op_id,
-    load_job,
     report_finished_task,
     save_string,
 )
@@ -28,7 +28,7 @@ app = typer.Typer(help="Create Jobs and Workorders")
 logger = logging.getLogger(__name__)
 
 DEFAULT_WORKORDER = EsiWorkOrder(
-    parent_path_template="workorders/${ewo_iso_date_time}/workorder-${ewo_uid}"
+    output_path="workorders/${ewo_iso_date_time}/workorder-${ewo_uid}"
 )
 
 
@@ -55,15 +55,17 @@ def ewo(
         raise typer.BadParameter(f"{path_in} does not exist.")
     loaded_jobs = []
     if path_in.is_file():
-        loaded_job = load_job(path_in)
+        job_string = path_in.read_text()
+        loaded_job = deserialize_job_from_string(job_string, format_id="json")
         if loaded_job is not None:
             loaded_jobs.append(loaded_job)
     if path_in.is_dir():
         maybe_jobs = path_in.glob("*.json")
         for maybe_job in maybe_jobs:
-            loaded_job = load_job(maybe_job)
-            if loaded_job is not None:
-                loaded_jobs.append(loaded_job)
+            job_string = maybe_job.read_text()
+            loaded_job = deserialize_job_from_string(job_string, format_id="json")
+            # if loaded_job is not None:
+            loaded_jobs.append(loaded_job)
     if not loaded_jobs:
         raise typer.BadParameter(f"No jobs found at {path_in}")
     if ewo_path is None:

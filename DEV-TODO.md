@@ -2,6 +2,9 @@
 
 ## before release
 
+- DONE ADD do job from cli without workorder
+- ADD test for cli reporting failed jobs
+  - needs jobs guaranteed to fail
 - DONE FIX csv output does not respect file path templates.
 - DONE CHANGE exclude default values during pydantic serialization
 - DONE ADD add description to job model
@@ -21,7 +24,6 @@
   - DONE fix output path
 - DONE improve logging output and info.
 - DONE CHANGE remove additional_attributes param from do_work_orders, add any additional attributes to respective workorder before processing.
-- ADD repr for models?
 
 - Docs
   - oh so many docs
@@ -33,10 +35,6 @@
 - ADD tests for post jobs
 - ADD validate jobs without running them - dry run
   - make the action but dont run it?
-- ADD run job from cli without workorder
-  - make this separate commands
-- ADD test for cli reporting failed jobs
-  - needs jobs guaranteed to fail
 - yaml input and output options.
   - callback to offer yaml output of data
   - load and save yaml jobs and workorders

@@ -9,31 +9,23 @@ import typer
 
 from eve_esi_jobs.callback_manifest import DefaultCallbackFactory
 from eve_esi_jobs.eve_esi_jobs import (
-    deserialize_work_order_from_dict,
+    deserialize_job_from_string,
+    deserialize_work_order_from_string,
+    do_jobs,
     do_work_order,
     serialize_job,
     serialize_work_order,
 )
-from eve_esi_jobs.examples import jobs as example_jobs
-from eve_esi_jobs.examples import work_orders as example_work_orders
 from eve_esi_jobs.models import EsiJob, EsiWorkOrder
-from eve_esi_jobs.typer_cli.cli_helpers import (
-    load_esi_work_order_json,
+from eve_esi_jobs.typer_cli.cli_helpers import (  # load_esi_work_order_json,
+    FormatChoices,
     report_finished_task,
-    save_string,
     validate_input_path,
     validate_output_path,
 )
 
-# from eve_esi_jobs.typer_cli.collect import app as collect_app
-
-# from eve_esi_jobs.typer_cli.create import app as create_app
-
 app = typer.Typer(help="""Do Jobs and Work Orders.\n\nmore info.""")
 logger = logging.getLogger(__name__)
-
-# app.add_typer(create_app, name="create")
-# app.add_typer(collect_app, name="collect")
 
 
 @app.command()
@@ -42,6 +34,12 @@ def job(
     path_in: str = typer.Argument(..., help="Path to Esi Work Order json"),
     path_out: Optional[str] = typer.Argument(
         None, help="Path to be prepended to the Esi Work Order path."
+    ),
+    format_id: FormatChoices = typer.Option(
+        FormatChoices.json,
+        "-f",
+        "--format-id",
+        show_choices=True,
     ),
     dry_run: bool = typer.Option(
         False,
@@ -52,15 +50,36 @@ not find mistakes that can only be checked on the server, eg. a non-existant typ
 """,
     ),
 ):
-    """Load Work Orders and run them.
-
-    Dry-run will perform all operations up to but not including making the actual
-    http requests. This will detect some missed settings and parameters, but does
-    not find mistakes that can only be checked on the server, eg. a non-existant type_id.
-    """
+    """Load Jobs and run them."""
     if dry_run:
         typer.BadParameter("not implemented yet.")
-    typer.BadParameter("not implemented yet.")
+    path_in = validate_input_path(path_in)
+    file_path = Path(path_in)
+    job_string = file_path.read_text()
+    # esi_job_json = load_esi_job_json(Path(path_in))
+    try:
+        esi_job = deserialize_job_from_string(job_string, format_id)
+    except Exception as ex:
+        logger.exception(
+            "Error deserializing job from file: %s data: %s",
+            file_path,
+            job_string,
+        )
+        raise typer.BadParameter(f"Error decoding job at {file_path}")
+    if path_out is not None:
+        # print(path_out)
+        # NOTE: path is not checked with results of template values.
+        path_out = validate_output_path(path_out)
+        # output_path_string = str(path_out / Path(esi_work_order.parent_path_template))
+        # esi_job.update_attributes({"ewo_parent_path_template": str(path_out)})
+    esi_provider = ctx.obj["esi_provider"]
+    ewo_ = EsiWorkOrder()
+    ewo_.output_path = str(path_out)
+    ewo_.jobs.append(esi_job)
+    do_work_order(ewo_, esi_provider)
+    print(repr(esi_job))
+    report_on_jobs(ewo_.jobs)
+    report_finished_task(ctx)
 
 
 @app.command()
@@ -88,18 +107,26 @@ not find mistakes that can only be checked on the server, eg. a non-existant typ
 
     if dry_run:
         typer.BadParameter("not implemented yet.")
-    # additional_attributes = {}
     path_in = validate_input_path(path_in)
-    esi_work_order_json = load_esi_work_order_json(Path(path_in))
-    esi_work_order = deserialize_work_order_from_dict(esi_work_order_json)
+    file_path = Path(path_in)
+    ewo_string = file_path.read_text()
+    # esi_work_order_json = load_esi_work_order_json(Path(path_in))
+    try:
+        esi_work_order = deserialize_work_order_from_string(ewo_string, "json")
+    except Exception as ex:
+        logger.exception(
+            "Error deserializing work order from file: %s data: %s",
+            file_path,
+            ewo_string,
+        )
+        raise typer.BadParameter(f"Error decoding work order at {file_path}")
     if path_out is not None:
+        # NOTE: path is not checked with results of template values.
         path_out = validate_output_path(path_out)
         output_path_string = str(path_out / Path(esi_work_order.parent_path_template))
         esi_work_order.update_attributes(
             {"ewo_parent_path_template": output_path_string}
         )
-        # additional_attributes["ewo_parent_path_template"] = output_path_string
-    # esi_work_order.update_attributes(additional_attributes)
     esi_provider = ctx.obj["esi_provider"]
     do_work_order(esi_work_order, esi_provider)
     report_on_jobs(esi_work_order.jobs)

@@ -1,6 +1,7 @@
 """Common helper functions"""
 import json
 import logging
+from enum import Enum
 from pathlib import Path
 from time import perf_counter_ns
 from typing import Any, Dict, Optional
@@ -11,6 +12,11 @@ from eve_esi_jobs.eve_esi_jobs import deserialize_job_from_dict
 from eve_esi_jobs.models import EsiJob, EsiWorkOrder
 
 logger = logging.getLogger(__name__)
+
+
+class FormatChoices(str, Enum):
+    json = "json"
+    yaml = "yaml"
 
 
 def report_finished_task(ctx: typer.Context):
@@ -130,15 +136,9 @@ def validate_input_path(path_in: str) -> str:
     """
     Ensure the input path exists, raise an error and exit the script if it does not.
 
-    Args:
-        path_in: The path as a string
 
-    Raises:
-        typer.BadParameter:
-
-    Returns:
-        The path string as a Path.
     """
+    # TODO refactor this to use Path
     input_path: Path = Path(path_in)
     if not input_path.exists():
         raise typer.BadParameter(f"Input path {input_path.resolve()} does not exist.")
@@ -151,14 +151,7 @@ def validate_output_path(path_out: str) -> str:
 
     Does not check to see if it is a directory, or if it exists.
 
-    Args:
-        path_out: the path as a string.
 
-    Raises:
-        typer.BadParameter:
-
-    Returns:
-        The path string as a Path
     """
     output_path: Path = Path(path_out)
     if output_path.is_file():
@@ -168,48 +161,57 @@ def validate_output_path(path_out: str) -> str:
     return str(output_path)
 
 
-def load_esi_work_order_json(file_path: Path) -> Dict:
-    """
-    Load a json file. Exit script on error.
+# def load_esi_work_order(file_path: Path, format_id: str = "json") -> Dict:
+#     """
+#     Load a json file. Exit script on error.
 
-    Args:
-        file_path: Path to be loaded.
+#     Args:
+#         file_path: Path to be loaded.
 
-    Raises:
-        typer.BadParameter: [description]
-        typer.BadParameter: [description]
+#     Raises:
+#         typer.BadParameter: [description]
+#         typer.BadParameter: [description]
 
-    Returns:
-        The json file.
-    """
-    try:
-        json_data = load_json(file_path)
-    except json.decoder.JSONDecodeError as ex:
-        raise typer.BadParameter(
-            f"Error loading json file at {file_path.resolve()} "
-            "are you sure it is a json file?"
-        )
-    except Exception as ex:
-        raise typer.BadParameter(
-            f"Error loading json file at {file_path.resolve()}\n"
-            f"The error reported was {ex.__class__} with msg {ex}"
-        )
-    return json_data
+#     Returns:
+#         The json file.
+#     """
+#     try:
+#         ewo_string = file_path.read_text()
+#     except Exception as ex:
+#         raise typer.BadParameter(
+#             f"{ex.__class__.__name__} Error loading file at {file_path.resolve()} "
+#             f"msg: {ex}"
+#         )
+#     if format_id.lower()=="json":
+
+#     try:
+#         json_data = load_json(file_path)
+#     except json.decoder.JSONDecodeError as ex:
+#         raise typer.BadParameter(
+#             f"Error loading json file at {file_path.resolve()} "
+#             "are you sure it is a json file?"
+#         )
+#     except Exception as ex:
+#         raise typer.BadParameter(
+#             f"Error loading json file at {file_path.resolve()}\n"
+#             f"The error reported was {ex.__class__} with msg {ex}"
+#         )
+#     return json_data
 
 
-def load_job(file_path: Path) -> Optional[EsiJob]:
-    try:
-        data = load_json(file_path)
-    except Exception as ex:  # pylint: disable=broad-except
-        typer.echo(f"Error loading job from {file_path}. {ex.__class__.__name__}, {ex}")
-        return None
-    try:
-        job = deserialize_job_from_dict(data)
-        return job
-    except Exception as ex:
-        raise typer.BadParameter(
-            f"{file_path} is not a valid EsiJob. {ex.__class__.__name__}, {ex}"
-        )
+# def load_job(file_path: Path) -> Optional[EsiJob]:
+#     try:
+#         data = load_json(file_path)
+#     except Exception as ex:  # pylint: disable=broad-except
+#         typer.echo(f"Error loading job from {file_path}. {ex.__class__.__name__}, {ex}")
+#         return None
+#     try:
+#         job = deserialize_job_from_dict(data)
+#         return job
+#     except Exception as ex:
+#         raise typer.BadParameter(
+#             f"{file_path} is not a valid EsiJob. {ex.__class__.__name__}, {ex}"
+#         )
 
 
 def completion_op_id(ctx: typer.Context, incomplete: str):

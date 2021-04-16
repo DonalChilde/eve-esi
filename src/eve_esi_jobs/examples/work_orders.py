@@ -14,7 +14,7 @@ def example_workorder():
     type_id = 34
     work_order = models.EsiWorkOrder(
         name="example_workorder",
-        parent_path_template="samples/workorder_output/${ewo_name}",
+        output_path="samples/workorder_output/${ewo_name}",
         description=(
             "An example of a workorder, with a collection of "
             "jobs whose output is gathered under a file path defined in the workorder."
@@ -131,7 +131,7 @@ def example_workorder():
 def response_to_job_json_file():
     work_order = models.EsiWorkOrder(
         name="response_to_job_json_file",
-        parent_path_template="samples/order_output/${ewo_name}",
+        output_path="samples/order_output/${ewo_name}",
         description=(
             "An example of saving a completed job to a json file,"
             " including the response data. Result data intentionaly left out."
@@ -162,7 +162,7 @@ def response_to_job_json_file():
 def result_to_job_json_file():
     work_order = models.EsiWorkOrder(
         name="result_to_job_json_file",
-        parent_path_template="samples/order_output/${ewo_name}",
+        output_path="samples/order_output/${ewo_name}",
         description=(
             "An example of saving a completed job to a json file, with result data"
         ),
@@ -192,7 +192,7 @@ def result_to_job_json_file():
 def result_to_json_file_and_response_to_json_file():
     work_order = models.EsiWorkOrder(
         name="result_to_json_file_and_response_to_json_file",
-        parent_path_template="samples/order_output/${ewo_name}",
+        output_path="samples/order_output/${ewo_name}",
         description=(
             "An example of saving the raw results to a json file,"
             " and the job with response data to a separate json file"
@@ -229,7 +229,7 @@ def result_to_json_file_and_response_to_json_file():
 def result_and_response_to_job_json_file():
     work_order = models.EsiWorkOrder(
         name="result_and_response_to_job_json_file",
-        parent_path_template="samples/order_output/${ewo_name}",
+        output_path="samples/order_output/${ewo_name}",
         description=(
             "An example of saving a completed job to a json file,"
             " with result and response data"
@@ -261,7 +261,7 @@ def result_and_response_to_job_json_file():
 def result_to_json_file():
     work_order = models.EsiWorkOrder(
         name="result_to_json_file",
-        parent_path_template="samples/order_output/${ewo_name}",
+        output_path="samples/order_output/${ewo_name}",
         description=("An example of saving the raw results to a json file."),
     )
     job = models.EsiJob(
@@ -287,7 +287,7 @@ def result_to_json_file():
 def result_to_csv_file():
     work_order = models.EsiWorkOrder(
         name="result_to_csv_file",
-        parent_path_template="samples/order_output/${ewo_name}",
+        output_path="samples/order_output/${ewo_name}",
         description=(
             "An example of saving the json results to a csv file. Also, shows "
             "reordering columns, and adding additional columns"
@@ -329,7 +329,7 @@ def result_to_csv_file():
 def result_with_pages_to_json_file():
     work_order = models.EsiWorkOrder(
         name="result_with_pages_to_json_file",
-        parent_path_template="samples/order_output/${ewo_name}",
+        output_path="samples/order_output/${ewo_name}",
         description=(
             "An example of saving the raw results with a paged api to a json file."
         ),

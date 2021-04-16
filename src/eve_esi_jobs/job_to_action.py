@@ -53,8 +53,7 @@ class JobsToActions:
             return path_params
         except ValueError as ex:
             logger.warning("Missing required parameter %s", ex)
-            # FIXME what to do about errors
-            return {}
+            raise ex
 
     def _split_parameters(
         self, esi_job: EsiJob, split_id: str, esi_provider: EsiProvider
@@ -82,7 +81,8 @@ class JobsToActions:
         try:
             path_params = self._split_parameters(action_json, "query", esi_provider)
         except ValueError as ex:
-            logger.warning("Missing required parameter %s", ex)
+            logger.warning("Missing required parameter %s in %r", ex, action_json)
+            raise ex
         return path_params
 
     def _build_action_callbacks(

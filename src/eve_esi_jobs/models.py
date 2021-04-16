@@ -99,7 +99,7 @@ class EsiWorkOrder(BaseModel):
     description: str = ""
     id_: str = ""
     uid: UUID = Field(default_factory=uuid4)
-    parent_path_template: str = ""
+    output_path: str = ""
     additional_attributes: Dict[str, Any] = {}
     jobs: List[EsiJob] = []
 
@@ -124,7 +124,7 @@ class EsiWorkOrder(BaseModel):
         params: Dict[str, Union[int, str, None]] = {
             "ewo_name": self.name,
             "ewo_id": self.id_,
-            "ewo_parent_path_template": self.parent_path_template,
+            "ewo_output_path": self.output_path,
             "ewo_uid": str(self.uid),
             "ewo_iso_date_time": datetime.now().isoformat().replace(":", "-"),
         }

@@ -95,7 +95,7 @@ def test_default_file_path(esi_provider, test_app_dir):
     default_template = "job_data/${esi_job_op_id}-${esi_job_uid}.json"
     template = Template(default_template)
     job: EsiJob = create.create_job(op_id, parameters, callbacks, esi_provider)
-    work_order = EsiWorkOrder(parent_path_template=str(test_app_dir))
+    work_order = EsiWorkOrder(output_path=str(test_app_dir))
 
     work_order.jobs.append(job)
     inspect(work_order)

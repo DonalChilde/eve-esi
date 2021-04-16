@@ -26,7 +26,7 @@ class WorkOrderPreprocessor:
             )
         else:
             template_values = esi_job.attributes()
-        parent_path: str = template_values.get("ewo_parent_path_template", "")
+        parent_path: str = template_values.get("ewo_output_path", "")
         for callback in esi_job.callback_iter():
             file_path = callback.kwargs.get("file_path", None)
             if file_path is not None:
