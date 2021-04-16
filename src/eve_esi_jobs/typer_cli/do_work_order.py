@@ -123,10 +123,8 @@ not find mistakes that can only be checked on the server, eg. a non-existant typ
     if path_out is not None:
         # NOTE: path is not checked with results of template values.
         path_out = validate_output_path(path_out)
-        output_path_string = str(path_out / Path(esi_work_order.parent_path_template))
-        esi_work_order.update_attributes(
-            {"ewo_parent_path_template": output_path_string}
-        )
+        output_path_string = str(path_out / Path(esi_work_order.output_path))
+        esi_work_order.update_attributes({"ewo_output_path": output_path_string})
     esi_provider = ctx.obj["esi_provider"]
     do_work_order(esi_work_order, esi_provider)
     report_on_jobs(esi_work_order.jobs)
