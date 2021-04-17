@@ -1,11 +1,11 @@
 {
   "name": "response_to_job_json_file",
   "description": "An example of saving a completed job to a json file, including the response data. Result data intentionaly left out.",
-  "uid": "8e3f32b2-4949-4c44-9e8d-c997a852ecbe",
+  "uid": "46e350f3-6d34-480e-af0f-d10e8430b4cc",
   "output_path": "samples/order_output/${ewo_name}",
   "jobs": [
     {
-      "uid": "712cb6fe-a2a6-4e43-8369-5c32a3e46c57",
+      "uid": "1a10e7af-db37-4263-ab4d-e4918ae9fc92",
       "op_id": "get_markets_region_id_history",
       "parameters": {
         "region_id": 10000002,

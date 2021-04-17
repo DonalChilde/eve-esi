@@ -1,11 +1,11 @@
 {
   "name": "result_with_pages_to_json_file",
   "description": "An example of saving the raw results with a paged api to a json file.",
-  "uid": "5bf42b04-8558-4162-bbe0-faa9b424d160",
+  "uid": "17bb3c2d-d970-4283-9177-1e1196e091f1",
   "output_path": "samples/order_output/${ewo_name}",
   "jobs": [
     {
-      "uid": "13e1b034-d802-4533-91b2-fa19ef7b861b",
+      "uid": "c12bd7e1-6405-41f1-8061-cb1c1450539c",
       "op_id": "get_contracts_public_region_id",
       "parameters": {
         "region_id": 10000002

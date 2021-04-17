@@ -139,7 +139,7 @@ class EsiProvider:
         path_params: Dict[str, Any],
         query_params: Dict[str, Any],
         callbacks: Optional[ActionCallbacks] = None,
-        retry_limit: int = 5,
+        max_attempts: int = 5,
         request_kwargs: Optional[dict] = None,
         context: Optional[Dict] = None,
     ) -> AiohttpAction:
@@ -153,7 +153,7 @@ class EsiProvider:
             path_params: [description]
             query_params: [description]
             callbacks: [description]. Defaults to None.
-            retry_limit: [description]. Defaults to 5.
+            max_attempts: [description]. Defaults to 5.
             request_kwargs: [description]. Defaults to None.
             context: [description]. Defaults to None.
 
@@ -175,7 +175,7 @@ class EsiProvider:
             op_id_info.method,
             op_id_info.url_template,
             url_parameters=path_params,
-            retry_limit=retry_limit,
+            max_attempts=max_attempts,
             request_kwargs=request_kwargs,
             callbacks=callbacks,
             context=context,

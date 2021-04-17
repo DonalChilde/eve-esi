@@ -1,6 +1,6 @@
 import asyncio
 
-from pfmsoft.aiohttp_queue import ActionCallbacks, AiohttpQueueWorkerFactory
+from pfmsoft.aiohttp_queue import ActionCallbacks, AiohttpQueueWorker
 from pfmsoft.aiohttp_queue.callbacks import ResponseContentToJson
 from pfmsoft.aiohttp_queue.runners import queue_runner
 from rich import inspect
@@ -23,7 +23,7 @@ def test_get_action(esi_provider: EsiProvider):
     )
     inspect(action)
     assert action is not None
-    worker = AiohttpQueueWorkerFactory()
+    worker = AiohttpQueueWorker()
     asyncio.run(queue_runner([action], [worker]))
     assert action.result is not None
     assert len(action.result) > 5

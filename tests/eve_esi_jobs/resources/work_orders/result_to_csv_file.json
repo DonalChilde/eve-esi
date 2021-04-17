@@ -1,11 +1,11 @@
 {
   "name": "result_to_csv_file",
   "description": "An example of saving the json results to a csv file. Also, shows reordering columns, and adding additional columns",
-  "uid": "d47cc1f2-71ca-47a0-b4b6-de68ac12a094",
+  "uid": "0bb533be-1713-4d4f-84b8-9cda1636ad8e",
   "output_path": "samples/order_output/${ewo_name}",
   "jobs": [
     {
-      "uid": "e166943f-c259-4949-b6eb-87a69f8976b5",
+      "uid": "9a5897ef-caab-4a86-8d26-af194c50b41d",
       "op_id": "get_markets_region_id_history",
       "parameters": {
         "region_id": 10000002,

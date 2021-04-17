@@ -6,7 +6,7 @@ from math import ceil
 from typing import Any, Dict, Optional, Sequence
 
 import yaml
-from pfmsoft.aiohttp_queue import AiohttpQueueWorkerFactory
+from pfmsoft.aiohttp_queue import AiohttpQueueWorker
 from pfmsoft.aiohttp_queue.runners import queue_runner
 
 from eve_esi_jobs.callback_manifest import CallbackProvider
@@ -33,16 +33,16 @@ def do_jobs(
     jobs_to_actions = optional_object(jobs_to_actions, JobsToActions)
     additional_attributes = optional_object(additional_attributes, dict)
     worker_count = get_worker_count(len(esi_jobs), worker_count, max_workers)
-    factories = []
+    workers = []
     for _ in range(worker_count):
-        factories.append(AiohttpQueueWorkerFactory())
+        workers.append(AiohttpQueueWorker())
     # jobs_to_actions = JobsToActions()
     for esi_job in esi_jobs:
         esi_job.update_attributes(additional_attributes)
     actions = jobs_to_actions.make_actions(
         esi_jobs, esi_provider, callback_provider, None
     )
-    asyncio.run(queue_runner(actions, factories))
+    asyncio.run(queue_runner(actions, workers))
     return esi_jobs
 
 

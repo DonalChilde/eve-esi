@@ -98,7 +98,7 @@ def test_default_file_path(esi_provider, test_app_dir):
     work_order = EsiWorkOrder(output_path=str(test_app_dir))
 
     work_order.jobs.append(job)
-    inspect(work_order)
+    # inspect(work_order)
     expected_path: Path = test_app_dir / Path(template.substitute(job.attributes()))
     do_work_order(work_order, esi_provider)
     assert expected_path.is_file()

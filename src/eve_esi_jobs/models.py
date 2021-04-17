@@ -49,7 +49,7 @@ class EsiJob(BaseModel):
     id_: str = ""
     uid: UUID = Field(default_factory=uuid4)
     op_id: str
-    retry_limit: int = 5
+    max_attempts: int = 5
     parameters: Dict[str, Any] = {}
     additional_attributes: Dict[str, Any] = {}
     callbacks: CallbackCollection = CallbackCollection()
@@ -87,7 +87,7 @@ class EsiJob(BaseModel):
             "esi_job_name": self.name,
             "esi_job_id_": self.id_,
             "esi_job_op_id": self.op_id,
-            "esi_job_retry_limit": self.retry_limit,
+            "esi_job_max_attempts": self.max_attempts,
             "esi_job_uid": str(self.uid),
             "esi_job_iso_date_time": datetime.now().isoformat().replace(":", "-"),
         }

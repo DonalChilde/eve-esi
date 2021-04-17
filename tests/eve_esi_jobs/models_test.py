@@ -22,7 +22,7 @@ def test_roundtrip_json_job(test_app_dir):
     file_path = test_app_dir / Path("data/test.json")
     action_json = {
         "op_id": "get_markets_region_id_history",
-        "retry_limit": 1,
+        "max_attempts": 1,
         "parameters": {"region_id": "10000002", "type_id": 34},
         "callbacks": {
             "success": [
@@ -45,7 +45,7 @@ def test_roundtrip_json_job(test_app_dir):
     }
     deserialized = EJ.deserialize_job_from_dict(action_json)
     assert deserialized.op_id == action_json["op_id"]
-    assert deserialized.retry_limit == action_json["retry_limit"]
+    assert deserialized.max_attempts == action_json["max_attempts"]
     assert deserialized.parameters == action_json["parameters"]
     assert deserialized.callbacks == action_json["callbacks"]
     serialized = EJ.serialize_job(deserialized)

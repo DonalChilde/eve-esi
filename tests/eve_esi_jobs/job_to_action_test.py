@@ -1,7 +1,7 @@
 import asyncio
 import logging
 
-from pfmsoft.aiohttp_queue import AiohttpAction, AiohttpQueueWorkerFactory
+from pfmsoft.aiohttp_queue import AiohttpAction, AiohttpQueueWorker
 from pfmsoft.aiohttp_queue.runners import queue_runner
 from rich import inspect
 
@@ -14,7 +14,7 @@ def test_make_action_from_json(esi_provider, caplog):
     caplog.set_level(logging.INFO)
     esi_job_json = {
         "op_id": "get_markets_region_id_history",
-        "retry_limit": 1,
+        "max_attempts": 1,
         "parameters": {"region_id": 10000002, "type_id": 34},
         "callbacks": {
             "success": [
@@ -34,7 +34,7 @@ def test_make_action_from_json(esi_provider, caplog):
     assert action.url_parameters == {"region_id": 10000002}
     assert action.request_kwargs["params"] == {"type_id": 34}
     assert isinstance(action, AiohttpAction)
-    worker = AiohttpQueueWorkerFactory()
+    worker = AiohttpQueueWorker()
     asyncio.run(queue_runner([action], [worker]))
     assert action.result is not None
     assert len(action.result) > 5
@@ -44,7 +44,7 @@ def test_make_action_from_json(esi_provider, caplog):
 def test_build_path_parameters(esi_provider):
     esi_job_json = {
         "op_id": "get_markets_region_id_history",
-        "retry_limit": 1,
+        "max_attempts": 1,
         "parameters": {"region_id": 10000002, "type_id": 34},
         "callbacks": {},
     }
@@ -60,7 +60,7 @@ def test_build_path_parameters(esi_provider):
 def test_build_query_parameters(esi_provider):
     esi_job_json = {
         "op_id": "get_markets_region_id_history",
-        "retry_limit": 1,
+        "max_attempts": 1,
         "parameters": {"region_id": 10000002, "type_id": 34},
         "callbacks": {},
     }

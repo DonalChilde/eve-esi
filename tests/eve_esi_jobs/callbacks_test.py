@@ -1,7 +1,7 @@
 import asyncio
 from pathlib import Path
 
-from pfmsoft.aiohttp_queue import AiohttpQueueWorkerFactory
+from pfmsoft.aiohttp_queue import AiohttpQueueWorker
 from pfmsoft.aiohttp_queue.runners import queue_runner
 
 from eve_esi_jobs.callback_manifest import CallbackProvider
@@ -14,7 +14,7 @@ def test_save_job_to_file(esi_provider, test_app_dir):
     file_path: Path = test_app_dir / Path("data/test.json")
     esi_job_json = {
         "op_id": "get_markets_region_id_history",
-        "retry_limit": 1,
+        "max_attempts": 1,
         "parameters": {"region_id": 10000002, "type_id": 34},
         "callbacks": {
             "success": [
@@ -33,7 +33,7 @@ def test_save_job_to_file(esi_provider, test_app_dir):
         [esi_job], esi_provider, callback_provider, additional_attributes=None
     )
     action = actions[0]
-    worker = AiohttpQueueWorkerFactory()
+    worker = AiohttpQueueWorker()
     asyncio.run(queue_runner([action], [worker]))
     assert action.result is not None
     assert len(action.result) > 5

@@ -1,11 +1,11 @@
 {
   "name": "result_to_json_file_and_response_to_json_file",
   "description": "An example of saving the raw results to a json file, and the job with response data to a separate json file",
-  "uid": "d9bc1ac9-039a-43f6-aaf7-e8e6859d032a",
+  "uid": "32dc324e-06f1-40e4-8422-23b15a4b0b06",
   "output_path": "samples/order_output/${ewo_name}",
   "jobs": [
     {
-      "uid": "9f7a9a19-5831-4e48-8cf4-41069eb23666",
+      "uid": "d741d2f7-15fa-4acc-8cda-25010539978a",
       "op_id": "get_markets_region_id_history",
       "parameters": {
         "region_id": 10000002,

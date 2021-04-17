@@ -40,7 +40,7 @@ class JobsToActions:
                 callbacks=self._build_action_callbacks(
                     esi_job, callback_provider, additional_attributes
                 ),
-                retry_limit=esi_job.retry_limit,
+                max_attempts=esi_job.max_attempts,
                 request_kwargs=self._build_request_kwargs(esi_job, esi_provider),
                 context=self._build_context(esi_job, esi_provider),
             )

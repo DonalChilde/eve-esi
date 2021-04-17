@@ -1,6 +1,6 @@
 {
   "name": "get_industry_facilities",
-  "uid": "3386033d-da89-4607-996e-f48ae4dfb866",
+  "uid": "1e207687-ab29-4c16-863f-db20f90cef1d",
   "op_id": "get_industry_facilities",
   "callbacks": {
     "success": [
