@@ -2,6 +2,7 @@ import logging
 from typing import Any, Dict, List, Optional, Sequence
 
 from pfmsoft.aiohttp_queue import ActionCallbacks, AiohttpAction, AiohttpActionCallback
+from pfmsoft.aiohttp_queue.aiohttp import ActionObserver
 
 from eve_esi_jobs.callback_manifest import CallbackProvider
 from eve_esi_jobs.esi_provider import EsiProvider
@@ -29,9 +30,11 @@ class JobsToActions:
         esi_provider: EsiProvider,
         callback_provider: CallbackProvider,
         additional_attributes: Optional[Dict[str, str]],
+        observers: Optional[List[ActionObserver]] = None,
     ) -> List[AiohttpAction]:
         actions = []
         additional_attributes = optional_object(additional_attributes, dict)
+        observers = optional_object(observers, list)
         for esi_job in esi_jobs:
             action = esi_provider.build_action_from_op_id(
                 op_id=esi_job.op_id,
@@ -44,6 +47,7 @@ class JobsToActions:
                 request_kwargs=self._build_request_kwargs(esi_job, esi_provider),
                 context=self._build_context(esi_job, esi_provider),
             )
+            action.observers.extend(observers)
             actions.append(action)
         return actions
 

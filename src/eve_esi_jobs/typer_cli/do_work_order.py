@@ -23,6 +23,7 @@ from eve_esi_jobs.typer_cli.cli_helpers import (  # load_esi_work_order_json,
     validate_input_path,
     validate_output_path,
 )
+from eve_esi_jobs.typer_cli.observer import EsiObserver
 
 app = typer.Typer(help="""Do Jobs and Work Orders.\n\nmore info.""")
 logger = logging.getLogger(__name__)
@@ -76,7 +77,8 @@ not find mistakes that can only be checked on the server, eg. a non-existant typ
     ewo_ = EsiWorkOrder()
     ewo_.output_path = str(path_out)
     ewo_.jobs.append(esi_job)
-    do_work_order(ewo_, esi_provider)
+    observer = EsiObserver()
+    do_work_order(ewo_, esi_provider, observers=[observer])
     print(repr(esi_job))
     report_on_jobs(ewo_.jobs)
     report_finished_task(ctx)
@@ -126,7 +128,8 @@ not find mistakes that can only be checked on the server, eg. a non-existant typ
         output_path_string = str(path_out / Path(esi_work_order.output_path))
         esi_work_order.update_attributes({"ewo_output_path": output_path_string})
     esi_provider = ctx.obj["esi_provider"]
-    do_work_order(esi_work_order, esi_provider)
+    observer = EsiObserver()
+    do_work_order(esi_work_order, esi_provider, observers=[observer])
     report_on_jobs(esi_work_order.jobs)
     report_finished_task(ctx)
 

@@ -4,12 +4,14 @@
 
 - DONE CHANGE workorder.parent_path_template now workorder.output_path
 - DONE ADD do job from cli without workorder
+- DONE ADD support for action observer,cli registers observer to report on failed actions.
 - ADD test for cli reporting failed jobs
   - needs jobs guaranteed to fail
     - bad url
     - bad kwarg to callback
     - missing param
     - too many params
+- DONE CHANGE retry_limit to max_attempts, matches underlying Action
 - DONE FIX csv output does not respect file path templates.
 - DONE CHANGE exclude default values during pydantic serialization
 - DONE ADD add description to job model
