@@ -91,7 +91,7 @@ def test_get_params_from_file(sample_data: Dict[str, FileResource]):
 def test_default_file_path(esi_provider, test_app_dir):
     op_id = "get_markets_region_id_history"
     parameters = {"region_id": 10000002, "type_id": 34}
-    callbacks = create.EveEsiDefaultCallbackFactory().default_callback_collection()
+    callbacks = create.default_callback_collection()
     default_template = "job_data/${esi_job_op_id}-${esi_job_uid}.json"
     template = Template(default_template)
     job: EsiJob = create.create_job(op_id, parameters, callbacks, esi_provider)

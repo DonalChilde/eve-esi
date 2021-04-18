@@ -147,9 +147,7 @@ def jobs(
     file_data: Optional[List[Dict]] = get_params_from_file(data_path)
     parameters: Dict = decode_param_string(param_string)
     if callback_path is None:
-        callback_collection = (
-            EveEsiDefaultCallbackFactory().default_callback_collection()
-        )
+        callback_collection = default_callback_collection()
     else:
         callback_collection = load_callbacks(callback_path)
     jobs_ = []
@@ -297,24 +295,18 @@ def load_json_or_csv(file_path: Path):
             return data
 
 
-class EveEsiDefaultCallbackFactory:
-    def __init__(self) -> None:
-        pass
-
-    def default_callback_collection(self) -> CallbackCollection:
-        callback_collection = CallbackCollection()
-        callback_collection.success.append(
-            JobCallback(callback_id="response_content_to_json")
+def default_callback_collection() -> CallbackCollection:
+    callback_collection = CallbackCollection()
+    callback_collection.success.append(
+        JobCallback(callback_id="response_content_to_json")
+    )
+    callback_collection.success.append(JobCallback(callback_id="response_to_esi_job"))
+    callback_collection.success.append(
+        JobCallback(
+            callback_id="save_json_result_to_file",
+            kwargs={"file_path": "job_data/${esi_job_op_id}-${esi_job_uid}.json"},
         )
-        callback_collection.success.append(
-            JobCallback(callback_id="response_to_esi_job")
-        )
-        callback_collection.success.append(
-            JobCallback(
-                callback_id="save_json_result_to_file",
-                kwargs={"file_path": "job_data/${esi_job_op_id}-${esi_job_uid}.json"},
-            )
-        )
-        callback_collection.fail.append(JobCallback(callback_id="response_to_esi_job"))
-        callback_collection.fail.append(JobCallback(callback_id="log_job_failure"))
-        return callback_collection
+    )
+    callback_collection.fail.append(JobCallback(callback_id="response_to_esi_job"))
+    callback_collection.fail.append(JobCallback(callback_id="log_job_failure"))
+    return callback_collection
