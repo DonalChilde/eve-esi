@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from typing import Dict, List
 
+import pytest
 from rich import inspect
 from tests.eve_esi_jobs.conftest import FileResource
 from typer.testing import CliRunner
@@ -56,6 +57,70 @@ def test_do_job(esi_schema, jobs: Dict[str, FileResource], test_app_dir: Path):
     assert len(json_files) == 2
     for file in json_files:
         assert file.stat().st_size > 10
+
+
+def test_do_example_workorder(
+    esi_schema, work_orders: Dict[str, FileResource], test_app_dir: Path
+):
+    runner = CliRunner()
+    ewo_path = work_orders["example_workorder.json"].file_path
+    output_path = test_app_dir / Path("test_do_example_workorder")
+    result = runner.invoke(
+        app,
+        ["-s", str(esi_schema.file_path), "do", "ewo", str(ewo_path), str(output_path)],
+        catch_exceptions=False,
+    )
+    print(result.output)
+    assert result.exit_code == 0
+    json_files: List[Path] = list(output_path.glob("**/*.json"))
+    assert len(json_files) == 5
+    for file in json_files:
+        assert file.stat().st_size > 10
+    assert "Uncertain Result" not in result.output
+    assert "Failed" not in result.output
+
+
+def test_do_bad_validation_workorder(
+    esi_schema, bad_work_orders: Dict[str, FileResource], test_app_dir: Path
+):
+    runner = CliRunner()
+    ewo_path = bad_work_orders["bad-validation-workorder.json"].file_path
+    output_path = test_app_dir / Path("test_do_bad-validation-workorder")
+    with pytest.raises(ValueError):
+        result = runner.invoke(
+            app,
+            [
+                "-s",
+                str(esi_schema.file_path),
+                "do",
+                "ewo",
+                str(ewo_path),
+                str(output_path),
+            ],
+            catch_exceptions=False,
+        )
+
+
+def test_do_bad_status_workorder(
+    esi_schema, bad_work_orders: Dict[str, FileResource], test_app_dir: Path
+):
+    runner = CliRunner()
+    ewo_path = bad_work_orders["bad-status-workorder.json"].file_path
+    output_path = test_app_dir / Path("test_do_bad-status-workorder")
+
+    result = runner.invoke(
+        app,
+        ["-s", str(esi_schema.file_path), "do", "ewo", str(ewo_path), str(output_path)],
+        catch_exceptions=False,
+    )
+    print(result.output)
+    assert result.exit_code == 0
+    json_files: List[Path] = list(output_path.glob("**/*.json"))
+    assert len(json_files) == 0
+    for file in json_files:
+        assert file.stat().st_size > 10
+    assert "Uncertain Result" not in result.output
+    assert "Failed" in result.output
 
 
 # def test_create_workorder(test_app_dir, jobs: Dict[str, FileResource], esi_schema):

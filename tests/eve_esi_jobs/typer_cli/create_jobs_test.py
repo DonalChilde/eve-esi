@@ -315,12 +315,15 @@ def test_from_op_id_path_in_bad_data(
         ],
         catch_exceptions=False,
     )
+    print(result.output)
     assert result.exit_code == 2
+    assert "Error: Invalid value: Missing required parameters" in result.output
     sub_dir = output_path / Path("created-jobs")
     json_files = list(sub_dir.glob("*.json"))
     assert len(json_files) == 0
     for file in json_files:
         assert file.stat().st_size > 10
+    # assert False
 
 
 def test_load_json_or_csv(sample_data: Dict[str, FileResource]):

@@ -27,25 +27,25 @@ class EsiObserver(ActionObserver):
 
             if esi_job is None:
                 typer.echo(
-                    f"Failed action for unknown job. {action} status code: "
-                    f"{action.response.status}, {action.response.reason}"
-                    "See log for details."
+                    f"Failed action for unknown job. {action} status code="
+                    f"{action.response.status}, reason={action.response.reason}\n"
                 )
             typer.echo(
-                f"Failed job: {esi_job.name}, {action} status code: "
-                f"{action.response.status}, {action.response.reason}"
-                "See log for details."
+                f"Failed <{esi_job.__class__.__name__} name={esi_job.name}>, "
+                f"{action} status code="
+                f"{action.response.status}, reason={action.response.reason}\n"
             )
             return
         if action.state == ActionState.CALLBACK_FAIL:
             if callback is not None:
                 typer.echo(
-                    f"Uncertain Result: A callback failed for job {esi_job.name} "
-                    f"during {action} with msg: {callback.state_message} "
-                    "See log for details."
+                    f"Uncertain Result: {callback.__class__.__name__} failed with "
+                    f"msg: {callback.state_message} for <{esi_job.__class__.__name__} name={esi_job.name}> "
+                    f"during {action} \n"
                 )
                 return
             typer.echo(
-                f"Uncertain Result: A callback failed for job {esi_job.name} "
-                f"during {action} for unreported reasons. See log for details."
+                f"Uncertain Result: {callback.__class__.__name__} failed for "
+                f"<{esi_job.__class__.__name__} name={esi_job.name}>  "
+                f"during {action} for unreported reasons. \n"
             )
