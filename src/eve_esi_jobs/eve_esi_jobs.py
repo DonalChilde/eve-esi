@@ -14,8 +14,8 @@ from eve_esi_jobs.callback_manifest import CallbackProvider
 from eve_esi_jobs.esi_provider import EsiProvider
 from eve_esi_jobs.helpers import combine_dictionaries, optional_object
 from eve_esi_jobs.job_to_action import JobsToActions
-from eve_esi_jobs.model_helpers import WorkOrderPreprocessor
-from eve_esi_jobs.models import EsiJob, EsiWorkOrder
+from eve_esi_jobs.model_helpers import JobPreprocessor
+from eve_esi_jobs.models import EsiJob, EsiWorkOrder, JobCallback
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -26,22 +26,24 @@ def do_jobs(
     esi_provider: EsiProvider,
     callback_provider: Optional[CallbackProvider] = None,
     jobs_to_actions: Optional[JobsToActions] = None,
-    additional_attributes: Optional[Dict[str, Any]] = None,
+    workorder_attributes: Optional[Dict[str, Any]] = None,
     observers: Optional[List[ActionObserver]] = None,
     worker_count: Optional[int] = None,
     max_workers: int = 100,
 ) -> Sequence[EsiJob]:
     callback_provider = optional_object(callback_provider, CallbackProvider)
     jobs_to_actions = optional_object(jobs_to_actions, JobsToActions)
-    additional_attributes = optional_object(additional_attributes, dict)
+    workorder_attributes = optional_object(workorder_attributes, dict)
     observers = optional_object(observers, list)
     worker_count = get_worker_count(len(esi_jobs), worker_count, max_workers)
     workers = []
     for _ in range(worker_count):
         workers.append(AiohttpQueueWorker())
     # jobs_to_actions = JobsToActions()
+    job_preprocessor = JobPreprocessor()
     for esi_job in esi_jobs:
-        esi_job.update_attributes(additional_attributes)
+        esi_job.update_attributes(workorder_attributes)
+        job_preprocessor.pre_process_job(esi_job)
     actions = jobs_to_actions.make_actions(
         esi_jobs=esi_jobs,
         esi_provider=esi_provider,
@@ -68,15 +70,15 @@ def do_work_order(
     # combined_attributes = combine_dictionaries(
     #     ewo.attributes(), [additional_attributes]
     # )
-    pre_processor = WorkOrderPreprocessor()
-    pre_processor.pre_process_work_order(ewo)
+    # pre_processor = WorkOrderPreprocessor()
+    # pre_processor.pre_process_work_order(ewo)
     worker_count = get_worker_count(len(ewo.jobs), worker_count, max_workers)
     do_jobs(
         esi_jobs=ewo.jobs,
         esi_provider=esi_provider,
         callback_provider=callback_provider,
         jobs_to_actions=jobs_to_actions,
-        additional_attributes=ewo.attributes(),
+        workorder_attributes=ewo.attributes(),
         observers=observers,
         worker_count=worker_count,
     )

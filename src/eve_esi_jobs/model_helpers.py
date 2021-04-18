@@ -1,35 +1,32 @@
 import logging
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict
 
-from eve_esi_jobs.helpers import combine_dictionaries
-from eve_esi_jobs.models import EsiJob, EsiWorkOrder
+from eve_esi_jobs.models import EsiJob
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 
-class WorkOrderPreprocessor:
+class JobPreprocessor:
     def __init__(self) -> None:
         pass
 
-    def pre_process_work_order(self, ewo: EsiWorkOrder):
-        for esi_job in ewo.jobs:
-            self._add_file_path_prefix_to_callbacks(esi_job, ewo.attributes())
+    def pre_process_job(self, esi_job: EsiJob):
+        job_attributes = esi_job.attributes()
+        self._add_file_path_prefix_to_callbacks(esi_job, job_attributes)
+        self._add_path_values_to_callbacks(esi_job, job_attributes)
 
-    def _add_file_path_prefix_to_callbacks(
-        self, esi_job: EsiJob, additional_attributes: Optional[Dict[str, str]] = None
-    ):
-        if additional_attributes is not None:
-            template_values = combine_dictionaries(
-                esi_job.attributes(), [additional_attributes]
-            )
-        else:
-            template_values = esi_job.attributes()
-        parent_path: str = template_values.get("ewo_output_path", "")
+    def _add_file_path_prefix_to_callbacks(self, esi_job: EsiJob, job_atributes: Dict):
+        parent_path: str = job_atributes.get("ewo_output_path", "")
         for callback in esi_job.callback_iter():
             file_path = callback.kwargs.get("file_path", None)
             if file_path is not None:
                 full_path_string = str(Path(parent_path) / Path(file_path))
                 callback.kwargs["file_path"] = full_path_string
-                # logger.info("file_path: %s", full_path_string)
+
+    def _add_path_values_to_callbacks(self, esi_job: EsiJob, job_attributes: Dict):
+        for callback in esi_job.callback_iter():
+            file_path = callback.kwargs.get("file_path", None)
+            if file_path is not None:
+                callback.kwargs["path_values"] = job_attributes
