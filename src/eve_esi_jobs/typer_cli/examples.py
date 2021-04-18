@@ -4,10 +4,10 @@ from typing import Callable, Sequence
 
 import typer
 
-from eve_esi_jobs.callback_manifest import DefaultCallbackFactory
 from eve_esi_jobs.eve_esi_jobs import serialize_job, serialize_work_order
 from eve_esi_jobs.examples import jobs as example_jobs
 from eve_esi_jobs.examples import work_orders as example_work_orders
+from eve_esi_jobs.model_helpers import default_callback_collection
 from eve_esi_jobs.models import EsiJob, EsiWorkOrder
 from eve_esi_jobs.typer_cli.cli_helpers import (
     report_finished_task,
@@ -65,7 +65,7 @@ def save_job_examples(output_path: Path):
         example_jobs.get_industry_systems,
         example_jobs.post_universe_names,
     ]
-    default_callbacks = DefaultCallbackFactory().default_callback_collection()
+    default_callbacks = default_callback_collection()
     for sample in jobs_list:
         job: EsiJob = sample(default_callbacks)
         file_path = output_path / Path("jobs") / Path(job.name).with_suffix(".json")

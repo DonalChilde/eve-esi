@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from typing import Dict
 
-from eve_esi_jobs.models import EsiJob
+from eve_esi_jobs.models import CallbackCollection, EsiJob, JobCallback
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -30,3 +30,14 @@ class JobPreprocessor:
             file_path = callback.kwargs.get("file_path", None)
             if file_path is not None:
                 callback.kwargs["path_values"] = job_attributes
+
+
+def default_callback_collection() -> CallbackCollection:
+    callback_collection = CallbackCollection()
+    callback_collection.success.append(
+        JobCallback(callback_id="response_content_to_json")
+    )
+    callback_collection.success.append(JobCallback(callback_id="response_to_esi_job"))
+    callback_collection.fail.append(JobCallback(callback_id="response_to_esi_job"))
+    callback_collection.fail.append(JobCallback(callback_id="log_job_failure"))
+    return callback_collection

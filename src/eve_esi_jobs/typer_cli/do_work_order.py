@@ -2,19 +2,14 @@
 
 import logging
 from pathlib import Path
-from time import perf_counter_ns
-from typing import Callable, List, Optional, Sequence
+from typing import List, Optional
 
 import typer
 
-from eve_esi_jobs.callback_manifest import DefaultCallbackFactory
 from eve_esi_jobs.eve_esi_jobs import (
     deserialize_job_from_string,
     deserialize_work_order_from_string,
-    do_jobs,
     do_work_order,
-    serialize_job,
-    serialize_work_order,
 )
 from eve_esi_jobs.models import EsiJob, EsiWorkOrder
 from eve_esi_jobs.typer_cli.cli_helpers import (  # load_esi_work_order_json,

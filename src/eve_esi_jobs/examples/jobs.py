@@ -1,7 +1,7 @@
 from typing import Optional
 
 from eve_esi_jobs import models
-from eve_esi_jobs.callback_manifest import DefaultCallbackFactory
+from eve_esi_jobs.model_helpers import default_callback_collection
 
 
 def get_markets_region_id_history(
@@ -10,7 +10,7 @@ def get_markets_region_id_history(
     callbacks: Optional[models.CallbackCollection] = None,
 ):
     if callbacks is None:
-        callbacks = DefaultCallbackFactory.default_callback_collection()
+        callbacks = default_callback_collection()
         callbacks.success.append(
             models.JobCallback(
                 callback_id="save_esi_job_to_json_file",
@@ -40,7 +40,7 @@ def get_industry_facilities(
     callbacks: Optional[models.CallbackCollection] = None,
 ):
     if callbacks is None:
-        callbacks = DefaultCallbackFactory.default_callback_collection()
+        callbacks = default_callback_collection()
         callbacks.success.append(
             models.JobCallback(
                 callback_id="save_esi_job_to_json_file",
@@ -65,7 +65,7 @@ def get_industry_systems(
     callbacks: Optional[models.CallbackCollection] = None,
 ):
     if callbacks is None:
-        callbacks = DefaultCallbackFactory.default_callback_collection()
+        callbacks = default_callback_collection()
         callbacks.success.append(
             models.JobCallback(
                 callback_id="save_esi_job_to_json_file",
@@ -90,7 +90,7 @@ def post_universe_names(
     callbacks: Optional[models.CallbackCollection] = None,
 ):
     if callbacks is None:
-        callbacks = DefaultCallbackFactory.default_callback_collection()
+        callbacks = default_callback_collection()
         callbacks.success.append(
             models.JobCallback(
                 callback_id="save_esi_job_to_json_file",

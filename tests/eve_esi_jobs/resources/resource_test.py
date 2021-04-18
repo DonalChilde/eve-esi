@@ -6,9 +6,9 @@ from pathlib import Path
 from typing import Callable, Sequence
 
 from eve_esi_jobs import models
-from eve_esi_jobs.callback_manifest import DefaultCallbackFactory
 from eve_esi_jobs.eve_esi_jobs import serialize_job, serialize_work_order
 from eve_esi_jobs.examples import callback_collections, jobs, work_orders
+from eve_esi_jobs.model_helpers import default_callback_collection
 from eve_esi_jobs.typer_cli.cli_helpers import save_string
 
 REFRESH_RESOURCES = False
@@ -139,7 +139,7 @@ def missing_parameter_job():
         id_="missing-parameter",
         op_id="get_markets_region_id_history",
         parameters={"region_id": 10000002},
-        callbacks=DefaultCallbackFactory.default_callback_collection(),
+        callbacks=default_callback_collection(),
     )
     return job
 
@@ -151,6 +151,6 @@ def bad_parameter_job():
         id_="bad-parameter",
         op_id="get_markets_region_id_history",
         parameters={"region_id": 10000002, "type_id": 0},
-        callbacks=DefaultCallbackFactory.default_callback_collection(),
+        callbacks=default_callback_collection(),
     )
     return job

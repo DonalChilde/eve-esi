@@ -1,15 +1,15 @@
 import logging
 
 from eve_esi_jobs import models
-from eve_esi_jobs.callback_manifest import DefaultCallbackFactory
 from eve_esi_jobs.examples.jobs import get_markets_region_id_history
+from eve_esi_jobs.model_helpers import default_callback_collection
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 
 def example_workorder():
-    callback_factory = DefaultCallbackFactory
+
     region_id = 10000002
     type_id = 34
     work_order = models.EsiWorkOrder(
@@ -21,7 +21,7 @@ def example_workorder():
         ),
     )
     job = get_markets_region_id_history(
-        region_id, type_id, callback_factory.default_callback_collection()
+        region_id, type_id, default_callback_collection()
     )
     job.name = "Save market history as json"
     job.id_ = 1
@@ -40,7 +40,7 @@ def example_workorder():
     work_order.jobs.append(job)
     #####
     job_2 = get_markets_region_id_history(
-        region_id, type_id, callback_factory.default_callback_collection()
+        region_id, type_id, default_callback_collection()
     )
     job_2.name = "Save market history and job as json"
     job_2.id_ = 2
@@ -68,7 +68,7 @@ def example_workorder():
     work_order.jobs.append(job_2)
     #####
     job_3 = get_markets_region_id_history(
-        region_id, type_id, callback_factory.default_callback_collection()
+        region_id, type_id, default_callback_collection()
     )
     job_3.name = "Save market history as csv and job with data as json"
     job_3.id_ = 3
@@ -115,7 +115,7 @@ def example_workorder():
         id_=4,
         op_id="get_contracts_public_region_id",
         parameters={"region_id": 10000002},
-        callbacks=callback_factory.default_callback_collection(),
+        callbacks=default_callback_collection(),
     )
     job_4.callbacks.success.append(models.JobCallback(callback_id="check_for_pages"))
     job_4.callbacks.success.append(

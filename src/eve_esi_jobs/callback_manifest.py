@@ -90,7 +90,7 @@ def build_log_job_failure(job_callback: JobCallback, **kwargs) -> LogJobFailure:
     return LogJobFailure()
 
 
-class DefaultCallbackFactory:
+class DefaultCallbackFactory2:
     # FIXME change name to CallbackCollectionFactory
     def __init__(self) -> None:
         pass

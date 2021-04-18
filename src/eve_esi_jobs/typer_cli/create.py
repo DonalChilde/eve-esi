@@ -7,7 +7,6 @@ from typing import Dict, List, Optional
 
 import typer
 
-# from eve_esi_jobs.callback_manifest import DefaultCallbackFactory
 from eve_esi_jobs.esi_provider import EsiProvider
 from eve_esi_jobs.eve_esi_jobs import (
     deserialize_job_from_string,
