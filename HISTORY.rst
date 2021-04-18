@@ -2,6 +2,27 @@
 History
 =======
 
+0.1.3 (2021-04-?)
+------------------
+
+* CHANGE workorder.parent_path_template now workorder.output_path
+* ADD do job from cli without workorder
+* ADD support for action observer,cli registers observer to report on failed actions.
+* ADD cli reports failure details
+* CHANGE retry_limit to max_attempts, matches underlying Action
+* FIX csv output does not respect file path templates.
+* CHANGE exclude default values during pydantic serialization
+* ADD add description to job model
+* ADD Multi job example workorder
+* CHANGE sort model args for prettier yaml output
+* ADD cli success fail retry reporting
+* ADD async queue log level setting to env.
+* ADD create jobs can load custom callbacks from json file, use default callbacks if not supplied
+* ADD test function to generate test resources from examples
+* ADD create/add to workorders from cli
+* ADD improve logging output and info.
+* CHANGE remove additional_attributes param from do_work_orders, add any additional attributes to respective workorder before processing.
+
 0.1.2 (2021-04-00)
 ------------------
 

@@ -2,42 +2,20 @@
 
 ## before release
 
-- DONE CHANGE workorder.parent_path_template now workorder.output_path
-- DONE ADD do job from cli without workorder
-- DONE ADD support for action observer,cli registers observer to report on failed actions.
-- ADD test for cli reporting failed jobs
-  - needs jobs guaranteed to fail
-    - bad url
-    - bad kwarg to callback
-    - missing param
-    - too many params
-- DONE CHANGE retry_limit to max_attempts, matches underlying Action
-- DONE FIX csv output does not respect file path templates.
-- DONE CHANGE exclude default values during pydantic serialization
-- DONE ADD add description to job model
-- DONE ADD Multi job example workorder
-  - DONE split output directories
-  - DONE build jobs with various example callbacks
-- DONE CHANGE sort model args for prettier yaml output
-- DONE ADD cli success fail retry reporting
-- DONE ADD async queue log level setting to env.
-- DONE ADD create jobs can load custom callbacks from json file
-  - DONE use default callbacks if not supplied
-  - DONE alter tests to reflect new command
-  - DONE add callback collection tests resources
-- DONE ADD test function to generate test resources from examples
-- DONE ADD create/add to workorders from cli
-  - DONE tests
-  - DONE fix output path
-- DONE improve logging output and info.
-- DONE CHANGE remove additional_attributes param from do_work_orders, add any additional attributes to respective workorder before processing.
-
 - Docs
   - oh so many docs
   - reasonable cli help
 - docs internal - write out program flow
 
 ## future releases
+
+- test for cli reporting failed jobs
+
+  - needs jobs guaranteed to fail
+    - bad url
+    - bad kwarg to callback
+    - missing param
+    - too many params
 
 - compound functions for convenience.
   - region_ids with names
