@@ -1,0 +1,28 @@
+{
+  "name": "missing-parameter",
+  "description": "A job with a missing parameter, should result in a validation failure.",
+  "id_": "missing-parameter",
+  "uid": "df5ce054-5d6b-4f9c-9498-04d69cdcb5cf",
+  "op_id": "get_markets_region_id_history",
+  "parameters": {
+    "region_id": 10000002
+  },
+  "callbacks": {
+    "success": [
+      {
+        "callback_id": "response_content_to_json"
+      },
+      {
+        "callback_id": "response_to_esi_job"
+      }
+    ],
+    "fail": [
+      {
+        "callback_id": "response_to_esi_job"
+      },
+      {
+        "callback_id": "log_job_failure"
+      }
+    ]
+  }
+}

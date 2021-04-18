@@ -93,6 +93,20 @@ def work_orders_() -> Dict[str, FileResource]:
     return sample_data
 
 
+@pytest.fixture(scope="session", name="bad_work_orders")
+def bad_work_orders_() -> Dict[str, FileResource]:
+    resource_path: str = "tests.eve_esi_jobs.resources.bad_work_orders"
+    sample_data = make_file_resources_from_resource_path(resource_path)
+    return sample_data
+
+
+@pytest.fixture(scope="session", name="bad_jobs")
+def bad_jobs_() -> Dict[str, FileResource]:
+    resource_path: str = "tests.eve_esi_jobs.resources.bad_jobs"
+    sample_data = make_file_resources_from_resource_path(resource_path)
+    return sample_data
+
+
 @pytest.fixture(scope="session", name="jobs")
 def jobs_() -> Dict[str, FileResource]:
     resource_path: str = "tests.eve_esi_jobs.resources.jobs"
