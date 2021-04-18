@@ -78,6 +78,7 @@ def test_do_example_workorder(
         assert file.stat().st_size > 10
     assert "Uncertain Result" not in result.output
     assert "Failed" not in result.output
+    # assert False
 
 
 def test_do_bad_validation_workorder(

@@ -5,7 +5,7 @@ from pfmsoft.aiohttp_queue import AiohttpAction, AiohttpQueueWorker
 from pfmsoft.aiohttp_queue.runners import queue_runner
 from rich import inspect
 
-from eve_esi_jobs.callback_manifest import CallbackProvider
+from eve_esi_jobs.callback_manifest import CallbackManifest, new_manifest
 from eve_esi_jobs.eve_esi_jobs import deserialize_job_from_dict
 from eve_esi_jobs.job_to_action import JobsToActions
 
@@ -26,10 +26,8 @@ def test_make_action_from_json(esi_provider, caplog):
     }
     esi_job = deserialize_job_from_dict(esi_job_json)
     jobs_to_actions = JobsToActions()
-    callback_provider = CallbackProvider()
-    actions = jobs_to_actions.make_actions(
-        [esi_job], esi_provider, callback_provider, additional_attributes=None
-    )
+    callback_provider = new_manifest()
+    actions = jobs_to_actions.make_actions([esi_job], esi_provider, callback_provider)
     action = actions[0]
     assert action.url_parameters == {"region_id": 10000002}
     assert action.request_kwargs["params"] == {"type_id": 34}

@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional, Sequence
 from pfmsoft.aiohttp_queue import ActionCallbacks, AiohttpAction, AiohttpActionCallback
 from pfmsoft.aiohttp_queue.aiohttp import ActionObserver
 
-from eve_esi_jobs.callback_manifest import CallbackProvider
+from eve_esi_jobs.callback_manifest import CallbackManifest
 from eve_esi_jobs.esi_provider import EsiProvider
 from eve_esi_jobs.helpers import combine_dictionaries, optional_object
 from eve_esi_jobs.models import EsiJob, JobCallback
@@ -28,21 +28,19 @@ class JobsToActions:
         self,
         esi_jobs: Sequence[EsiJob],
         esi_provider: EsiProvider,
-        callback_provider: CallbackProvider,
-        additional_attributes: Optional[Dict[str, str]],
+        callback_manifest: CallbackManifest,
+        # additional_attributes: Optional[Dict[str, str]],
         observers: Optional[List[ActionObserver]] = None,
     ) -> List[AiohttpAction]:
         actions = []
-        additional_attributes = optional_object(additional_attributes, dict)
+        # additional_attributes = optional_object(additional_attributes, dict)
         observers = optional_object(observers, list)
         for esi_job in esi_jobs:
             action = esi_provider.build_action_from_op_id(
                 op_id=esi_job.op_id,
                 path_params=self._build_path_params(esi_job, esi_provider),
                 query_params=self._build_query_params(esi_job, esi_provider),
-                callbacks=self._build_action_callbacks(
-                    esi_job, callback_provider, additional_attributes
-                ),
+                callbacks=self._build_action_callbacks(esi_job, callback_manifest),
                 max_attempts=esi_job.max_attempts,
                 request_kwargs=self._build_request_kwargs(esi_job, esi_provider),
                 context=self._build_context(esi_job, esi_provider),
@@ -92,27 +90,21 @@ class JobsToActions:
     def _build_action_callbacks(
         self,
         esi_job: EsiJob,
-        callback_provider: CallbackProvider,
-        additional_attributes: Dict,
+        callback_manifest: CallbackManifest,
+        # additional_attributes: Dict,
     ) -> ActionCallbacks:
         action_callbacks = ActionCallbacks()
-        combined_attributes = combine_dictionaries(
-            esi_job.attributes(), [additional_attributes]
-        )
+        # combined_attributes = combine_dictionaries(
+        #     esi_job.attributes(), [additional_attributes]
+        # )
         for job_callback in esi_job.callbacks.success:
-            action_callback = callback_provider.configure_action_callback(
-                "success", job_callback, combined_attributes
-            )
+            action_callback = callback_manifest.init_callback("success", job_callback)
             action_callbacks.success.append(action_callback)
         for job_callback in esi_job.callbacks.retry:
-            action_callback = callback_provider.configure_action_callback(
-                "retry", job_callback, combined_attributes
-            )
+            action_callback = callback_manifest.init_callback("retry", job_callback)
             action_callbacks.retry.append(action_callback)
         for job_callback in esi_job.callbacks.fail:
-            action_callback = callback_provider.configure_action_callback(
-                "fail", job_callback, combined_attributes
-            )
+            action_callback = callback_manifest.init_callback("fail", job_callback)
             action_callbacks.fail.append(action_callback)
 
         return action_callbacks

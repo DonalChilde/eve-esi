@@ -10,7 +10,7 @@ from pfmsoft.aiohttp_queue import AiohttpQueueWorker
 from pfmsoft.aiohttp_queue.aiohttp import ActionObserver
 from pfmsoft.aiohttp_queue.runners import queue_runner
 
-from eve_esi_jobs.callback_manifest import CallbackProvider
+from eve_esi_jobs.callback_manifest import CallbackManifest, new_manifest
 from eve_esi_jobs.esi_provider import EsiProvider
 from eve_esi_jobs.helpers import combine_dictionaries, optional_object
 from eve_esi_jobs.job_to_action import JobsToActions
@@ -24,14 +24,14 @@ logger.addHandler(logging.NullHandler())
 def do_jobs(
     esi_jobs: Sequence[EsiJob],
     esi_provider: EsiProvider,
-    callback_provider: Optional[CallbackProvider] = None,
+    callback_manifest: Optional[CallbackManifest] = None,
     jobs_to_actions: Optional[JobsToActions] = None,
     workorder_attributes: Optional[Dict[str, Any]] = None,
     observers: Optional[List[ActionObserver]] = None,
     worker_count: Optional[int] = None,
     max_workers: int = 100,
 ) -> Sequence[EsiJob]:
-    callback_provider = optional_object(callback_provider, CallbackProvider)
+    callback_manifest = optional_object(callback_manifest, new_manifest)
     jobs_to_actions = optional_object(jobs_to_actions, JobsToActions)
     workorder_attributes = optional_object(workorder_attributes, dict)
     observers = optional_object(observers, list)
@@ -47,9 +47,8 @@ def do_jobs(
     actions = jobs_to_actions.make_actions(
         esi_jobs=esi_jobs,
         esi_provider=esi_provider,
-        callback_provider=callback_provider,
+        callback_manifest=callback_manifest,
         observers=observers,
-        additional_attributes=None,
     )
     asyncio.run(queue_runner(actions, workers))
     return esi_jobs
@@ -59,12 +58,12 @@ def do_work_order(
     ewo: EsiWorkOrder,
     esi_provider: EsiProvider,
     worker_count: Optional[int] = None,
-    callback_provider: Optional[CallbackProvider] = None,
+    callback_manifest: Optional[CallbackManifest] = None,
     jobs_to_actions: Optional[JobsToActions] = None,
     observers: Optional[List[ActionObserver]] = None,
     max_workers: int = 100,
 ) -> EsiWorkOrder:
-    callback_provider = optional_object(callback_provider, CallbackProvider)
+    callback_manifest = optional_object(callback_manifest, new_manifest)
     jobs_to_actions = optional_object(jobs_to_actions, JobsToActions)
     # additional_attributes = optional_object(additional_attributes, dict)
     # combined_attributes = combine_dictionaries(
@@ -76,7 +75,7 @@ def do_work_order(
     do_jobs(
         esi_jobs=ewo.jobs,
         esi_provider=esi_provider,
-        callback_provider=callback_provider,
+        callback_manifest=callback_manifest,
         jobs_to_actions=jobs_to_actions,
         workorder_attributes=ewo.attributes(),
         observers=observers,

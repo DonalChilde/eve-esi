@@ -2,6 +2,13 @@
 
 ## before release
 
+- Callback manifest redo
+
+  - callback manifest default laods known callbacks, can add additional callbacks (user defined)
+  - add_callback(callback_id,callback,factory_function, valid_targets)
+
+- add yaml function to models, mixin?
+
 - Docs
   - oh so many docs
   - reasonable cli help
