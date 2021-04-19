@@ -1,0 +1,51 @@
+{
+  "name": "result_to_csv_file",
+  "description": "An example of saving the json results to a csv file. Also, shows reordering columns, and adding additional columns",
+  "uid": "b81668d0-d893-4845-ab49-914090761d1f",
+  "output_path": "samples/order_output/${ewo_name}",
+  "jobs": [
+    {
+      "uid": "40e508af-dfe9-4a94-bba5-e7b3bf3b0ec5",
+      "op_id": "get_markets_region_id_history",
+      "parameters": {
+        "region_id": 10000002,
+        "type_id": 34
+      },
+      "callbacks": {
+        "success": [
+          {
+            "callback_id": "response_content_to_json"
+          },
+          {
+            "callback_id": "save_list_of_dict_result_to_csv_file",
+            "kwargs": {
+              "additional_fields": {
+                "region_id": 10000002,
+                "type_id": 34
+              },
+              "field_names": [
+                "date",
+                "average",
+                "highest",
+                "lowest",
+                "order_count",
+                "volume",
+                "region_id",
+                "type_id"
+              ],
+              "file_path": "data/market-history/${region_id}-${type_id}.csv"
+            }
+          }
+        ],
+        "fail": [
+          {
+            "callback_id": "response_to_esi_job"
+          },
+          {
+            "callback_id": "log_job_failure"
+          }
+        ]
+      }
+    }
+  ]
+}

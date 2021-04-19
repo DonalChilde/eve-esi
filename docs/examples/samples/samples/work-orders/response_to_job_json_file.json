@@ -1,0 +1,40 @@
+{
+  "name": "response_to_job_json_file",
+  "description": "An example of saving a completed job to a json file, including the response data. Result data intentionaly left out.",
+  "uid": "675741c5-9d4e-4d4e-8f56-e79a52b79a52",
+  "output_path": "samples/order_output/${ewo_name}",
+  "jobs": [
+    {
+      "uid": "b6da99d0-a4c4-42a4-9c15-576eb3290fc2",
+      "op_id": "get_markets_region_id_history",
+      "parameters": {
+        "region_id": 10000002,
+        "type_id": 34
+      },
+      "callbacks": {
+        "success": [
+          {
+            "callback_id": "response_content_to_json"
+          },
+          {
+            "callback_id": "response_to_esi_job"
+          },
+          {
+            "callback_id": "save_esi_job_to_json_file",
+            "kwargs": {
+              "file_path": "data/market-history/${region_id}-${type_id}-esi-job.json"
+            }
+          }
+        ],
+        "fail": [
+          {
+            "callback_id": "response_to_esi_job"
+          },
+          {
+            "callback_id": "log_job_failure"
+          }
+        ]
+      }
+    }
+  ]
+}

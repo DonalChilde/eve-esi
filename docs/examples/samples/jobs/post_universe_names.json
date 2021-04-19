@@ -1,0 +1,29 @@
+{
+  "name": "post_universe_names",
+  "uid": "d4fa4d8d-c106-4a09-a87a-586c6830cc19",
+  "op_id": "post_universe_names",
+  "parameters": {
+    "ids": [
+      95465499,
+      30000142
+    ]
+  },
+  "callbacks": {
+    "success": [
+      {
+        "callback_id": "response_content_to_json"
+      },
+      {
+        "callback_id": "response_to_esi_job"
+      }
+    ],
+    "fail": [
+      {
+        "callback_id": "response_to_esi_job"
+      },
+      {
+        "callback_id": "log_job_failure"
+      }
+    ]
+  }
+}

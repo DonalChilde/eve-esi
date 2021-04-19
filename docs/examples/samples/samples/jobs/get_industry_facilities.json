@@ -1,0 +1,23 @@
+{
+  "name": "get_industry_facilities",
+  "uid": "3975cc90-08a7-42e6-8deb-979b741bd23e",
+  "op_id": "get_industry_facilities",
+  "callbacks": {
+    "success": [
+      {
+        "callback_id": "response_content_to_json"
+      },
+      {
+        "callback_id": "response_to_esi_job"
+      }
+    ],
+    "fail": [
+      {
+        "callback_id": "response_to_esi_job"
+      },
+      {
+        "callback_id": "log_job_failure"
+      }
+    ]
+  }
+}
