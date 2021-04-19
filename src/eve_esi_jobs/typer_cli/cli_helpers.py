@@ -8,7 +8,6 @@ from typing import Any, Dict, Optional
 
 import typer
 
-from eve_esi_jobs.eve_esi_jobs import deserialize_job_from_dict
 from eve_esi_jobs.models import EsiJob, EsiWorkOrder
 
 logger = logging.getLogger(__name__)

@@ -94,73 +94,73 @@ def get_worker_count(job_count, workers: Optional[int], max_workers: int = 100) 
     return worker_calc
 
 
-def deserialize_job_from_dict(esi_job_dict: Dict) -> EsiJob:
-    esi_job = EsiJob(**esi_job_dict)
-    return esi_job
+# def deserialize_job_from_dict(esi_job_dict: Dict) -> EsiJob:
+#     esi_job = EsiJob(**esi_job_dict)
+#     return esi_job
 
 
-def deserialize_work_order_from_dict(esi_work_order_dict: Dict) -> EsiWorkOrder:
-    esi_work_order = EsiWorkOrder(**esi_work_order_dict)
-    return esi_work_order
+# def deserialize_work_order_from_dict(esi_work_order_dict: Dict) -> EsiWorkOrder:
+#     esi_work_order = EsiWorkOrder(**esi_work_order_dict)
+#     return esi_work_order
 
 
-def deserialize_job_from_string(esi_job_string: str, format_id: str = "json") -> EsiJob:
-    if format_id.lower() == "json":
-        job_dict = json.loads(esi_job_string)
-    elif format_id.lower() == "yaml":
-        job_dict = yaml.safe_load(esi_job_string)
-    else:
-        raise ValueError(
-            f"Bad format_id argument. Got: {format_id} expected one of {['json','yaml']}"
-        )
-    esi_job = deserialize_job_from_dict(job_dict)
-    return esi_job
+# def deserialize_job_from_string(esi_job_string: str, format_id: str = "json") -> EsiJob:
+#     if format_id.lower() == "json":
+#         job_dict = json.loads(esi_job_string)
+#     elif format_id.lower() == "yaml":
+#         job_dict = yaml.safe_load(esi_job_string)
+#     else:
+#         raise ValueError(
+#             f"Bad format_id argument. Got: {format_id} expected one of {['json','yaml']}"
+#         )
+#     esi_job = deserialize_job_from_dict(job_dict)
+#     return esi_job
 
 
-def deserialize_work_order_from_string(
-    esi_work_order_string: str, format_id: str = "json"
-) -> EsiWorkOrder:
-    if format_id.lower() == "json":
-        ewo_dict = json.loads(esi_work_order_string)
-    elif format_id.lower() == "yaml":
-        ewo_dict = yaml.safe_load(esi_work_order_string)
-    else:
-        raise ValueError(
-            f"Bad format_id argument. Got: {format_id} expected one of {['json','yaml']}"
-        )
-    esi_work_order = deserialize_work_order_from_dict(ewo_dict)
-    return esi_work_order
+# def deserialize_work_order_from_string(
+#     esi_work_order_string: str, format_id: str = "json"
+# ) -> EsiWorkOrder:
+#     if format_id.lower() == "json":
+#         ewo_dict = json.loads(esi_work_order_string)
+#     elif format_id.lower() == "yaml":
+#         ewo_dict = yaml.safe_load(esi_work_order_string)
+#     else:
+#         raise ValueError(
+#             f"Bad format_id argument. Got: {format_id} expected one of {['json','yaml']}"
+#         )
+#     esi_work_order = deserialize_work_order_from_dict(ewo_dict)
+#     return esi_work_order
 
 
-def serialize_job(esi_job: EsiJob, format_id: str = "json") -> str:
-    serialized_json = esi_job.json(exclude_defaults=True, indent=2)
-    if format_id.lower() == "json":
-        return serialized_json
-    if format_id.lower() == "yaml":
-        json_rep = json.loads(serialized_json)
-        serialized_yaml = yaml.dump(json_rep)
-        return serialized_yaml
-    raise ValueError(
-        f"Bad format_id argument. Got: {format_id} expected one of {['json','yaml']}"
-    )
+# def serialize_job(esi_job: EsiJob, format_id: str = "json") -> str:
+#     serialized_json = esi_job.json(exclude_defaults=True, indent=2)
+#     if format_id.lower() == "json":
+#         return serialized_json
+#     if format_id.lower() == "yaml":
+#         json_rep = json.loads(serialized_json)
+#         serialized_yaml = yaml.dump(json_rep)
+#         return serialized_yaml
+#     raise ValueError(
+#         f"Bad format_id argument. Got: {format_id} expected one of {['json','yaml']}"
+#     )
 
 
-def serialize_work_order(ewo: EsiWorkOrder, format_id: str = "json") -> str:
-    serialized_json = ewo.json(exclude_defaults=True, indent=2)
-    if format_id.lower() == "json":
-        return serialized_json
-    if format_id.lower() == "yaml":
-        json_rep = json.loads(serialized_json)
-        serialized_yaml = yaml.dump(json_rep)
-        return serialized_yaml
-    raise ValueError(
-        f"Bad format_id argument. Got: {format_id} expected one of {['json','yaml']}"
-    )
+# def serialize_work_order(ewo: EsiWorkOrder, format_id: str = "json") -> str:
+#     serialized_json = ewo.json(exclude_defaults=True, indent=2)
+#     if format_id.lower() == "json":
+#         return serialized_json
+#     if format_id.lower() == "yaml":
+#         json_rep = json.loads(serialized_json)
+#         serialized_yaml = yaml.dump(json_rep)
+#         return serialized_yaml
+#     raise ValueError(
+#         f"Bad format_id argument. Got: {format_id} expected one of {['json','yaml']}"
+#     )
 
 
-def job_to_dict(esi_job: EsiJob) -> Dict:
-    return esi_job.dict()
+# def job_to_dict(esi_job: EsiJob) -> Dict:
+#     return esi_job.dict()
 
 
-def work_order_to_dict(ewo: EsiWorkOrder) -> Dict:
-    return ewo.dict()
+# def work_order_to_dict(ewo: EsiWorkOrder) -> Dict:
+#     return ewo.dict()

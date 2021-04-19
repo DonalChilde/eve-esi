@@ -8,12 +8,6 @@ from typing import Dict, List, Optional
 import typer
 
 from eve_esi_jobs.esi_provider import EsiProvider
-from eve_esi_jobs.eve_esi_jobs import (
-    deserialize_job_from_string,
-    deserialize_work_order_from_string,
-    serialize_job,
-    serialize_work_order,
-)
 from eve_esi_jobs.helpers import optional_object
 from eve_esi_jobs.models import CallbackCollection, EsiJob, EsiWorkOrder, JobCallback
 from eve_esi_jobs.typer_cli.cli_helpers import (  # load_job,
@@ -55,14 +49,14 @@ def ewo(
     loaded_jobs = []
     if path_in.is_file():
         job_string = path_in.read_text()
-        loaded_job = deserialize_job_from_string(job_string, format_id="json")
+        loaded_job = EsiJob.deserialize_json(job_string)
         if loaded_job is not None:
             loaded_jobs.append(loaded_job)
     if path_in.is_dir():
         maybe_jobs = path_in.glob("*.json")
         for maybe_job in maybe_jobs:
             job_string = maybe_job.read_text()
-            loaded_job = deserialize_job_from_string(job_string, format_id="json")
+            loaded_job = EsiJob.deserialize_json(job_string)
             # if loaded_job is not None:
             loaded_jobs.append(loaded_job)
     if not loaded_jobs:
@@ -73,7 +67,7 @@ def ewo(
     else:
         try:
             ewo_string = ewo_path.read_text()
-            ewo_ = deserialize_work_order_from_string(ewo_string)
+            ewo_ = EsiWorkOrder.deserialize_json(ewo_string)
         except Exception as ex:
             raise typer.BadParameter(
                 f"Error decoding work order string. {ex.__class__.__name__}, {ex}"
@@ -84,7 +78,7 @@ def ewo(
     out_string = out_template.substitute(ewo_.attributes())
     out_path_from_template = Path(out_string)
     try:
-        save_string(serialize_work_order(ewo_), out_path_from_template, parents=True)
+        save_string(ewo_.serialize_json(), out_path_from_template, parents=True)
         typer.echo(f"Workorder saved to {out_path_from_template}")
         report_finished_task(ctx)
     except Exception as ex:
@@ -150,7 +144,7 @@ def jobs(
         callback_collection = default_callback_collection()
     else:
         callback_collection = load_callbacks(callback_path)
-    jobs_ = []
+    jobs_: List[EsiJob] = []
     if not file_data:
         job = create_job(op_id, parameters, callback_collection, esi_provider)
         jobs_.append(job)
@@ -162,8 +156,7 @@ def jobs(
     # validate jobs
     for job in jobs_:
         file_path = resolve_job_file_path(job, file_name_template, path_out)
-        job_string = serialize_job(job)
-        save_string(job_string, file_path, parents=True)
+        save_string(job.serialize_json(), file_path, parents=True)
         logger.info("Saved job %s at %s", job.uid, file_path)
     typer.echo(f"{len(jobs_)} jobs saved to {path_out}")
     report_finished_task(ctx)

@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Callable, Sequence
 
 from eve_esi_jobs import models
-from eve_esi_jobs.eve_esi_jobs import serialize_job, serialize_work_order
 from eve_esi_jobs.examples import callback_collections, jobs, work_orders
 from eve_esi_jobs.model_helpers import default_callback_collection
 from eve_esi_jobs.typer_cli.cli_helpers import save_string
@@ -28,8 +27,7 @@ def test_job_examples():
     for sample in jobs_list:
         job: models.EsiJob = sample()
         file_path = output_path / Path(job.name).with_suffix(".json")
-        job_string = serialize_job(job)
-        save_string(job_string, file_path, parents=True)
+        save_string(job.serialize_json(), file_path, parents=True)
 
 
 def test_ewo_examples():
@@ -51,8 +49,7 @@ def test_ewo_examples():
     for sample in ewo_list:
         ewo: models.EsiWorkOrder = sample()
         file_path = output_path / Path(ewo.name).with_suffix(".json")
-        ewo_string = serialize_work_order(ewo)
-        save_string(ewo_string, file_path, parents=True)
+        save_string(ewo.serialize_json(), file_path, parents=True)
 
 
 def test_callback_collections():
@@ -62,21 +59,15 @@ def test_callback_collections():
     parent_path = Path(__file__).parent
     output_path = parent_path / Path("callback_collections")
     callbacks_list: Sequence[Callable] = [
-        ("no_file_output", callback_collections.no_file_output),
-        (
-            "generic_save_result_to_json",
-            callback_collections.generic_save_result_to_json,
-        ),
-        (
-            "generic_save_result_and_job_to_json",
-            callback_collections.generic_save_result_and_job_to_json,
-        ),
+        callback_collections.no_file_output,
+        callback_collections.generic_save_result_to_json,
+        callback_collections.generic_save_result_and_job_to_separate_json,
+        callback_collections.generic_save_result_and_job_to_same_json,
     ]
     for sample in callbacks_list:
-        callbacks: models.CallbackCollection = sample[1]()
-        file_path = output_path / Path(sample[0]).with_suffix(".json")
-        data_string = callbacks.json(indent=2)
-        save_string(data_string, file_path, parents=True)
+        callbacks: models.CallbackCollection = sample()
+        file_path = output_path / Path(sample.__name__).with_suffix(".json")
+        save_string(callbacks.serialize_json(), file_path, parents=True)
 
 
 def test_bad_workorders():
@@ -89,8 +80,7 @@ def test_bad_workorders():
     for sample in ewo_list:
         ewo: models.EsiWorkOrder = sample()
         file_path = output_path / Path(ewo.name).with_suffix(".json")
-        ewo_string = serialize_work_order(ewo)
-        save_string(ewo_string, file_path, parents=True)
+        save_string(ewo.serialize_json(), file_path, parents=True)
 
 
 def test_bad_jobs():
@@ -103,8 +93,7 @@ def test_bad_jobs():
     for sample in jobs_list:
         job: models.EsiJob = sample()
         file_path = output_path / Path(job.name).with_suffix(".json")
-        job_string = serialize_job(job)
-        save_string(job_string, file_path, parents=True)
+        save_string(job.serialize_json(), file_path, parents=True)
 
 
 def bad_status_workorder():

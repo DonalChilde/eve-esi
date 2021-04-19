@@ -16,6 +16,12 @@
 
 ## future releases
 
+- ADD JobCallback builder to CallbackManifest
+  - so we get a runtime error for missing callback_id during api construction.
+  - offer validation, at least as far as creating a callback, and seeing if args are there.
+    - use existing init_callback.
+- ADD default useragent header
+- ADD cli option to add custom path values.
 - test for cli reporting failed jobs
 
   - needs jobs guaranteed to fail

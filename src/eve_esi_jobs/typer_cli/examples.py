@@ -4,7 +4,8 @@ from typing import Callable, Sequence
 
 import typer
 
-from eve_esi_jobs.eve_esi_jobs import serialize_job, serialize_work_order
+from eve_esi_jobs import models
+from eve_esi_jobs.examples import callback_collections as example_callbacks
 from eve_esi_jobs.examples import jobs as example_jobs
 from eve_esi_jobs.examples import work_orders as example_work_orders
 from eve_esi_jobs.model_helpers import default_callback_collection
@@ -30,6 +31,7 @@ def all_examples(
     typer.echo(f"Samples will be saved to {output_path.resolve()}")
     save_job_examples(output_path)
     save_work_order_examples(output_path)
+    save_callback_examples(output_path)
     report_finished_task(ctx)
 
 
@@ -59,6 +61,33 @@ def jobs(
     report_finished_task(ctx)
 
 
+@app.command()
+def callbacks(
+    ctx: typer.Context,
+    path_out: str = typer.Argument("./tmp", help="Path to output directory."),
+):
+    output_path_string = validate_output_path(path_out)
+    output_path = Path(output_path_string) / Path("samples")
+    typer.echo(f"Samples will be saved to {output_path.resolve()}")
+    save_callback_examples(output_path)
+    report_finished_task(ctx)
+
+
+def save_callback_examples(output_path: Path):
+    callbacks_list: Sequence[Callable] = [
+        example_callbacks.no_file_output,
+        example_callbacks.generic_save_result_to_json,
+        example_callbacks.generic_save_result_and_job_to_separate_json,
+        example_callbacks.generic_save_result_and_job_to_same_json,
+    ]
+    for sample in callbacks_list:
+        callback_collection: models.CallbackCollection = sample()
+        file_path = (
+            output_path / Path("callbacks") / Path(sample.__name__).with_suffix(".json")
+        )
+        save_string(callback_collection.serialize_json(), file_path, parents=True)
+
+
 def save_job_examples(output_path: Path):
     jobs_list: Sequence[Callable] = [
         example_jobs.get_industry_facilities,
@@ -69,8 +98,7 @@ def save_job_examples(output_path: Path):
     for sample in jobs_list:
         job: EsiJob = sample(default_callbacks)
         file_path = output_path / Path("jobs") / Path(job.name).with_suffix(".json")
-        job_string = serialize_job(job)
-        save_string(job_string, file_path, parents=True)
+        save_string(job.serialize_json(), file_path, parents=True)
 
 
 def save_work_order_examples(output_path: Path):
@@ -89,5 +117,4 @@ def save_work_order_examples(output_path: Path):
         file_path = (
             output_path / Path("work-orders") / Path(ewo_.name).with_suffix(".json")
         )
-        ewo_string = serialize_work_order(ewo_)
-        save_string(ewo_string, file_path, parents=True)
+        save_string(ewo_.serialize_json(), file_path, parents=True)

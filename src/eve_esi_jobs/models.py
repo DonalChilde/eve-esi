@@ -1,9 +1,11 @@
+import json
 import logging
 from datetime import datetime
 from itertools import chain
 from typing import Any, Dict, Iterable, List, Optional, Union
 from uuid import UUID, uuid4
 
+import yaml
 from pydantic import BaseModel, Field  # pylint: disable=no-name-in-module
 
 from eve_esi_jobs.helpers import combine_dictionaries
@@ -12,7 +14,38 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 
-class JobCallback(BaseModel):
+class SerializeMixin:
+    def serialize_json(self, exclude_defaults=True, indent=2, **kwargs):
+        serialized_json = self.json(
+            exclude_defaults=exclude_defaults, indent=indent, **kwargs
+        )
+        return serialized_json
+
+    def serialize_yaml(self):
+        json_string = self.serialize_json()
+        json_rep = json.loads(json_string)
+        serialized_yaml = yaml.dump(json_rep)
+        return serialized_yaml
+
+    @classmethod
+    def deserialize_obj(cls, obj: Dict):
+        # cls = self.__class__
+        return cls(**obj)
+
+    @classmethod
+    def deserialize_yaml(cls, yaml_string: str):
+        obj = yaml.safe_load(yaml_string)
+        instance = cls.deserialize_obj(obj)
+        return instance
+
+    @classmethod
+    def deserialize_json(cls, json_string):
+        obj = json.loads(json_string)
+        instance = cls.deserialize_obj(obj)
+        return instance
+
+
+class JobCallback(BaseModel, SerializeMixin):
     callback_id: str
     args: List[Any] = []
     kwargs: Dict[str, Any] = {}
@@ -22,7 +55,7 @@ class JobCallback(BaseModel):
         extra = "forbid"
 
 
-class CallbackCollection(BaseModel):
+class CallbackCollection(BaseModel, SerializeMixin):
     success: List[JobCallback] = []
     retry: List[JobCallback] = []
     fail: List[JobCallback] = []
@@ -31,7 +64,7 @@ class CallbackCollection(BaseModel):
         extra = "forbid"
 
 
-class EsiJobResult(BaseModel):
+class EsiJobResult(BaseModel, SerializeMixin):
     work_order_name: Optional[str] = None
     work_order_id: Optional[str] = None
     work_order_uid: str = ""
@@ -43,7 +76,7 @@ class EsiJobResult(BaseModel):
         extra = "forbid"
 
 
-class EsiJob(BaseModel):
+class EsiJob(BaseModel, SerializeMixin):
     name: str = ""
     description: str = ""
     id_: str = ""
@@ -94,7 +127,7 @@ class EsiJob(BaseModel):
         return params
 
 
-class EsiWorkOrder(BaseModel):
+class EsiWorkOrder(BaseModel, SerializeMixin):
     name: str = ""
     description: str = ""
     id_: str = ""

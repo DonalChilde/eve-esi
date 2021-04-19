@@ -6,11 +6,7 @@ from typing import List, Optional
 
 import typer
 
-from eve_esi_jobs.eve_esi_jobs import (
-    deserialize_job_from_string,
-    deserialize_work_order_from_string,
-    do_work_order,
-)
+from eve_esi_jobs.eve_esi_jobs import do_work_order
 from eve_esi_jobs.models import EsiJob, EsiWorkOrder
 from eve_esi_jobs.typer_cli.cli_helpers import (  # load_esi_work_order_json,
     FormatChoices,
@@ -54,14 +50,17 @@ not find mistakes that can only be checked on the server, eg. a non-existant typ
     job_string = file_path.read_text()
     # esi_job_json = load_esi_job_json(Path(path_in))
     try:
-        esi_job = deserialize_job_from_string(job_string, format_id)
+        if format_id == FormatChoices.yaml:
+            esi_job = EsiJob.deserialize_yaml(job_string)
+        else:
+            esi_job = EsiJob.deserialize_json(job_string)
     except Exception as ex:
         logger.exception(
             "Error deserializing job from file: %s data: %s",
             file_path,
             job_string,
         )
-        raise typer.BadParameter(f"Error decoding job at {file_path}")
+        raise typer.BadParameter(f"Error decoding job at {file_path}, msg:{ex}")
     if path_out is not None:
         # print(path_out)
         # NOTE: path is not checked with results of template values.
@@ -80,7 +79,7 @@ not find mistakes that can only be checked on the server, eg. a non-existant typ
 
 
 @app.command()
-def ewo(
+def workorder(
     ctx: typer.Context,
     path_in: str = typer.Argument(..., help="Path to Esi Work Order json"),
     path_out: Optional[str] = typer.Argument(
@@ -109,14 +108,14 @@ not find mistakes that can only be checked on the server, eg. a non-existant typ
     ewo_string = file_path.read_text()
     # esi_work_order_json = load_esi_work_order_json(Path(path_in))
     try:
-        esi_work_order = deserialize_work_order_from_string(ewo_string, "json")
+        esi_work_order = EsiWorkOrder.deserialize_json(ewo_string)
     except Exception as ex:
         logger.exception(
             "Error deserializing work order from file: %s data: %s",
             file_path,
             ewo_string,
         )
-        raise typer.BadParameter(f"Error decoding work order at {file_path}")
+        raise typer.BadParameter(f"Error decoding work order at {file_path}, msg: {ex}")
     if path_out is not None:
         # NOTE: path is not checked with results of template values.
         path_out = validate_output_path(path_out)
@@ -134,9 +133,9 @@ def report_on_jobs(esi_jobs: List[EsiJob]):
     failures = 0
     no_info = len(esi_jobs)
     # jobs with retries?
-    for job in esi_jobs:
-        if job.result is not None and job.result.response is not None:
-            status = job.result.response.get("status", None)
+    for job_ in esi_jobs:
+        if job_.result is not None and job_.result.response is not None:
+            status = job_.result.response.get("status", None)
             if status == 200:
                 successes += 1
                 no_info -= 1
