@@ -2,6 +2,7 @@ import json
 import logging
 from datetime import datetime
 from itertools import chain
+from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Union
 from uuid import UUID, uuid4
 
@@ -43,6 +44,33 @@ class SerializeMixin:
         obj = json.loads(json_string)
         instance = cls.deserialize_obj(obj)
         return instance
+
+    @classmethod
+    def deserialize_file(cls, file_path: Path):
+        valid_suffixes = [".json", ".yaml"]
+        if not file_path.is_file():
+            raise ValueError(f"{file_path} is not a file.")
+        if file_path.suffix.lower() not in valid_suffixes:
+            raise ValueError(f"Invalid file suffix, must be one of {valid_suffixes}")
+        string_data = file_path.read_text()
+        if file_path.suffix.lower() == ".json":
+            return cls.deserialize_json(string_data)
+        return cls.deserialize_yaml(string_data)
+
+    def serialize_file(self, file_path: Path, file_format: str) -> Path:
+        valid_formats = ["json", "yaml"]
+        if file_format.lower() not in valid_formats:
+            raise ValueError(f"Invalid file suffix, must be one of {valid_formats}")
+        file_ending = "." + file_format
+        if file_path.suffix.lower() != file_ending:
+            file_path = file_path.with_suffix(file_ending)
+        if file_format == "json":
+            string_data = self.serialize_json()
+        else:
+            string_data = self.serialize_yaml()
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        file_path.write_text(string_data)
+        return file_path
 
 
 class JobCallback(BaseModel, SerializeMixin):
