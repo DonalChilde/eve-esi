@@ -25,7 +25,7 @@ class SerializeMixin:
     def serialize_yaml(self):
         json_string = self.serialize_json()
         json_rep = json.loads(json_string)
-        serialized_yaml = yaml.dump(json_rep)
+        serialized_yaml = yaml.dump(json_rep, sort_keys=False)
         return serialized_yaml
 
     @classmethod
