@@ -22,7 +22,7 @@ def test_create_workorder(test_app_dir, jobs: Dict[str, FileResource], esi_schem
             "-s",
             str(esi_schema.file_path),
             "create",
-            "ewo",
+            "workorder",
             str(path_in),
             str(output_path),
         ],

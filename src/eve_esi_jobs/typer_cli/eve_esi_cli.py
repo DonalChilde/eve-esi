@@ -40,10 +40,8 @@ def eve_esi(
     ),
 ):
     """
-    Welcome to Eve Esi Jobs. Try one of the commands below.
-    Checkout the docs at: https://eve-esi-jobs.readthedocs.io/en/latest/
-
-
+    Welcome to Eve Esi Jobs. Try one of the commands below, or checkout the
+    docs at: https://eve-esi-jobs.readthedocs.io/en/latest/
     """
     # TODO fix flow when no schema
     config = make_config_from_env()

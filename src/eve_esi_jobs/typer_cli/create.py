@@ -6,84 +6,100 @@ from string import Template
 from typing import Dict, List, Optional
 
 import typer
+import yaml
 
 from eve_esi_jobs.esi_provider import EsiProvider
 from eve_esi_jobs.helpers import optional_object
 from eve_esi_jobs.models import CallbackCollection, EsiJob, EsiWorkOrder, JobCallback
-from eve_esi_jobs.typer_cli.cli_helpers import (  # load_job,
+from eve_esi_jobs.typer_cli.cli_helpers import (
+    FormatChoices,
     check_for_op_id,
     completion_op_id,
     report_finished_task,
     save_string,
 )
 
-app = typer.Typer(help="Create Jobs and Workorders")
+app = typer.Typer(help="Create jobs and workorders")
 logger = logging.getLogger(__name__)
-
-DEFAULT_WORKORDER = EsiWorkOrder(
-    output_path="workorders/${ewo_iso_date_time}/workorder-${ewo_uid}"
-)
 
 
 @app.command()
-def ewo(
+def workorder(
     ctx: typer.Context,
-    path_in: Path = typer.Argument(...),
-    path_out: Path = typer.Argument(...),
-    file_name: Path = typer.Option(
-        "workorders/${ewo_iso_date_time}/workorder-${ewo_uid}.json",
-        "-f",
-        "--file-name",
-        help="file name for the work order. Can include directories.",
+    path_in: Path = typer.Argument(
+        ...,
+        help="Path to the job file(s). File format and suffix must match format-id.",
     ),
-    ewo_path: Optional[Path] = typer.Option(None, "-w", "--work-order"),
+    path_out: Path = typer.Argument(
+        ...,
+        help="Parent path for saving the new workorder, will be prepended to file-name.",
+    ),
+    format_id: FormatChoices = typer.Option(
+        FormatChoices.json,
+        "-f",
+        "--format-id",
+        show_choices=True,
+    ),
+    file_name: Path = typer.Option(
+        "workorders/${ewo_iso_date_time}/workorder-${ewo_uid}",
+        "-n",
+        "--file-name",
+        help=(
+            "File name for the new workorder. Can include directories, "
+            "and the file type suffix will be added based on format-id if necessary."
+        ),
+    ),
+    ewo_path: Optional[Path] = typer.Option(
+        None,
+        "-w",
+        "--existing-work-order",
+        help="Path to an existing workorder. File suffix and format must match format-id.",
+    ),
 ):
-    """Create a Workorder, and add existing jobs to it.
+    """Create a workorder, and add existing jobs to it.
 
     Can also add jobs to an existing Workorder.
     """
     _ = ctx
-    # TODO change ewo_string to a json file path
     if not path_in.exists():
         raise typer.BadParameter(f"{path_in} does not exist.")
-    loaded_jobs = []
     if path_in.is_file():
-        job_string = path_in.read_text()
-        loaded_job = EsiJob.deserialize_json(job_string)
-        if loaded_job is not None:
-            loaded_jobs.append(loaded_job)
-    if path_in.is_dir():
-        maybe_jobs = path_in.glob("*.json")
-        for maybe_job in maybe_jobs:
-            job_string = maybe_job.read_text()
-            loaded_job = EsiJob.deserialize_json(job_string)
-            # if loaded_job is not None:
-            loaded_jobs.append(loaded_job)
+        maybe_jobs = [path_in]
+    # elif path_in.is_dir() and format_id == FormatChoices.json:
+    #     maybe_jobs = list(path_in.glob("*.json"))
+    # elif path_in.is_dir() and format_id == FormatChoices.yaml:
+    #     maybe_jobs = list(path_in.glob("*.yaml"))
+    else:
+        maybe_jobs = [*path_in.glob("*.json"), *path_in.glob("*.yaml")]
+    loaded_jobs = []
+    for maybe_job in maybe_jobs:
+        try:
+            loaded_job = EsiJob.deserialize_file(maybe_job)
+        except Exception as ex:
+            raise typer.BadParameter(f"Error decoding job at {maybe_job}, msg:{ex}")
+        loaded_jobs.append(loaded_job)
     if not loaded_jobs:
         raise typer.BadParameter(f"No jobs found at {path_in}")
     if ewo_path is None:
-        # TODO change this?
-        ewo_ = DEFAULT_WORKORDER.copy()
+        ewo_ = get_default_workorder()
     else:
         try:
-            ewo_string = ewo_path.read_text()
-            ewo_ = EsiWorkOrder.deserialize_json(ewo_string)
+            ewo_ = EsiWorkOrder.deserialize_file(ewo_path)
         except Exception as ex:
             raise typer.BadParameter(
-                f"Error decoding work order string. {ex.__class__.__name__}, {ex}"
+                f"Error decoding workorder string. {ex.__class__.__name__}, {ex}"
             )
     ewo_.jobs.extend(loaded_jobs)
     output_path = path_out / file_name
     out_template = Template(str(output_path))
-    out_string = out_template.substitute(ewo_.attributes())
-    out_path_from_template = Path(out_string)
+    file_path = Path(out_template.substitute(ewo_.attributes()))
     try:
-        save_string(ewo_.serialize_json(), out_path_from_template, parents=True)
-        typer.echo(f"Workorder saved to {out_path_from_template}")
+        saved_path = ewo_.serialize_file(file_path, format_id)
+        typer.echo(f"Workorder saved to {saved_path}")
         report_finished_task(ctx)
     except Exception as ex:
         raise typer.BadParameter(
-            f"Error saving work order to {path_out}. {ex.__class__.__name__}, {ex}"
+            f"Error saving workorder to {path_out}. {ex.__class__.__name__}, {ex}"
         )
 
 
@@ -100,30 +116,44 @@ def jobs(
         None,
         "--param-string",
         "-p",
-        help="Optional. Full or partial parameters as a json string.",
+        help="Optional. Full or partial parameters as a key/value json string. "
+        "Keys must be valid parameters for selected op_id.",
     ),
     callback_path: Optional[Path] = typer.Option(
         None,
         "-c",
         "--callbacks",
-        help="Optional. Json file of callbacks to be used. ",
+        help="Optional. Path to callbacks to be used. ",
     ),
-    file_name_template: str = typer.Option(
+    file_name: str = typer.Option(
         "created-jobs/${esi_job_op_id}-${esi_job_uid}.json",
         "-n",
-        "--job-name",
-        help="Optional. Customize template used for job file name.",
+        "--file-name",
+        help=(
+            "File name for the new job, must be unique for multiple jobs. "
+            "Can include directories, "
+            "and the file type suffix will be added based on format-id."
+        ),
     ),
     data_path: Optional[Path] = typer.Option(
         None,
         "--data-file",
         "-i",
         help=(
-            "Optional. Path to json or csv file with full or partial parameters. "
+            "Optional. Path to json, csv, or yaml file with full or partial parameters. "
             "Must result in a list of dicts."
         ),
     ),
-    path_out: Path = typer.Argument(..., help="Output directory."),
+    format_id: FormatChoices = typer.Option(
+        FormatChoices.json,
+        "-f",
+        "--format-id",
+        show_choices=True,
+    ),
+    path_out: Path = typer.Argument(
+        ...,
+        help="Parent path for saving the new jobs, will be prepended to file-name.",
+    ),
 ):
     """Create one or more jobs from an op_id.
 
@@ -132,10 +162,10 @@ def jobs(
     This allows supplying one region_id through param-string,
     and a list of type_ids from a csv file to get multiple jobs.
 
-    Csv files must have properly labeled columns.
+    Csv input files must have properly labeled columns.
     """
     esi_provider: EsiProvider = ctx.obj["esi_provider"]
-    path_out = optional_object(path_out, Path, ".")
+    # path_out = optional_object(path_out, Path, ".")
     if path_out.is_file:
         typer.BadParameter("path_out must not be a file.")
     file_data: Optional[List[Dict]] = get_params_from_file(data_path)
@@ -155,7 +185,13 @@ def jobs(
             jobs_.append(job)
     # validate jobs
     for job in jobs_:
-        file_path = resolve_job_file_path(job, file_name_template, path_out)
+        file_path = resolve_job_file_path(job, file_name, path_out)
+        try:
+            save_path = job.serialize_file(file_path, format_id)
+        except Exception as ex:
+            raise typer.BadParameter(
+                f"Error saving job to {save_path}. {ex.__class__.__name__}, {ex}"
+            )
         save_string(job.serialize_json(), file_path, parents=True)
         logger.info("Saved job %s at %s", job.uid, file_path)
     typer.echo(f"{len(jobs_)} jobs saved to {path_out}")
@@ -178,7 +214,7 @@ def get_params_from_file(file_path: Optional[Path]) -> Optional[List[Dict]]:
 
     if file_path is not None:
         if file_path.is_file():
-            file_data = load_json_or_csv(file_path)
+            file_data = load_data_file(file_path)
             if not isinstance(file_data, list):
                 raise typer.BadParameter(f"{file_path} is not a list of dicts. 1")
             if not file_data:
@@ -192,9 +228,7 @@ def get_params_from_file(file_path: Optional[Path]) -> Optional[List[Dict]]:
 
 def load_callbacks(file_path: Path) -> CallbackCollection:
     try:
-        callback_collection_string = file_path.read_text()
-        callback_collection_json = json.loads(callback_collection_string)
-        callback_collection = CallbackCollection(**callback_collection_json)
+        callback_collection = CallbackCollection.deserialize_file(file_path)
         return callback_collection
     except Exception as ex:
         raise typer.BadParameter(
@@ -270,17 +304,21 @@ def resolve_job_file_path(job: EsiJob, file_path_template: str, path_out: Path):
     return file_path
 
 
-def load_json_or_csv(file_path: Path):
-    if file_path.suffix.lower() not in [".json", ".csv"]:
+def load_data_file(file_path: Path):
+    valid_suffixes = [".json", ".csv", ".yaml"]
+    if file_path.suffix.lower() not in valid_suffixes:
         raise typer.BadParameter(
             (
                 f"{file_path} does not have a recognized file type "
-                "suffix. Should be either .json or .csv."
+                f"suffix. Should be one of {valid_suffixes}"
             )
         )
     with open(file_path) as file:
         if file_path.suffix.lower() == ".json":
             data = json.load(file)
+            return data
+        if file_path.suffix.lower() == ".yaml":
+            data = yaml.safe_load(file)
             return data
         if file_path.suffix.lower() == ".csv":
             csv_reader = csv.DictReader(file)
@@ -303,3 +341,10 @@ def default_callback_collection() -> CallbackCollection:
     callback_collection.fail.append(JobCallback(callback_id="response_to_esi_job"))
     callback_collection.fail.append(JobCallback(callback_id="log_job_failure"))
     return callback_collection
+
+
+def get_default_workorder():
+    ewo = EsiWorkOrder(
+        output_path="workorders/${ewo_iso_date_time}/workorder-${ewo_uid}"
+    )
+    return ewo

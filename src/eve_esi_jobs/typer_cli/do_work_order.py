@@ -16,49 +16,42 @@ from eve_esi_jobs.typer_cli.cli_helpers import (  # load_esi_work_order_json,
 )
 from eve_esi_jobs.typer_cli.observer import EsiObserver
 
-app = typer.Typer(help="""Do Jobs and Work Orders.\n\nmore info.""")
+app = typer.Typer(help="""Do jobs and workorders.\n\nmore info.""")
 logger = logging.getLogger(__name__)
 
 
 @app.command()
 def job(
     ctx: typer.Context,
-    path_in: str = typer.Argument(..., help="Path to Esi Work Order json"),
+    path_in: str = typer.Argument(..., help="Path to the job file."),
     path_out: Optional[str] = typer.Argument(
-        None, help="Path to be prepended to the Esi Work Order path."
-    ),
-    format_id: FormatChoices = typer.Option(
-        FormatChoices.json,
-        "-f",
-        "--format-id",
-        show_choices=True,
+        None, help="Path to be prepended to the job output path."
     ),
     dry_run: bool = typer.Option(
         False,
+        "-d",
+        "--dry-run",
         help="""
+Not implemented yet.
 Dry-run will perform all operations up to but not including making the
 actual http requests. This will detect some missed settings and parameters, but does
 not find mistakes that can only be checked on the server, eg. a non-existant type_id.
 """,
     ),
 ):
-    """Load Jobs and run them."""
+    """Load a job from a file and do it."""
     if dry_run:
         typer.BadParameter("not implemented yet.")
     path_in = validate_input_path(path_in)
     file_path = Path(path_in)
-    job_string = file_path.read_text()
-    # esi_job_json = load_esi_job_json(Path(path_in))
     try:
-        if format_id == FormatChoices.yaml:
-            esi_job = EsiJob.deserialize_yaml(job_string)
-        else:
-            esi_job = EsiJob.deserialize_json(job_string)
+        esi_job = EsiJob.deserialize_file(file_path)
     except Exception as ex:
         logger.exception(
-            "Error deserializing job from file: %s data: %s",
+            "Error deserializing job from file: %s. Error: %s, msg: %s",
             file_path,
-            job_string,
+            ex.__class__.__name__,
+            ex,
         )
         raise typer.BadParameter(f"Error decoding job at {file_path}, msg:{ex}")
     if path_out is not None:
@@ -81,41 +74,38 @@ not find mistakes that can only be checked on the server, eg. a non-existant typ
 @app.command()
 def workorder(
     ctx: typer.Context,
-    path_in: str = typer.Argument(..., help="Path to Esi Work Order json"),
+    path_in: str = typer.Argument(..., help="Path to the workorder file."),
     path_out: Optional[str] = typer.Argument(
-        None, help="Path to be prepended to the Esi Work Order path."
+        None, help="Path to be prepended to the workorder output path."
     ),
     dry_run: bool = typer.Option(
         False,
+        "-d",
+        "--dry-run",
         help="""
+Not implemented yet.
 Dry-run will perform all operations up to but not including making the
 actual http requests. This will detect some missed settings and parameters, but does
 not find mistakes that can only be checked on the server, eg. a non-existant type_id.
 """,
     ),
 ):
-    """Load Work Orders and run them.
-
-    Dry-run will perform all operations up to but not including making the actual
-    http requests. This will detect some missed settings and parameters, but does
-    not find mistakes that can only be checked on the server, eg. a non-existant type_id.
-    """
+    """Load a workorder and do it."""
 
     if dry_run:
         typer.BadParameter("not implemented yet.")
     path_in = validate_input_path(path_in)
     file_path = Path(path_in)
-    ewo_string = file_path.read_text()
-    # esi_work_order_json = load_esi_work_order_json(Path(path_in))
     try:
-        esi_work_order = EsiWorkOrder.deserialize_json(ewo_string)
+        esi_work_order = EsiWorkOrder.deserialize_file(file_path)
     except Exception as ex:
         logger.exception(
-            "Error deserializing work order from file: %s data: %s",
+            "Error deserializing workorder from file: %s. Error: %s, msg: %s",
             file_path,
-            ewo_string,
+            ex.__class__.__name__,
+            ex,
         )
-        raise typer.BadParameter(f"Error decoding work order at {file_path}, msg: {ex}")
+        raise typer.BadParameter(f"Error decoding workorder at {file_path}, msg: {ex}")
     if path_out is not None:
         # NOTE: path is not checked with results of template values.
         path_out = validate_output_path(path_out)
@@ -143,66 +133,8 @@ def report_on_jobs(esi_jobs: List[EsiJob]):
                 failures += 1
                 no_info -= 1
     typer.echo(
-        f"Successes: {successes}, Failures: {failures}, Not Reporting: {no_info}"
+        f"Network response -> Successes: {successes}, Failures: {failures}, "
+        f"Not Reporting: {no_info}"
     )
     typer.echo("see logs for details.")
     typer.echo(f"Completed {len(esi_jobs)} jobs!")
-
-
-# @app.command()
-# def samples(
-#     ctx: typer.Context,
-#     path_out: str = typer.Argument("./tmp", help="Path to output directory."),
-# ):
-#     """Generate sample Work Orders and Jobs."""
-#     output_path_string = validate_output_path(path_out)
-#     output_path = Path(output_path_string) / Path("samples")
-#     typer.echo(f"Samples will be saved to {output_path.resolve()}")
-#     ewo_list = [
-#         example_work_orders.response_to_job_json_file,
-#         example_work_orders.result_to_job_json_file,
-#         example_work_orders.result_to_json_file_and_response_to_json_file,
-#         example_work_orders.result_and_response_to_job_json_file,
-#         example_work_orders.result_to_json_file,
-#         example_work_orders.result_to_csv_file,
-#         example_work_orders.result_with_pages_to_json_file,
-#     ]
-#     for sample in ewo_list:
-#         ewo_: EsiWorkOrder = sample()
-#         file_path = (
-#             output_path / Path("work-orders") / Path(ewo_.name).with_suffix(".json")
-#         )
-#         ewo_string = serialize_work_order(ewo_)
-#         save_string(ewo_string, file_path, parents=True)
-#     jobs_list: Sequence[Callable] = [
-#         example_jobs.get_industry_facilities,
-#         example_jobs.get_industry_systems,
-#         example_jobs.post_universe_names,
-#     ]
-#     default_callbacks = DefaultCallbackProvider().default_callback_collection()
-#     for sample in jobs_list:
-#         job: EsiJob = sample(default_callbacks)
-#         file_path = output_path / Path("jobs") / Path(job.name).with_suffix(".json")
-#         job_string = serialize_job(job)
-#         save_string(job_string, file_path, parents=True)
-#     start = ctx.obj.get("start_time", perf_counter_ns())
-#     end = perf_counter_ns()
-#     seconds = (end - start) / 1000000000
-#     typer.echo(f"Task completed in {seconds:0.2f} seconds")
-
-
-# def combine(ctx: typer.Context, source_path: Path, out_path: Path):
-#     """combine all the jobs in a dir into one workorder."""
-#     pass
-
-
-# def bulk_create(ctx: typer.Context, op_id, input_file: Path, file_type: str):
-#     """Bulk create jobs from json or csv files.
-
-#     json must be in list of dicts of valid params for op_id
-#     csv must read into a list of dicts that contain the required params
-#     extra params are ok.
-#     should be able to read previous csv output that contains required fields
-#     identical inputs will be consolidated. (dict to json.dumps, set, and back)
-#     """
-#     pass

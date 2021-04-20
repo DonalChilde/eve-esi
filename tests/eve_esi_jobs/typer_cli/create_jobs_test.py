@@ -219,6 +219,7 @@ def test_from_op_id_path_in_full_data(
         ],
         catch_exceptions=False,
     )
+    print(result.output)
     assert result.exit_code == 0
     sub_dir = output_path / Path("created-jobs")
     json_files = list(sub_dir.glob("*.json"))
@@ -328,11 +329,11 @@ def test_from_op_id_path_in_bad_data(
 
 def test_load_json_or_csv(sample_data: Dict[str, FileResource]):
     json_resource = sample_data["3-market-history-params.json"]
-    json_data = create.load_json_or_csv(json_resource.file_path)
+    json_data = create.load_data_file(json_resource.file_path)
     assert json_data == json.loads(json_resource.data)
 
     csv_resource = sample_data["3-market-history-params.csv"]
-    json_from_csv_data = create.load_json_or_csv(csv_resource.file_path)
+    json_from_csv_data = create.load_data_file(csv_resource.file_path)
     assert len(json_from_csv_data) == 3
 
 
