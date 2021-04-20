@@ -26,16 +26,16 @@ def test_load_schema_from_file(esi_schema, monkeypatch):
     # Load from file
     runner = CliRunner()
     result = runner.invoke(app, ["-s", esi_schema.file_path, "schema"])
-    inspect(result)
+    # inspect(result)
     assert result.exit_code == 0
     assert f"Loaded schema from {esi_schema.file_path}" in result.output
 
     # Fail to load from file
     runner = CliRunner()
     result = runner.invoke(app, ["-s", "foo", "schema"])
-    inspect(result)
+    # inspect(result)
     assert result.exit_code == 2
-    assert "foo is not a valid file path." in result.output
+    assert "Error loading schema from foo" in result.output
 
     # Bad schema
 
@@ -43,7 +43,7 @@ def test_load_schema_from_file(esi_schema, monkeypatch):
     monkeypatch.setenv("PFMSOFT_eve_esi_jobs_APP_DIR", "tmp")
     runner = CliRunner()
     result = runner.invoke(app, ["schema"])
-    inspect(result)
+    # inspect(result)
     assert result.exit_code == 0
     assert "Schema not found in app data" in result.output
 
