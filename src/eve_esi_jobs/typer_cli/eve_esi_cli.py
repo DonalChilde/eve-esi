@@ -2,16 +2,17 @@
 
 # TODO silent flag to support stdout pipe to file
 
+import json
 import logging
 from pathlib import Path
 from time import perf_counter_ns
+from typing import Optional
 
 import typer
 
 from eve_esi_jobs.esi_provider import EsiProvider
 from eve_esi_jobs.typer_cli.app_config import make_config_from_env
 from eve_esi_jobs.typer_cli.app_data import load_schema
-from eve_esi_jobs.typer_cli.cli_helpers import load_json
 from eve_esi_jobs.typer_cli.create import app as create_app
 from eve_esi_jobs.typer_cli.do_work_order import app as do_app
 from eve_esi_jobs.typer_cli.examples import app as examples_app
@@ -33,17 +34,16 @@ def eve_esi(
     version: str = typer.Option(
         "latest",
         "--version",
-        help="schema version to load from Eve Esi Jobs app data directory",
+        help="Esi schema version to load from Eve Esi Jobs app data directory",
     ),
-    schema_path: str = typer.Option(
-        None, "--schema-path", "-s", help="path to local schema"
+    schema_path: Optional[Path] = typer.Option(
+        None, "--schema-path", "-s", help="Path to local schema file."
     ),
 ):
     """
-    Welcome to Eve Esi Jobs. Try one of the commands below, or checkout the
+    Welcome to Eve Esi Jobs. Get started by downloading a schema, or checkout the
     docs at: https://eve-esi-jobs.readthedocs.io/en/latest/
     """
-    # TODO fix flow when no schema
     config = make_config_from_env()
     typer.echo(f"Logging at {config.log_path}")
     ctx.obj = {}
@@ -52,27 +52,35 @@ def eve_esi(
     logger.info("loading schema")
     ctx.obj["config"] = config
     schema = None
+    schema_source = ""
     if schema_path is not None:
         try:
-            schema = load_json(Path(schema_path))
+            schema_text = schema_path.read_text()
+            schema = json.loads(schema_text)
             typer.echo(f"Loaded schema from {schema_path}")
+            schema_source = str(schema_path)
         except FileNotFoundError as ex:
-            logger.exception("Tried to load schema from file, not found.")
-            raise typer.BadParameter(f"{schema_path} is not a valid file path.")
+            logger.exception("Error loading schema from file.")
+            raise typer.BadParameter(
+                f"Error loading schema from {schema_path}. "
+                f"Error: {ex.__class__.__name__} msg: {ex}."
+            )
     else:
         schema = load_schema(config.app_dir, version)
+        schema_source = str(config.app_dir) + f"version: {version}"
         if schema is None:
             typer.echo("Schema not found in app data, attempting to download.")
             typer.echo("Consider using `eve-esi schema download` to save a local copy,")
             typer.echo("or provide a valid local path to the schema.")
             schema = download_json(config.schema_url)
+            schema_source = config.schema_url
     try:
         esi_provider = EsiProvider(schema)
     except Exception:
         logger.exception(
-            "Tried to make esi_provider with invalid schema. version: %s, file_path: %s",
+            "Tried to make esi_provider with invalid schema. version: %s, source: %s",
             version,
-            schema_path,
+            schema_source,
         )
         raise typer.BadParameter(
             "The provided schema was invalid. please try a different one."

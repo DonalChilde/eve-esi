@@ -24,13 +24,14 @@ or somekind of caching expiration.
 
 # pylint: disable=empty-docstring, missing-function-docstring
 
+import json
 import logging
 from pathlib import Path
 from string import Template
 from typing import Dict, List, Optional
 
 from eve_esi_jobs.helpers import optional_object
-from eve_esi_jobs.typer_cli.cli_helpers import load_json, save_json
+from eve_esi_jobs.typer_cli.cli_helpers import load_json
 
 logger = logging.getLogger(__name__)
 ROUTE: Dict = {
@@ -72,14 +73,16 @@ def get_data_filename(route_name: str, params: Optional[Dict] = None) -> str:
 
 def save_json_to_app_data(
     data, app_dir: Path, route_name: str, params: Optional[Dict] = None
-) -> Optional[Path]:
+) -> Path:
     # app_data_path = get_app_data_directory()
     sub_path = get_data_subpath(route_name, params)
     version = get_data_version(route_name, params)
     file_name = get_data_filename(route_name, params)
     file_path = app_dir / sub_path / version / Path(file_name)
     try:
-        save_json(data, file_path, parents=True)
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        file_path.write_text(json.dumps(data))
+        # save_json(data, file_path, parents=True)
     except Exception as ex:
         logger.error(
             "Unable to save %s with params: %s to path %s Error message: %s",
@@ -88,7 +91,7 @@ def save_json_to_app_data(
             file_path,
             ex,
         )
-        return None
+        raise ex
     return file_path
 
 

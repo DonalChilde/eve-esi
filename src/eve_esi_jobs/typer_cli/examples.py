@@ -12,7 +12,6 @@ from eve_esi_jobs.model_helpers import default_callback_collection
 from eve_esi_jobs.models import EsiJob, EsiWorkOrder
 from eve_esi_jobs.typer_cli.cli_helpers import (
     report_finished_task,
-    save_string,
     validate_output_path,
 )
 
@@ -23,12 +22,12 @@ logger = logging.getLogger(__name__)
 @app.command()
 def all_examples(
     ctx: typer.Context,
-    path_out: str = typer.Argument("./tmp", help="Path to output directory."),
+    path_out: str = typer.Argument("./tmp", help="Path to example output directory."),
 ):
-    """Generate sample Work Orders and Jobs."""
+    """Generate all examples."""
     output_path_string = validate_output_path(path_out)
-    output_path = Path(output_path_string) / Path("samples")
-    typer.echo(f"Samples will be saved to {output_path.resolve()}")
+    output_path = Path(output_path_string) / Path("examples")
+    typer.echo(f"Examples will be saved to {output_path.resolve()}")
     save_job_examples(output_path)
     save_work_order_examples(output_path)
     save_callback_examples(output_path)
@@ -38,12 +37,12 @@ def all_examples(
 @app.command()
 def workorders(
     ctx: typer.Context,
-    path_out: str = typer.Argument("./tmp", help="Path to output directory."),
+    path_out: str = typer.Argument("./tmp", help="Path to example output directory."),
 ):
-    """Generate sample workorders."""
+    """Generate example workorders."""
     output_path_string = validate_output_path(path_out)
-    output_path = Path(output_path_string) / Path("samples")
-    typer.echo(f"Samples will be saved to {output_path.resolve()}")
+    output_path = Path(output_path_string) / Path("examples")
+    typer.echo(f"Examples will be saved to {output_path.resolve()}")
     save_work_order_examples(output_path)
     report_finished_task(ctx)
 
@@ -51,12 +50,12 @@ def workorders(
 @app.command()
 def jobs(
     ctx: typer.Context,
-    path_out: str = typer.Argument("./tmp", help="Path to output directory."),
+    path_out: str = typer.Argument("./tmp", help="Path to example output directory."),
 ):
-    """Generate sample jobs."""
+    """Generate example jobs."""
     output_path_string = validate_output_path(path_out)
-    output_path = Path(output_path_string) / Path("samples")
-    typer.echo(f"Samples will be saved to {output_path.resolve()}")
+    output_path = Path(output_path_string) / Path("examples")
+    typer.echo(f"Examples will be saved to {output_path.resolve()}")
     save_job_examples(output_path)
     report_finished_task(ctx)
 
@@ -64,11 +63,12 @@ def jobs(
 @app.command()
 def callbacks(
     ctx: typer.Context,
-    path_out: str = typer.Argument("./tmp", help="Path to output directory."),
+    path_out: str = typer.Argument("./tmp", help="Path to example output directory."),
 ):
+    """Generate example callbacks."""
     output_path_string = validate_output_path(path_out)
-    output_path = Path(output_path_string) / Path("samples")
-    typer.echo(f"Samples will be saved to {output_path.resolve()}")
+    output_path = Path(output_path_string) / Path("examples")
+    typer.echo(f"Examples will be saved to {output_path.resolve()}")
     save_callback_examples(output_path)
     report_finished_task(ctx)
 
@@ -82,10 +82,9 @@ def save_callback_examples(output_path: Path):
     ]
     for sample in callbacks_list:
         callback_collection: models.CallbackCollection = sample()
-        file_path = (
-            output_path / Path("callbacks") / Path(sample.__name__).with_suffix(".json")
-        )
-        save_string(callback_collection.serialize_json(), file_path, parents=True)
+        file_path = output_path / Path("callbacks") / Path(sample.__name__)
+        callback_collection.serialize_file(file_path, "json")
+        callback_collection.serialize_file(file_path, "yaml")
 
 
 def save_job_examples(output_path: Path):
@@ -97,8 +96,9 @@ def save_job_examples(output_path: Path):
     default_callbacks = default_callback_collection()
     for sample in jobs_list:
         job: EsiJob = sample(default_callbacks)
-        file_path = output_path / Path("jobs") / Path(job.name).with_suffix(".json")
-        save_string(job.serialize_json(), file_path, parents=True)
+        file_path = output_path / Path("jobs") / Path(job.name)
+        job.serialize_file(file_path, "json")
+        job.serialize_file(file_path, "yaml")
 
 
 def save_work_order_examples(output_path: Path):
@@ -114,7 +114,6 @@ def save_work_order_examples(output_path: Path):
     ]
     for sample in ewo_list:
         ewo_: EsiWorkOrder = sample()
-        file_path = (
-            output_path / Path("work-orders") / Path(ewo_.name).with_suffix(".json")
-        )
-        save_string(ewo_.serialize_json(), file_path, parents=True)
+        file_path = output_path / Path("work-orders") / Path(ewo_.name)
+        ewo_.serialize_file(file_path, "json")
+        ewo_.serialize_file(file_path, "yaml")

@@ -16,7 +16,7 @@ from eve_esi_jobs.typer_cli.cli_helpers import (  # load_esi_work_order_json,
 )
 from eve_esi_jobs.typer_cli.observer import EsiObserver
 
-app = typer.Typer(help="""Do jobs and workorders.\n\nmore info.""")
+app = typer.Typer(help="""Do jobs and workorders.""")
 logger = logging.getLogger(__name__)
 
 
@@ -24,8 +24,8 @@ logger = logging.getLogger(__name__)
 def job(
     ctx: typer.Context,
     path_in: str = typer.Argument(..., help="Path to the job file."),
-    path_out: Optional[str] = typer.Argument(
-        None, help="Path to be prepended to the job output path."
+    path_out: str = typer.Argument(
+        "./tmp", help="Path to be prepended to the job output path."
     ),
     dry_run: bool = typer.Option(
         False,
@@ -54,19 +54,15 @@ not find mistakes that can only be checked on the server, eg. a non-existant typ
             ex,
         )
         raise typer.BadParameter(f"Error decoding job at {file_path}, msg:{ex}")
-    if path_out is not None:
-        # print(path_out)
-        # NOTE: path is not checked with results of template values.
-        path_out = validate_output_path(path_out)
-        # output_path_string = str(path_out / Path(esi_work_order.parent_path_template))
-        # esi_job.update_attributes({"ewo_parent_path_template": str(path_out)})
+
+    # NOTE: path is not checked with results of template values.
+    path_out = validate_output_path(path_out)
     esi_provider = ctx.obj["esi_provider"]
-    ewo_ = EsiWorkOrder()
-    ewo_.output_path = str(path_out)
+    ewo_ = EsiWorkOrder(output_path=str(path_out))
+    # ewo_.output_path = str(path_out)
     ewo_.jobs.append(esi_job)
     observer = EsiObserver()
     do_work_order(ewo_, esi_provider, observers=[observer])
-    print(repr(esi_job))
     report_on_jobs(ewo_.jobs)
     report_finished_task(ctx)
 
@@ -75,8 +71,8 @@ not find mistakes that can only be checked on the server, eg. a non-existant typ
 def workorder(
     ctx: typer.Context,
     path_in: str = typer.Argument(..., help="Path to the workorder file."),
-    path_out: Optional[str] = typer.Argument(
-        None, help="Path to be prepended to the workorder output path."
+    path_out: str = typer.Argument(
+        "./tmp", help="Path to be prepended to the workorder output path."
     ),
     dry_run: bool = typer.Option(
         False,
@@ -106,11 +102,11 @@ not find mistakes that can only be checked on the server, eg. a non-existant typ
             ex,
         )
         raise typer.BadParameter(f"Error decoding workorder at {file_path}, msg: {ex}")
-    if path_out is not None:
-        # NOTE: path is not checked with results of template values.
-        path_out = validate_output_path(path_out)
-        output_path_string = str(path_out / Path(esi_work_order.output_path))
-        esi_work_order.update_attributes({"ewo_output_path": output_path_string})
+
+    # NOTE: path is not checked with results of template values.
+    path_out = validate_output_path(path_out)
+    output_path_string = str(path_out / Path(esi_work_order.output_path))
+    esi_work_order.update_attributes({"ewo_output_path": output_path_string})
     esi_provider = ctx.obj["esi_provider"]
     observer = EsiObserver()
     do_work_order(esi_work_order, esi_provider, observers=[observer])

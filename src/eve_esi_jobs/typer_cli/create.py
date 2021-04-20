@@ -28,17 +28,18 @@ def workorder(
     ctx: typer.Context,
     path_in: Path = typer.Argument(
         ...,
-        help="Path to the job file(s). File format and suffix must match format-id.",
+        help="Path to the job file(s).",
     ),
     path_out: Path = typer.Argument(
-        ...,
-        help="Parent path for saving the new workorder, will be prepended to file-name.",
+        "./tmp",
+        help="Parent path for saving the new workorder, will be prepended to --file-name.",
     ),
     format_id: FormatChoices = typer.Option(
         FormatChoices.json,
         "-f",
         "--format-id",
         show_choices=True,
+        help="Output file format.",
     ),
     file_name: Path = typer.Option(
         "workorders/${ewo_iso_date_time}/workorder-${ewo_uid}",
@@ -46,14 +47,14 @@ def workorder(
         "--file-name",
         help=(
             "File name for the new workorder. Can include directories, "
-            "and the file type suffix will be added based on format-id if necessary."
+            "and the file type suffix will be added based on --format-id if necessary."
         ),
     ),
     ewo_path: Optional[Path] = typer.Option(
         None,
         "-w",
         "--existing-work-order",
-        help="Path to an existing workorder. File suffix and format must match format-id.",
+        help="Path to an existing workorder.",
     ),
 ):
     """Create a workorder, and add existing jobs to it.
@@ -65,10 +66,6 @@ def workorder(
         raise typer.BadParameter(f"{path_in} does not exist.")
     if path_in.is_file():
         maybe_jobs = [path_in]
-    # elif path_in.is_dir() and format_id == FormatChoices.json:
-    #     maybe_jobs = list(path_in.glob("*.json"))
-    # elif path_in.is_dir() and format_id == FormatChoices.yaml:
-    #     maybe_jobs = list(path_in.glob("*.yaml"))
     else:
         maybe_jobs = [*path_in.glob("*.json"), *path_in.glob("*.yaml")]
     loaded_jobs = []
@@ -110,29 +107,29 @@ def jobs(
         ...,
         autocompletion=completion_op_id,
         callback=check_for_op_id,
-        help="A valid op-id.",
+        help="A valid op-id. e.g. get_markets_prices",
     ),
     param_string: Optional[str] = typer.Option(
         None,
         "--param-string",
         "-p",
-        help="Optional. Full or partial parameters as a key/value json string. "
+        help="Optional. Full or partial parameters as a json encoded dictionary string. "
         "Keys must be valid parameters for selected op_id.",
     ),
     callback_path: Optional[Path] = typer.Option(
         None,
         "-c",
         "--callbacks",
-        help="Optional. Path to callbacks to be used. ",
+        help="Optional. Path to custom callbacks to be used. ",
     ),
     file_name: str = typer.Option(
-        "created-jobs/${esi_job_op_id}-${esi_job_uid}.json",
+        "created-jobs/${esi_job_op_id}-${esi_job_uid}",
         "-n",
         "--file-name",
         help=(
-            "File name for the new job, must be unique for multiple jobs. "
+            "File name for the new job, must be unique if multiple jobs. "
             "Can include directories, "
-            "and the file type suffix will be added based on format-id."
+            "and the file type suffix will be added based on --format-id."
         ),
     ),
     data_path: Optional[Path] = typer.Option(
@@ -149,15 +146,16 @@ def jobs(
         "-f",
         "--format-id",
         show_choices=True,
+        help="Output file format.",
     ),
     path_out: Path = typer.Argument(
-        ...,
-        help="Parent path for saving the new jobs, will be prepended to file-name.",
+        "./tmp",
+        help="Parent path for saving the new jobs, will be prepended to --file-name.",
     ),
 ):
     """Create one or more jobs from an op_id.
 
-    Required parameters can be supplied as a combination of param-string and file-data.
+    Required parameters can be supplied as a combination of --param-string and file data.
 
     This allows supplying one region_id through param-string,
     and a list of type_ids from a csv file to get multiple jobs.

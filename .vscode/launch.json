@@ -19,6 +19,14 @@
       "program": "${workspaceFolder}/src/eve_esi_jobs/typer_cli/eve_esi_cli.py",
       "args": ["examples", "all-examples", "./tmp"],
       "console": "integratedTerminal"
+    },
+    {
+      "name": "eve-esi schema download",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/eve_esi_jobs/typer_cli/eve_esi_cli.py",
+      "args": ["schema", "download"],
+      "console": "integratedTerminal"
     }
   ]
 }
