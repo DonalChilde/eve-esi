@@ -1,0 +1,15 @@
+name: bad-parameter
+description: A job with a bad parameter, should result in a 400 bad request.
+id_: bad-parameter
+uid: fb45ca27-6dc4-43b3-9e4b-d5dd695dfc1e
+op_id: get_markets_region_id_history
+parameters:
+  region_id: 10000002
+  type_id: 0
+callbacks:
+  success:
+  - callback_id: response_content_to_json
+  - callback_id: response_to_esi_job
+  fail:
+  - callback_id: response_to_esi_job
+  - callback_id: log_job_failure

@@ -9,12 +9,12 @@ import typer
 import yaml
 
 from eve_esi_jobs.esi_provider import EsiProvider
-from eve_esi_jobs.helpers import optional_object
-from eve_esi_jobs.models import CallbackCollection, EsiJob, EsiWorkOrder, JobCallback
+from eve_esi_jobs.models import CallbackCollection, EsiJob, EsiWorkOrder
 from eve_esi_jobs.typer_cli.cli_helpers import (
     FormatChoices,
     check_for_op_id,
     completion_op_id,
+    default_callback_collection,
     report_finished_task,
     save_string,
 )
@@ -322,23 +322,6 @@ def load_data_file(file_path: Path):
             csv_reader = csv.DictReader(file)
             data = list(csv_reader)
             return data
-
-
-def default_callback_collection() -> CallbackCollection:
-    callback_collection = CallbackCollection()
-    callback_collection.success.append(
-        JobCallback(callback_id="response_content_to_json")
-    )
-    callback_collection.success.append(JobCallback(callback_id="response_to_esi_job"))
-    callback_collection.success.append(
-        JobCallback(
-            callback_id="save_json_result_to_file",
-            kwargs={"file_path": "job_data/${esi_job_op_id}-${esi_job_uid}.json"},
-        )
-    )
-    callback_collection.fail.append(JobCallback(callback_id="response_to_esi_job"))
-    callback_collection.fail.append(JobCallback(callback_id="log_job_failure"))
-    return callback_collection
 
 
 def get_default_workorder():

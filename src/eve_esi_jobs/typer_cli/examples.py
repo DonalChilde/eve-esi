@@ -1,16 +1,20 @@
+import csv
+import json
 import logging
 from pathlib import Path
-from typing import Callable, Sequence
+from typing import Callable, Dict, List, Sequence
 
 import typer
+import yaml
 
 from eve_esi_jobs import models
 from eve_esi_jobs.examples import callback_collections as example_callbacks
+from eve_esi_jobs.examples import input_data as example_input_data
 from eve_esi_jobs.examples import jobs as example_jobs
 from eve_esi_jobs.examples import work_orders as example_work_orders
-from eve_esi_jobs.model_helpers import default_callback_collection
 from eve_esi_jobs.models import EsiJob, EsiWorkOrder
 from eve_esi_jobs.typer_cli.cli_helpers import (
+    default_callback_collection,
     report_finished_task,
     validate_output_path,
 )
@@ -31,6 +35,7 @@ def all_examples(
     save_job_examples(output_path)
     save_work_order_examples(output_path)
     save_callback_examples(output_path)
+    save_input_data_examples(output_path)
     report_finished_task(ctx)
 
 
@@ -73,6 +78,39 @@ def callbacks(
     report_finished_task(ctx)
 
 
+@app.command()
+def input_data(
+    ctx: typer.Context,
+    path_out: str = typer.Argument("./tmp", help="Path to example output directory."),
+):
+    """Generate example input data."""
+    output_path_string = validate_output_path(path_out)
+    output_path = Path(output_path_string) / Path("examples")
+    typer.echo(f"Examples will be saved to {output_path.resolve()}")
+    save_callback_examples(output_path)
+    report_finished_task(ctx)
+
+
+def save_input_data_examples(output_path: Path):
+    input_list: Sequence[Callable] = [
+        example_input_data.market_history_params,
+        example_input_data.market_history_params_extras,
+        example_input_data.type_ids,
+        example_input_data.region_ids,
+    ]
+    parent_path = output_path / Path("input-data")
+    for sample in input_list:
+        data = sample()
+        file_path = parent_path / Path(sample.__name__)
+        csv_path = file_path.with_suffix(".csv")
+        save_csv(csv_path, data)
+        yaml_path = file_path.with_suffix(".yaml")
+        yaml_path.write_text(yaml.dump(data, sort_keys=False))
+        json_path = file_path.with_suffix(".json")
+        json_path.write_text(json.dumps(data, indent=2))
+    return parent_path
+
+
 def save_callback_examples(output_path: Path):
     callbacks_list: Sequence[Callable] = [
         example_callbacks.no_file_output,
@@ -80,11 +118,13 @@ def save_callback_examples(output_path: Path):
         example_callbacks.generic_save_result_and_job_to_separate_json,
         example_callbacks.generic_save_result_and_job_to_same_json,
     ]
+    parent_path = output_path / Path("callbacks")
     for sample in callbacks_list:
         callback_collection: models.CallbackCollection = sample()
-        file_path = output_path / Path("callbacks") / Path(sample.__name__)
+        file_path = parent_path / Path(sample.__name__)
         callback_collection.serialize_file(file_path, "json")
         callback_collection.serialize_file(file_path, "yaml")
+    return parent_path
 
 
 def save_job_examples(output_path: Path):
@@ -93,12 +133,14 @@ def save_job_examples(output_path: Path):
         example_jobs.get_industry_systems,
         example_jobs.post_universe_names,
     ]
-    default_callbacks = default_callback_collection()
+
+    parent_path = output_path / Path("jobs")
     for sample in jobs_list:
-        job: EsiJob = sample(default_callbacks)
-        file_path = output_path / Path("jobs") / Path(job.name)
+        job: EsiJob = sample()
+        file_path = parent_path / Path(job.name)
         job.serialize_file(file_path, "json")
         job.serialize_file(file_path, "yaml")
+    return parent_path
 
 
 def save_work_order_examples(output_path: Path):
@@ -112,8 +154,21 @@ def save_work_order_examples(output_path: Path):
         example_work_orders.result_to_csv_file,
         example_work_orders.result_with_pages_to_json_file,
     ]
+    parent_path = output_path / Path("workorders")
     for sample in ewo_list:
         ewo_: EsiWorkOrder = sample()
-        file_path = output_path / Path("work-orders") / Path(ewo_.name)
+        file_path = parent_path / Path(ewo_.name)
         ewo_.serialize_file(file_path, "json")
         ewo_.serialize_file(file_path, "yaml")
+    return parent_path
+
+
+def save_csv(file_path: Path, data: List[Dict]):
+    if file_path.suffix.lower() != ".csv":
+        file_path = file_path.with_suffix(".csv")
+    field_names = list(data[0])
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(file_path, mode="w", newline="") as file:
+        writer = csv.DictWriter(file, field_names)
+        writer.writeheader()
+        writer.writerows(data)

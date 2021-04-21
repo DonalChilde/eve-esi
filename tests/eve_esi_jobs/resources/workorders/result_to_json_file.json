@@ -1,0 +1,37 @@
+{
+  "name": "result_to_json_file",
+  "description": "An example of saving the raw results to a json file.",
+  "uid": "1a10b097-afc6-4a40-8dc7-3ce4256541c6",
+  "output_path": "samples/order_output/${ewo_name}",
+  "jobs": [
+    {
+      "uid": "911f726e-d741-4d8d-a6f0-7cccf5bd1e52",
+      "op_id": "get_markets_region_id_history",
+      "parameters": {
+        "region_id": 10000002,
+        "type_id": 34
+      },
+      "callbacks": {
+        "success": [
+          {
+            "callback_id": "response_content_to_json"
+          },
+          {
+            "callback_id": "save_json_result_to_file",
+            "kwargs": {
+              "file_path": "data/market-history/${region_id}-${type_id}.json"
+            }
+          }
+        ],
+        "fail": [
+          {
+            "callback_id": "response_to_esi_job"
+          },
+          {
+            "callback_id": "log_job_failure"
+          }
+        ]
+      }
+    }
+  ]
+}

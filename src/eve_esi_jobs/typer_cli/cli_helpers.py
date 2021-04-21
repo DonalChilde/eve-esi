@@ -8,7 +8,7 @@ from typing import Any, Dict, Optional
 
 import typer
 
-from eve_esi_jobs.models import EsiJob, EsiWorkOrder
+from eve_esi_jobs.models import CallbackCollection, EsiJob, EsiWorkOrder, JobCallback
 
 logger = logging.getLogger(__name__)
 
@@ -160,60 +160,25 @@ def validate_output_path(path_out: str) -> str:
     return str(output_path)
 
 
-# def load_esi_work_order(file_path: Path, format_id: str = "json") -> Dict:
-#     """
-#     Load a json file. Exit script on error.
-
-#     Args:
-#         file_path: Path to be loaded.
-
-#     Raises:
-#         typer.BadParameter: [description]
-#         typer.BadParameter: [description]
-
-#     Returns:
-#         The json file.
-#     """
-#     try:
-#         ewo_string = file_path.read_text()
-#     except Exception as ex:
-#         raise typer.BadParameter(
-#             f"{ex.__class__.__name__} Error loading file at {file_path.resolve()} "
-#             f"msg: {ex}"
-#         )
-#     if format_id.lower()=="json":
-
-#     try:
-#         json_data = load_json(file_path)
-#     except json.decoder.JSONDecodeError as ex:
-#         raise typer.BadParameter(
-#             f"Error loading json file at {file_path.resolve()} "
-#             "are you sure it is a json file?"
-#         )
-#     except Exception as ex:
-#         raise typer.BadParameter(
-#             f"Error loading json file at {file_path.resolve()}\n"
-#             f"The error reported was {ex.__class__} with msg {ex}"
-#         )
-#     return json_data
-
-
-# def load_job(file_path: Path) -> Optional[EsiJob]:
-#     try:
-#         data = load_json(file_path)
-#     except Exception as ex:  # pylint: disable=broad-except
-#         typer.echo(f"Error loading job from {file_path}. {ex.__class__.__name__}, {ex}")
-#         return None
-#     try:
-#         job = deserialize_job_from_dict(data)
-#         return job
-#     except Exception as ex:
-#         raise typer.BadParameter(
-#             f"{file_path} is not a valid EsiJob. {ex.__class__.__name__}, {ex}"
-#         )
+def default_callback_collection() -> CallbackCollection:
+    callback_collection = CallbackCollection()
+    callback_collection.success.append(
+        JobCallback(callback_id="response_content_to_json")
+    )
+    callback_collection.success.append(JobCallback(callback_id="response_to_esi_job"))
+    callback_collection.success.append(
+        JobCallback(
+            callback_id="save_json_result_to_file",
+            kwargs={"file_path": "job_data/${esi_job_op_id}-${esi_job_uid}.json"},
+        )
+    )
+    callback_collection.fail.append(JobCallback(callback_id="response_to_esi_job"))
+    callback_collection.fail.append(JobCallback(callback_id="log_job_failure"))
+    return callback_collection
 
 
 def completion_op_id(ctx: typer.Context, incomplete: str):
+    _ = ctx
     completion = []
     for name in OPID:
         if name.startswith(incomplete):

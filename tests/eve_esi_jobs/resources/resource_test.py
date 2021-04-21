@@ -2,15 +2,21 @@
 
 Uncomment the tests below to update test resources.
 """
+import json
 from pathlib import Path
-from typing import Callable, Sequence
+
+import yaml
 
 from eve_esi_jobs import models
-from eve_esi_jobs.examples import callback_collections, jobs, work_orders
 from eve_esi_jobs.model_helpers import default_callback_collection
-from eve_esi_jobs.typer_cli.cli_helpers import save_string
+from eve_esi_jobs.typer_cli.examples import (
+    save_callback_examples,
+    save_input_data_examples,
+    save_job_examples,
+    save_work_order_examples,
+)
 
-REFRESH_RESOURCES = False
+REFRESH_RESOURCES = True
 
 
 def test_job_examples():
@@ -18,16 +24,9 @@ def test_job_examples():
         assert True
         return
     parent_path = Path(__file__).parent
-    output_path = parent_path / Path("jobs")
-    jobs_list: Sequence[Callable] = [
-        jobs.get_industry_facilities,
-        jobs.get_industry_systems,
-        jobs.post_universe_names,
-    ]
-    for sample in jobs_list:
-        job: models.EsiJob = sample()
-        file_path = output_path / Path(job.name).with_suffix(".json")
-        save_string(job.serialize_json(), file_path, parents=True)
+    data_path = save_job_examples(parent_path)
+    init = data_path / Path("__init__.py")
+    init.touch()
 
 
 def test_ewo_examples():
@@ -35,21 +34,9 @@ def test_ewo_examples():
         assert True
         return
     parent_path = Path(__file__).parent
-    output_path = parent_path / Path("work_orders")
-    ewo_list = [
-        work_orders.example_workorder,
-        work_orders.response_to_job_json_file,
-        work_orders.result_to_job_json_file,
-        work_orders.result_to_json_file_and_response_to_json_file,
-        work_orders.result_and_response_to_job_json_file,
-        work_orders.result_to_json_file,
-        work_orders.result_to_csv_file,
-        work_orders.result_with_pages_to_json_file,
-    ]
-    for sample in ewo_list:
-        ewo: models.EsiWorkOrder = sample()
-        file_path = output_path / Path(ewo.name).with_suffix(".json")
-        save_string(ewo.serialize_json(), file_path, parents=True)
+    data_path = save_work_order_examples(parent_path)
+    init = data_path / Path("__init__.py")
+    init.touch()
 
 
 def test_callback_collections():
@@ -57,17 +44,19 @@ def test_callback_collections():
         assert True
         return
     parent_path = Path(__file__).parent
-    output_path = parent_path / Path("callback_collections")
-    callbacks_list: Sequence[Callable] = [
-        callback_collections.no_file_output,
-        callback_collections.generic_save_result_to_json,
-        callback_collections.generic_save_result_and_job_to_separate_json,
-        callback_collections.generic_save_result_and_job_to_same_json,
-    ]
-    for sample in callbacks_list:
-        callbacks: models.CallbackCollection = sample()
-        file_path = output_path / Path(sample.__name__).with_suffix(".json")
-        save_string(callbacks.serialize_json(), file_path, parents=True)
+    data_path = save_callback_examples(parent_path)
+    init = data_path / Path("__init__.py")
+    init.touch()
+
+
+def test_save_input_data_examples():
+    if not REFRESH_RESOURCES:
+        assert True
+        return
+    parent_path = Path(__file__).parent
+    data_path = save_input_data_examples(parent_path)
+    init = data_path / Path("__init__.py")
+    init.touch()
 
 
 def test_bad_workorders():
@@ -75,12 +64,18 @@ def test_bad_workorders():
         assert True
         return
     parent_path = Path(__file__).parent
-    output_path = parent_path / Path("bad_work_orders")
+    output_path = parent_path / Path("bad-workorders")
+    output_path.mkdir(parents=True, exist_ok=True)
+    init = output_path / Path("__init__.py")
+    init.touch()
     ewo_list = [bad_status_workorder, bad_validation_workorder]
-    for sample in ewo_list:
-        ewo: models.EsiWorkOrder = sample()
-        file_path = output_path / Path(ewo.name).with_suffix(".json")
-        save_string(ewo.serialize_json(), file_path, parents=True)
+    for item in ewo_list:
+        ewo: models.EsiWorkOrder = item()
+        file_path = output_path / Path(ewo.name)
+        json_path = file_path.with_suffix(".json")
+        json_path.write_text(ewo.serialize_json())
+        yaml_path = file_path.with_suffix(".yaml")
+        yaml_path.write_text(ewo.serialize_yaml())
 
 
 def test_bad_jobs():
@@ -88,12 +83,44 @@ def test_bad_jobs():
         assert True
         return
     parent_path = Path(__file__).parent
-    output_path = parent_path / Path("bad_jobs")
+    output_path = parent_path / Path("bad-jobs")
+    output_path.mkdir(parents=True, exist_ok=True)
+    init = output_path / Path("__init__.py")
+    init.touch()
     jobs_list = [bad_parameter_job, missing_parameter_job]
     for sample in jobs_list:
         job: models.EsiJob = sample()
-        file_path = output_path / Path(job.name).with_suffix(".json")
-        save_string(job.serialize_json(), file_path, parents=True)
+        file_path = output_path / Path(job.name)
+        json_path = file_path.with_suffix(".json")
+        json_path.write_text(job.serialize_json())
+        yaml_path = file_path.with_suffix(".yaml")
+        yaml_path.write_text(job.serialize_yaml())
+
+
+def test_bad_data():
+    if not REFRESH_RESOURCES:
+        assert True
+        return
+    parent_path = Path(__file__).parent
+    output_path = parent_path / Path("bad-data")
+    output_path.mkdir(parents=True, exist_ok=True)
+    init = output_path / Path("__init__.py")
+    init.touch()
+    dict_not_list = {"region_id": 10000002, "type_id": 34}
+    json_path = output_path / Path("dict_not_list").with_suffix(".json")
+    json_path.write_text(json.dumps(dict_not_list, indent=2))
+    yaml_path = json_path.with_suffix(".yaml")
+    yaml_path.write_text(yaml.dump(dict_not_list, sort_keys=False))
+    wrong_params = {"apple": "red", "pear": "yellow", "orange": 42}
+    json_path = output_path / Path("wrong_params").with_suffix(".json")
+    json_path.write_text(json.dumps(wrong_params, indent=2))
+    yaml_path = json_path.with_suffix(".yaml")
+    yaml_path.write_text(yaml.dump(wrong_params, sort_keys=False))
+    empty_list = []
+    json_path = output_path / Path("empty_list").with_suffix(".json")
+    json_path.write_text(json.dumps(empty_list, indent=2))
+    yaml_path = json_path.with_suffix(".yaml")
+    yaml_path.write_text(yaml.dump(empty_list, sort_keys=False))
 
 
 def bad_status_workorder():

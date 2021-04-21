@@ -1,0 +1,179 @@
+{
+  "name": "example_workorder",
+  "description": "An example of a workorder, with a collection of jobs whose output is gathered under a file path defined in the workorder.",
+  "uid": "d811dec4-0dfd-4987-a3e0-f637de0f0f1e",
+  "output_path": "samples/workorder_output/${ewo_name}",
+  "jobs": [
+    {
+      "name": "Save market history as json",
+      "description": "Get the market history for Tritainium in The Forge region, and save it to a json file.",
+      "id_": 1,
+      "uid": "7e88252a-3ed8-4990-9a30-c09859958396",
+      "op_id": "get_markets_region_id_history",
+      "parameters": {
+        "region_id": 10000002,
+        "type_id": 34
+      },
+      "callbacks": {
+        "success": [
+          {
+            "callback_id": "response_content_to_json"
+          },
+          {
+            "callback_id": "response_to_esi_job"
+          },
+          {
+            "callback_id": "save_json_result_to_file",
+            "kwargs": {
+              "file_path": "${esi_job_id_}/market-history-${region_id}-${type_id}-esi-job.json"
+            }
+          }
+        ],
+        "fail": [
+          {
+            "callback_id": "response_to_esi_job"
+          },
+          {
+            "callback_id": "log_job_failure"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Save market history and job as json",
+      "description": "Get the market history for Tritainium in The Forge region, and save it to a json file. Also save the job, including the response metadata, to a separate json file.",
+      "id_": 2,
+      "uid": "600583ed-1f24-4b6b-ba93-576cf14460aa",
+      "op_id": "get_markets_region_id_history",
+      "parameters": {
+        "region_id": 10000002,
+        "type_id": 34
+      },
+      "callbacks": {
+        "success": [
+          {
+            "callback_id": "response_content_to_json"
+          },
+          {
+            "callback_id": "response_to_esi_job"
+          },
+          {
+            "callback_id": "save_esi_job_to_json_file",
+            "kwargs": {
+              "file_path": "${esi_job_id_}/market-history-${region_id}-${type_id}-esi-job.json"
+            }
+          },
+          {
+            "callback_id": "save_json_result_to_file",
+            "kwargs": {
+              "file_path": "${esi_job_id_}/market-history-${region_id}-${type_id}.json"
+            }
+          }
+        ],
+        "fail": [
+          {
+            "callback_id": "response_to_esi_job"
+          },
+          {
+            "callback_id": "log_job_failure"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Save market history as csv and job with data as json",
+      "description": "Get the market history for Tritainium in The Forge region, and save it to a csv file. The region_id and type_id added to each row, and the columns are given a custom order. Also save the job, including the response metadata and the result data, to a separate json file.",
+      "id_": 3,
+      "uid": "bd64bbbe-a85e-43e2-81ef-ff502c501123",
+      "op_id": "get_markets_region_id_history",
+      "parameters": {
+        "region_id": 10000002,
+        "type_id": 34
+      },
+      "callbacks": {
+        "success": [
+          {
+            "callback_id": "response_content_to_json"
+          },
+          {
+            "callback_id": "response_to_esi_job"
+          },
+          {
+            "callback_id": "result_to_esi_job"
+          },
+          {
+            "callback_id": "save_esi_job_to_json_file",
+            "kwargs": {
+              "file_path": "${esi_job_id_}/market-history-${region_id}-${type_id}-esi-job.json"
+            }
+          },
+          {
+            "callback_id": "save_list_of_dict_result_to_csv_file",
+            "kwargs": {
+              "additional_fields": {
+                "region_id": 10000002,
+                "type_id": 34
+              },
+              "field_names": [
+                "date",
+                "average",
+                "highest",
+                "lowest",
+                "order_count",
+                "volume",
+                "region_id",
+                "type_id"
+              ],
+              "file_path": "${esi_job_id_}/market-history-${region_id}-${type_id}.csv"
+            }
+          }
+        ],
+        "fail": [
+          {
+            "callback_id": "response_to_esi_job"
+          },
+          {
+            "callback_id": "log_job_failure"
+          }
+        ]
+      }
+    },
+    {
+      "name": "get paged data",
+      "description": "Get the all the pages from a paged api.",
+      "id_": "4",
+      "uid": "1770a896-e74b-4e06-9b52-2ed5169d35a9",
+      "op_id": "get_contracts_public_region_id",
+      "parameters": {
+        "region_id": 10000002
+      },
+      "callbacks": {
+        "success": [
+          {
+            "callback_id": "response_content_to_json"
+          },
+          {
+            "callback_id": "response_to_esi_job"
+          },
+          {
+            "callback_id": "check_for_pages"
+          },
+          {
+            "callback_id": "save_json_result_to_file",
+            "kwargs": {
+              "file_path": "${esi_job_id_}/public-contracts/${region_id}.json"
+            }
+          }
+        ],
+        "fail": [
+          {
+            "callback_id": "response_to_esi_job"
+          },
+          {
+            "callback_id": "log_job_failure"
+          }
+        ]
+      }
+    }
+  ]
+}

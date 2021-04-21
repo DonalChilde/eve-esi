@@ -1,0 +1,16 @@
+name: get_industry_systems
+uid: e5311ea8-7faf-4495-94f7-fa4d3aa60eb6
+op_id: get_industry_systems
+callbacks:
+  success:
+  - callback_id: response_content_to_json
+  - callback_id: response_to_esi_job
+  - callback_id: save_esi_job_to_json_file
+    kwargs:
+      file_path: data/industry-systems-esi-job.json
+  - callback_id: save_json_result_to_file
+    kwargs:
+      file_path: data/industry-systems.json
+  fail:
+  - callback_id: response_to_esi_job
+  - callback_id: log_job_failure

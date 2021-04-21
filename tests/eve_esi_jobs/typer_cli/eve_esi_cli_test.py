@@ -33,7 +33,7 @@ def test_load_schema_from_file(esi_schema, monkeypatch):
     # Fail to load from file
     runner = CliRunner()
     result = runner.invoke(app, ["-s", "foo", "schema"])
-    # inspect(result)
+    print(result.output)
     assert result.exit_code == 2
     assert "Error loading schema from foo" in result.output
 

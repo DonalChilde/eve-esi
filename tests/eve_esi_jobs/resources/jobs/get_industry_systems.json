@@ -1,6 +1,6 @@
 {
   "name": "get_industry_systems",
-  "uid": "7180bfa1-7e21-4849-b4a1-5f5e7e2d767d",
+  "uid": "e5311ea8-7faf-4495-94f7-fa4d3aa60eb6",
   "op_id": "get_industry_systems",
   "callbacks": {
     "success": [

@@ -56,28 +56,31 @@ def test_decode_param_string():
     assert isinstance(result, dict)
 
 
-def test_get_params_from_file(sample_data: Dict[str, FileResource]):
+def test_get_bad_params_from_file(bad_data: Dict[str, FileResource]):
     # Not a list of dicts
-    not_list_path = sample_data["json-dict.json"].file_path
+    not_list_path = bad_data["dict_not_list.json"].file_path
     with pytest.raises(typer.BadParameter) as ex:
         _ = create.get_params_from_file(not_list_path)
     assert "is not a list of dicts" in str(ex.value)
 
     # empty list
-    empty_list_path = sample_data["empty-list.json"].file_path
+    empty_list_path = bad_data["empty_list.json"].file_path
     with pytest.raises(typer.BadParameter) as ex:
         _ = create.get_params_from_file(empty_list_path)
     assert "had no data" in str(ex.value)
 
+
+def test_get_params_from_file(sample_data: Dict[str, FileResource]):
+
     # csv
-    csv_path = sample_data["3-type-ids.csv"].file_path
+    csv_path = sample_data["type_ids.csv"].file_path
     data_from_csv = create.get_params_from_file(csv_path)
     assert len(data_from_csv)
     assert isinstance(data_from_csv, list)
     assert isinstance(data_from_csv[0], dict)
 
     # json
-    json_path = sample_data["3-type-ids.json"].file_path
+    json_path = sample_data["type_ids.json"].file_path
     data_from_json = create.get_params_from_file(json_path)
     assert len(data_from_json)
     assert isinstance(data_from_json, list)
@@ -204,7 +207,7 @@ def test_from_op_id_path_in_full_data(
     runner = CliRunner()
     op_id = "get_markets_region_id_history"
     output_path = test_app_dir / Path("test_from_op_id_path_in_full_data")
-    path_in = sample_data["3-market-history-params.csv"].file_path
+    path_in = sample_data["market_history_params.csv"].file_path
     result = runner.invoke(
         app,
         [
@@ -235,7 +238,7 @@ def test_from_op_id_path_in_partial_data(
     op_id = "get_markets_region_id_history"
     parameters = {"region_id": 10000002}
     output_path = test_app_dir / Path("test_from_op_id_path_in_partial_data")
-    path_in = sample_data["3-type-ids.json"].file_path
+    path_in = sample_data["type_ids.json"].file_path
     result = runner.invoke(
         app,
         [
@@ -267,7 +270,7 @@ def test_from_op_id_path_in_extra_data(
     op_id = "get_markets_region_id_history"
     parameters = {"region_id": 10000002}
     output_path = test_app_dir / Path("test_from_op_id_path_in_extra_data")
-    path_in = sample_data["3-market-history-params-extras.json"].file_path
+    path_in = sample_data["market_history_params_extras.json"].file_path
     result = runner.invoke(
         app,
         [
@@ -293,13 +296,13 @@ def test_from_op_id_path_in_extra_data(
 
 
 def test_from_op_id_path_in_bad_data(
-    test_app_dir: Path, esi_schema: FileResource, sample_data: Dict[str, FileResource]
+    test_app_dir: Path, esi_schema: FileResource, bad_data: Dict[str, FileResource]
 ):
     runner = CliRunner()
     op_id = "get_markets_region_id_history"
     parameters = {"region_id": 10000002}
     output_path = test_app_dir / Path("test_from_op_id_path_in_bad_data")
-    path_in = sample_data["3-wrong-params.json"].file_path
+    path_in = bad_data["wrong_params.json"].file_path
     result = runner.invoke(
         app,
         [
@@ -318,7 +321,7 @@ def test_from_op_id_path_in_bad_data(
     )
     print(result.output)
     assert result.exit_code == 2
-    assert "Error: Invalid value: Missing required parameters" in result.output
+    assert "is not a list of dicts" in result.output
     sub_dir = output_path / Path("created-jobs")
     json_files = list(sub_dir.glob("*.json"))
     assert len(json_files) == 0
@@ -328,11 +331,11 @@ def test_from_op_id_path_in_bad_data(
 
 
 def test_load_json_or_csv(sample_data: Dict[str, FileResource]):
-    json_resource = sample_data["3-market-history-params.json"]
+    json_resource = sample_data["market_history_params.json"]
     json_data = create.load_data_file(json_resource.file_path)
     assert json_data == json.loads(json_resource.data)
 
-    csv_resource = sample_data["3-market-history-params.csv"]
+    csv_resource = sample_data["market_history_params.csv"]
     json_from_csv_data = create.load_data_file(csv_resource.file_path)
     assert len(json_from_csv_data) == 3
 
@@ -341,7 +344,7 @@ def test_data_from_csv(
     sample_data: Dict[str, FileResource], esi_schema, test_app_dir: Path
 ):
     # FIXME use callback json file
-    file_resource = sample_data["3-market-history-params.csv"]
+    file_resource = sample_data["market_history_params.csv"]
     runner = CliRunner()
     op_id = "get_markets_region_id_history"
     parameters = {"region_id": 10000002, "type_id": 34}

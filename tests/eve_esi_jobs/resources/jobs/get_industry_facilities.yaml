@@ -1,0 +1,16 @@
+name: get_industry_facilities
+uid: 1dee7f24-01f6-48ad-91ba-41112df5f868
+op_id: get_industry_facilities
+callbacks:
+  success:
+  - callback_id: response_content_to_json
+  - callback_id: response_to_esi_job
+  - callback_id: save_esi_job_to_json_file
+    kwargs:
+      file_path: data/industry-facilities-esi-job.json
+  - callback_id: save_json_result_to_file
+    kwargs:
+      file_path: data/industry-facilities.json
+  fail:
+  - callback_id: response_to_esi_job
+  - callback_id: log_job_failure

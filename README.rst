@@ -25,19 +25,20 @@ An api and command line utility for asyncronous interaction with Eve Online's Es
 Features
 --------
 
-* Async calls to Eve Online's `Eve Swagger Interface`_
+* Async calls to Eve Online's `Eve Swagger Interface`_.
 * repeatable cli actions based on json command files.
 * api for easy creation of commands, use it as a layer in your own programs.
 * Templated file paths to get your data just where you want it.
-* Command line completion with Typer_
-* csv output with added custom fields
-* generating jobs from csv input
+* Command line completion with Typer_.
+* Csv or json output of downloaded data.
+* Generate jobs from csv input.
 * Handles resulting data via async callbacks.
+* Json or yaml input and output of workorder and job files.
 
 Up Coming Features
 ------------------
 
-* yaml input and output
+* Yaml callback for downloaded data.
 * custom file path template values from the command line.
 * Even more options for Templated file output.
 * Pre-made commands for easy download of static data.
@@ -220,13 +221,19 @@ See -link to future api doc- for a list of available values for use in file path
 eve-esi schema
 ..............
 
+Download the schema, list the possible operations, and browse more indepth information on a particular operation here.
+
 eve-esi create
 ..............
+
+Create jobs and workorders here. you can:
+
+
 
 eve-esi do
 ..........
 
-
+do your jobs and workorders here.
 
 Credits
 -------

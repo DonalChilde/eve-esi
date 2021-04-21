@@ -38,11 +38,11 @@ def test_create_workorder(test_app_dir, jobs: Dict[str, FileResource], esi_schem
         assert file.stat().st_size > 10
         workorder_string = file.read_text()
         workorder = EsiWorkOrder.deserialize_json(workorder_string)
-        assert len(workorder.jobs) == 3
+        assert len(workorder.jobs) == 6
         yaml_string = workorder.serialize_yaml()
         print(yaml_string)
         workorder_yaml = EsiWorkOrder.deserialize_yaml(yaml_string)
-        assert len(workorder_yaml.jobs) == 3
+        assert len(workorder_yaml.jobs) == 6
         assert workorder == workorder_yaml
     # assert False
 

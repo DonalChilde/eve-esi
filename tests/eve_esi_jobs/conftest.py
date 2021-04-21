@@ -81,28 +81,35 @@ def test_app_dir_(tmp_path_factory):
 
 @pytest.fixture(scope="session", name="sample_data")
 def sample_data_() -> Dict[str, FileResource]:
-    resource_path: str = "tests.eve_esi_jobs.resources.data"
+    resource_path: str = "tests.eve_esi_jobs.resources.input-data"
     sample_data = make_file_resources_from_resource_path(resource_path)
     return sample_data
 
 
-@pytest.fixture(scope="session", name="work_orders")
+@pytest.fixture(scope="session", name="workorders")
 def work_orders_() -> Dict[str, FileResource]:
-    resource_path: str = "tests.eve_esi_jobs.resources.work_orders"
+    resource_path: str = "tests.eve_esi_jobs.resources.workorders"
     sample_data = make_file_resources_from_resource_path(resource_path)
     return sample_data
 
 
-@pytest.fixture(scope="session", name="bad_work_orders")
+@pytest.fixture(scope="session", name="bad_workorders")
 def bad_work_orders_() -> Dict[str, FileResource]:
-    resource_path: str = "tests.eve_esi_jobs.resources.bad_work_orders"
+    resource_path: str = "tests.eve_esi_jobs.resources.bad-workorders"
     sample_data = make_file_resources_from_resource_path(resource_path)
     return sample_data
 
 
 @pytest.fixture(scope="session", name="bad_jobs")
 def bad_jobs_() -> Dict[str, FileResource]:
-    resource_path: str = "tests.eve_esi_jobs.resources.bad_jobs"
+    resource_path: str = "tests.eve_esi_jobs.resources.bad-jobs"
+    sample_data = make_file_resources_from_resource_path(resource_path)
+    return sample_data
+
+
+@pytest.fixture(scope="session", name="bad_data")
+def bad_data_() -> Dict[str, FileResource]:
+    resource_path: str = "tests.eve_esi_jobs.resources.bad-data"
     sample_data = make_file_resources_from_resource_path(resource_path)
     return sample_data
 
@@ -116,7 +123,7 @@ def jobs_() -> Dict[str, FileResource]:
 
 @pytest.fixture(scope="session", name="callback_collections")
 def callback_collections_() -> Dict[str, FileResource]:
-    resource_path: str = "tests.eve_esi_jobs.resources.callback_collections"
+    resource_path: str = "tests.eve_esi_jobs.resources.callbacks"
     sample_data = make_file_resources_from_resource_path(resource_path)
     return sample_data
 
@@ -169,7 +176,7 @@ def collect_resource_paths(
 @pytest.fixture(scope="session", name="esi_schema")
 def esi_schema_(logger) -> FileResource:
     resource_path: str = "tests.eve_esi_jobs.resources.schema"
-    resource_name: str = "esi_schema_1.7.15.json"
+    resource_name: str = "schema-1.7.15.json"
     file_resource = make_file_resource(
         resource_path=resource_path, resource_name=resource_name, logger=logger
     )

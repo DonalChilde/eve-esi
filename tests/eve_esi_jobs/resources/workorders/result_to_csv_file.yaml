@@ -1,0 +1,32 @@
+name: result_to_csv_file
+description: An example of saving the json results to a csv file. Also, shows reordering
+  columns, and adding additional columns
+uid: 68630ef9-46ac-4437-82bf-946ca499411b
+output_path: samples/order_output/${ewo_name}
+jobs:
+- uid: 25e5942a-e5d9-45f5-8fa1-d88a534ce33b
+  op_id: get_markets_region_id_history
+  parameters:
+    region_id: 10000002
+    type_id: 34
+  callbacks:
+    success:
+    - callback_id: response_content_to_json
+    - callback_id: save_list_of_dict_result_to_csv_file
+      kwargs:
+        additional_fields:
+          region_id: 10000002
+          type_id: 34
+        field_names:
+        - date
+        - average
+        - highest
+        - lowest
+        - order_count
+        - volume
+        - region_id
+        - type_id
+        file_path: data/market-history/${region_id}-${type_id}.csv
+    fail:
+    - callback_id: response_to_esi_job
+    - callback_id: log_job_failure

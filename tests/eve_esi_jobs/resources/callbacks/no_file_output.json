@@ -1,0 +1,18 @@
+{
+  "success": [
+    {
+      "callback_id": "response_content_to_json"
+    },
+    {
+      "callback_id": "response_to_esi_job"
+    }
+  ],
+  "fail": [
+    {
+      "callback_id": "response_to_esi_job"
+    },
+    {
+      "callback_id": "log_job_failure"
+    }
+  ]
+}
