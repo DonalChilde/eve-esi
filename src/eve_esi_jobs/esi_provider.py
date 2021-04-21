@@ -1,12 +1,9 @@
 import logging
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Dict, List, Optional
 
-from pfmsoft.aiohttp_queue import ActionCallbacks, AiohttpAction, AiohttpActionCallback
-from rich import inspect
+from pfmsoft.aiohttp_queue import ActionCallbacks, AiohttpAction
 
-# from eve_esi_jobs.app_config import SCHEMA_URL
-# from eve_esi_jobs.callbacks import DEFAULT_CALLBACKS
 from eve_esi_jobs.helpers import nested_dict, optional_object
 
 logger = logging.getLogger(__name__)
@@ -131,6 +128,7 @@ class EsiProvider:
         return [""]
 
     def validate_params(self, op_id, path_params, query_params) -> bool:
+        # FIXME
         return True
 
     def build_action_from_op_id(
@@ -184,32 +182,5 @@ class EsiProvider:
         return action
 
 
-# def validate_params(esi_provider: EsiProvider, op_id, params) -> Dict:
-#     path_params = validate_path_params(esi_provider, op_id, params)
-#     query_params = validate_query_params(esi_provider, op_id, params)
-#     return {"path_params": path_params, "query_params": query_params}
-
-
-# def validate_path_params(esi_provider: EsiProvider, op_id, params) ->List[Dict}:
-#     path_parameters = {}
-#     # common_parameters = esi_provider.common_parameters()
-#     # operation_parameters = esi_provider.operation_parameters(op_id)
-#     # # TODO make a store of consolidated parameters on esi_provider to avoid repetition
-#     # TODO combine commom and operational params
-#     # check that all required params are present, return path_params
-#     # add default params
-
-#     return
-
-
-def validate_query_params(esi_provider: EsiProvider, op_id, params) -> Dict:
-    return {}
-
-    """
-    command to output a sample csv file that contains fields for a download operation.
-    ability to chain command files together for quicker download times
-    json file to have more command options?
-    some options only on first line of csv.
-
-
-    """
+# def validate_query_params(esi_provider: EsiProvider, op_id, params) -> Dict:
+#     return {}

@@ -75,17 +75,13 @@ def combine_dictionaries(
 
 
 def nested_dict(top_dict: Dict, keys: list[str]) -> Optional[Any]:
+    """With nested dictionaries, get value from nested dict using a list of keys
+
+    Needs refinement.
+    """
     result = top_dict
     for key in keys:
         result = result.get(key, None)
         if result is None:
             return result
     return result
-    # current_dict = top_dict
-    # result = None
-    # for key in keys:
-    #     result = current_dict.get(key, None)
-    #     if result is None:
-    #         return result
-    #     current_dict = result
-    # return result

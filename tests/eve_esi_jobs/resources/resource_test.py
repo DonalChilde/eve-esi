@@ -16,7 +16,7 @@ from eve_esi_jobs.typer_cli.examples import (
     save_work_order_examples,
 )
 
-REFRESH_RESOURCES = True
+REFRESH_RESOURCES = False
 
 
 def test_job_examples():

@@ -1,13 +1,13 @@
 import logging
 from typing import Any, Dict, List, Optional, Sequence
 
-from pfmsoft.aiohttp_queue import ActionCallbacks, AiohttpAction, AiohttpActionCallback
+from pfmsoft.aiohttp_queue import ActionCallbacks, AiohttpAction
 from pfmsoft.aiohttp_queue.aiohttp import ActionObserver
 
 from eve_esi_jobs.callback_manifest import CallbackManifest
 from eve_esi_jobs.esi_provider import EsiProvider
-from eve_esi_jobs.helpers import combine_dictionaries, optional_object
-from eve_esi_jobs.models import EsiJob, JobCallback
+from eve_esi_jobs.helpers import optional_object
+from eve_esi_jobs.models import EsiJob
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -15,6 +15,7 @@ logger.addHandler(logging.NullHandler())
 
 def validate_job(esi_job: EsiJob, esi_provider: EsiProvider):
     _, _ = esi_job, esi_provider
+    raise NotImplementedError()
     # raise error if fail
     # validate esi params
     # instance callbacks to check valid args? build_action_callbacks
@@ -29,11 +30,9 @@ class JobsToActions:
         esi_jobs: Sequence[EsiJob],
         esi_provider: EsiProvider,
         callback_manifest: CallbackManifest,
-        # additional_attributes: Optional[Dict[str, str]],
         observers: Optional[List[ActionObserver]] = None,
     ) -> List[AiohttpAction]:
         actions = []
-        # additional_attributes = optional_object(additional_attributes, dict)
         observers = optional_object(observers, list)
         for esi_job in esi_jobs:
             action = esi_provider.build_action_from_op_id(
@@ -91,12 +90,8 @@ class JobsToActions:
         self,
         esi_job: EsiJob,
         callback_manifest: CallbackManifest,
-        # additional_attributes: Dict,
     ) -> ActionCallbacks:
         action_callbacks = ActionCallbacks()
-        # combined_attributes = combine_dictionaries(
-        #     esi_job.attributes(), [additional_attributes]
-        # )
         for job_callback in esi_job.callbacks.success:
             action_callback = callback_manifest.init_callback("success", job_callback)
             action_callbacks.success.append(action_callback)
@@ -106,42 +101,7 @@ class JobsToActions:
         for job_callback in esi_job.callbacks.fail:
             action_callback = callback_manifest.init_callback("fail", job_callback)
             action_callbacks.fail.append(action_callback)
-
         return action_callbacks
-
-    # def _build_target_callbacks(
-    #     self, target: str, job_callbacks: List[JobCallback], additional_attributes: Dict
-    # ) -> List[AiohttpActionCallback]:
-    #     # logger.info("additional_attributes %s", additional_attributes)
-    #     callbacks: List[AiohttpActionCallback] = []
-    #     for job_callback in job_callbacks:
-    #         callback_id = job_callback.callback_id
-    #         manifest_entry = CALLBACK_MANIFEST.get(callback_id, None)
-    #         if manifest_entry is None:
-    #             raise ValueError(
-    #                 f"Unable to find {callback_id} in manifest. Is it a valid callback id?"
-    #             )
-    #         if target not in manifest_entry.valid_targets:
-    #             raise ValueError(
-    #                 (
-    #                     f"Invalid target for {callback_id}. Tried {target}, "
-    #                     "expected one of {manifest_entry.valid_targets}"
-    #                 )
-    #             )
-    #         try:
-    #             callback = manifest_entry.config_function(
-    #                 job_callback=job_callback,
-    #                 additional_attributes=additional_attributes,
-    #             )
-
-    #             callbacks.append(callback)
-    #         except Exception as ex:
-    #             logger.exception(
-    #                 "Failed to initialize callback with %s. Did you supply the correct arguments?",
-    #                 callback_id,
-    #             )
-    #             raise ex
-    #     return callbacks
 
     def _build_headers(
         self, esi_job: EsiJob, esi_provider: EsiProvider
@@ -156,10 +116,10 @@ class JobsToActions:
         self, esi_job: EsiJob, esi_provider: EsiProvider
     ) -> Dict[str, Any]:
         # request kwargs include:
-        # params - used to build the query string
-        # data/json - sent in the body of the request
-        # headers
-        # auth? expect to use oauth token
+        #   params - used to build the query string
+        #   data/json - sent in the body of the request
+        #   headers
+        #   auth? expect to use oauth token
 
         request_kwargs: Dict[str, Any] = {}
         body_param = self._check_for_body_param(esi_job, esi_provider)
@@ -181,7 +141,7 @@ class JobsToActions:
         body_keys = []
         op_info = esi_provider.op_id_lookup.get(esi_job.op_id, None)
         if op_info is None:
-            raise ValueError("could not find opid %s", esi_job.op_id)
+            raise ValueError(f"could not find opid {esi_job.op_id}")
         for param in op_info.parameters.values():
             if param.get("in", "") == "body":
                 body_keys.append(param["name"])

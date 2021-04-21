@@ -1,4 +1,3 @@
-"""foo"""
 import logging
 from typing import Dict, Optional
 
@@ -108,7 +107,6 @@ class LogJobFailure(AiohttpActionCallback):
         _, _ = args, kwargs
         try:
             esi_job: EsiJob = caller.context.get("esi_job", None)
-            job_string = esi_job.json(indent=2)
-            logger.warning("Job failed. %s", job_string)
+            logger.warning("Job failed. %r", esi_job)
         except Exception as ex:
             logger.exception("failure in callback %s", ex)

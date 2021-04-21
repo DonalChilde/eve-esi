@@ -11,8 +11,8 @@ from pfmsoft.aiohttp_queue.runners import queue_runner
 from eve_esi_jobs.callback_manifest import CallbackManifest, new_manifest
 from eve_esi_jobs.esi_provider import EsiProvider
 from eve_esi_jobs.helpers import optional_object
+from eve_esi_jobs.job_preprocessor import JobPreprocessor
 from eve_esi_jobs.job_to_action import JobsToActions
-from eve_esi_jobs.model_helpers import JobPreprocessor
 from eve_esi_jobs.models import EsiJob, EsiWorkOrder
 
 logger = logging.getLogger(__name__)
@@ -29,7 +29,9 @@ def do_jobs(
     worker_count: Optional[int] = None,
     max_workers: int = 100,
 ) -> Sequence[EsiJob]:
-    callback_manifest = optional_object(callback_manifest, new_manifest)
+    callback_manifest = optional_object(
+        callback_manifest, CallbackManifest.manifest_factory
+    )
     jobs_to_actions = optional_object(jobs_to_actions, JobsToActions)
     workorder_attributes = optional_object(workorder_attributes, dict)
     observers = optional_object(observers, list)
@@ -38,7 +40,6 @@ def do_jobs(
     workers = []
     for _ in range(worker_count):
         workers.append(AiohttpQueueWorker())
-    # jobs_to_actions = JobsToActions()
     job_preprocessor = JobPreprocessor()
     for esi_job in esi_jobs:
         esi_job.update_attributes(workorder_attributes)
@@ -62,7 +63,9 @@ def do_workorder(
     observers: Optional[List[ActionObserver]] = None,
     max_workers: int = 100,
 ) -> EsiWorkOrder:
-    callback_manifest = optional_object(callback_manifest, new_manifest)
+    callback_manifest = optional_object(
+        callback_manifest, CallbackManifest.manifest_factory
+    )
     jobs_to_actions = optional_object(jobs_to_actions, JobsToActions)
     if worker_count is None:
         worker_count = get_worker_count(len(ewo.jobs), max_workers)

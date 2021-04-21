@@ -90,23 +90,23 @@ def build_log_job_failure(job_callback: JobCallback, **kwargs) -> LogJobFailure:
     return LogJobFailure()
 
 
-class DefaultCallbackFactory2:
-    # FIXME change name to CallbackCollectionFactory
-    def __init__(self) -> None:
-        pass
+# class DefaultCallbackFactory2:
+#     # FIXME change name to CallbackCollectionFactory
+#     def __init__(self) -> None:
+#         pass
 
-    @staticmethod
-    def default_callback_collection() -> CallbackCollection:
-        callback_collection = CallbackCollection()
-        callback_collection.success.append(
-            JobCallback(callback_id="response_content_to_json")
-        )
-        callback_collection.success.append(
-            JobCallback(callback_id="response_to_esi_job")
-        )
-        callback_collection.fail.append(JobCallback(callback_id="response_to_esi_job"))
-        callback_collection.fail.append(JobCallback(callback_id="log_job_failure"))
-        return callback_collection
+#     @staticmethod
+#     def default_callback_collection() -> CallbackCollection:
+#         callback_collection = CallbackCollection()
+#         callback_collection.success.append(
+#             JobCallback(callback_id="response_content_to_json")
+#         )
+#         callback_collection.success.append(
+#             JobCallback(callback_id="response_to_esi_job")
+#         )
+#         callback_collection.fail.append(JobCallback(callback_id="response_to_esi_job"))
+#         callback_collection.fail.append(JobCallback(callback_id="log_job_failure"))
+#         return callback_collection
 
 
 class CallbackManifest:
@@ -116,6 +116,10 @@ class CallbackManifest:
         self.manifest_entries: Dict[str, CallbackManifestEntry] = optional_object(
             manifest_entries, dict
         )
+
+    @staticmethod
+    def manifest_factory():
+        return new_manifest()
 
     def add_callback(
         self,
