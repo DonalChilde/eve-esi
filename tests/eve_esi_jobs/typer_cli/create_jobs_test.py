@@ -5,13 +5,12 @@ from typing import Dict
 
 import pytest
 import typer
-from rich import inspect
 from tests.eve_esi_jobs.conftest import FileResource
 from typer.testing import CliRunner
 
-from eve_esi_jobs.eve_esi_jobs import do_work_order
+from eve_esi_jobs import do_workorder
 from eve_esi_jobs.helpers import combine_dictionaries
-from eve_esi_jobs.models import CallbackCollection, EsiJob, EsiWorkOrder, JobCallback
+from eve_esi_jobs.models import EsiJob, EsiWorkOrder
 from eve_esi_jobs.typer_cli import create
 from eve_esi_jobs.typer_cli.eve_esi_cli import app
 
@@ -103,7 +102,7 @@ def test_default_file_path(esi_provider, test_app_dir):
     work_order.jobs.append(job)
     # inspect(work_order)
     expected_path: Path = test_app_dir / Path(template.substitute(job.attributes()))
-    do_work_order(work_order, esi_provider)
+    do_workorder(work_order, esi_provider)
     assert expected_path.is_file()
     assert expected_path.stat().st_size > 10
 

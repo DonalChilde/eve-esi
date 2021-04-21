@@ -6,7 +6,7 @@ from typing import List, Optional
 
 import typer
 
-from eve_esi_jobs.eve_esi_jobs import do_work_order
+from eve_esi_jobs import do_workorder
 from eve_esi_jobs.models import EsiJob, EsiWorkOrder
 from eve_esi_jobs.typer_cli.cli_helpers import (  # load_esi_work_order_json,
     FormatChoices,
@@ -62,7 +62,7 @@ not find mistakes that can only be checked on the server, eg. a non-existant typ
     # ewo_.output_path = str(path_out)
     ewo_.jobs.append(esi_job)
     observer = EsiObserver()
-    do_work_order(ewo_, esi_provider, observers=[observer])
+    do_workorder(ewo_, esi_provider, observers=[observer])
     report_on_jobs(ewo_.jobs)
     report_finished_task(ctx)
 
@@ -109,7 +109,7 @@ not find mistakes that can only be checked on the server, eg. a non-existant typ
     esi_work_order.update_attributes({"ewo_output_path": output_path_string})
     esi_provider = ctx.obj["esi_provider"]
     observer = EsiObserver()
-    do_work_order(esi_work_order, esi_provider, observers=[observer])
+    do_workorder(esi_work_order, esi_provider, observers=[observer])
     report_on_jobs(esi_work_order.jobs)
     report_finished_task(ctx)
 
