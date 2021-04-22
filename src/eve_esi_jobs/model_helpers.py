@@ -7,11 +7,13 @@ logger.addHandler(logging.NullHandler())
 
 
 def default_callback_collection() -> CallbackCollection:
+    """A set of callbacks, without any file saving."""
     callback_collection = CallbackCollection()
     callback_collection.success.append(
         JobCallback(callback_id="response_content_to_json")
     )
     callback_collection.success.append(JobCallback(callback_id="response_to_esi_job"))
+    callback_collection.success.append(JobCallback(callback_id="result_to_esi_job"))
     callback_collection.fail.append(JobCallback(callback_id="response_to_esi_job"))
     callback_collection.fail.append(JobCallback(callback_id="log_job_failure"))
     return callback_collection

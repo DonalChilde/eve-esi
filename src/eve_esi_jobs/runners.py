@@ -1,4 +1,7 @@
-"""Main module."""
+"""Methods for doing :py:class:`eve_esi_jobs.models.EsiWorkOrder` and :py:class:`eve_esi_jobs.models.EsiJob`.
+
+These methods wrap all the async code, for easier usage.
+"""
 import asyncio
 import logging
 from math import ceil
@@ -8,7 +11,7 @@ from pfmsoft.aiohttp_queue import AiohttpQueueWorker
 from pfmsoft.aiohttp_queue.aiohttp import ActionObserver
 from pfmsoft.aiohttp_queue.runners import queue_runner
 
-from eve_esi_jobs.callback_manifest import CallbackManifest, new_manifest
+from eve_esi_jobs.callback_manifest import CallbackManifest
 from eve_esi_jobs.esi_provider import EsiProvider
 from eve_esi_jobs.helpers import optional_object
 from eve_esi_jobs.job_preprocessor import JobPreprocessor
@@ -28,7 +31,30 @@ def do_jobs(
     observers: Optional[List[ActionObserver]] = None,
     worker_count: Optional[int] = None,
     max_workers: int = 100,
-) -> Sequence[EsiJob]:
+):
+    """
+    Do a list of jobs.
+
+    The typical workflow has a workorder containing a list of jobs, but this function
+    can be used when there is no workorder. If any workorder attributes are used in the
+    job's callbacks, they must be passed in as workorder_attributes.
+
+    Args:
+        esi_jobs: The jobs to do.
+        esi_provider: The esi_provider.
+        callback_manifest: The :class:`CallbackManifest` to use if other than default.
+            Defaults to None.
+        jobs_to_actions: The `JobToAction` to use if other than default. Defaults to None.
+        workorder_attributes: Any additional values that might be used by the job callbacks.
+            Defaults to None.
+        observers: Observers to register with the
+            :class:`pfmsoft.aiohttp_queue.aiohttp.AiohttpAction` s. Defaults to None.
+        worker_count: The number of workers to use. If not given, a resonable number of
+            workers will be calculated. Defaults to None.
+        max_workers: The maximum number of workers. Be kind, dont DOS. Defaults to 100.
+
+    """
+
     callback_manifest = optional_object(
         callback_manifest, CallbackManifest.manifest_factory
     )
@@ -51,7 +77,6 @@ def do_jobs(
         observers=observers,
     )
     asyncio.run(queue_runner(actions, workers))
-    return esi_jobs
 
 
 def do_workorder(
@@ -62,13 +87,30 @@ def do_workorder(
     jobs_to_actions: Optional[JobsToActions] = None,
     observers: Optional[List[ActionObserver]] = None,
     max_workers: int = 100,
-) -> EsiWorkOrder:
-    callback_manifest = optional_object(
-        callback_manifest, CallbackManifest.manifest_factory
-    )
-    jobs_to_actions = optional_object(jobs_to_actions, JobsToActions)
-    if worker_count is None:
-        worker_count = get_worker_count(len(ewo.jobs), max_workers)
+):
+    """
+    Do a workorder.
+
+    This is the typical entrypoint to do workorders.
+
+    Args:
+        ewo: The workorder to do.
+        esi_provider: The esi_provider.
+        worker_count: The number of workers to use. If not given, a resonable number of
+            workers will be calculated. Defaults to None.
+        callback_manifest: The :class:`CallbackManifest` to use if other than default.
+            Defaults to None.
+        jobs_to_actions: The :class:`JobToAction` to use if other than default. Defaults to None.
+        observers: Observers to register with the
+            :class:`pfmsoft.aiohttp_queue.aiohttp.AiohttpAction` s. Defaults to None.
+        max_workers: The maximum number of workers. Be kind, dont DOS. Defaults to 100.
+    """
+    # callback_manifest = optional_object(
+    #     callback_manifest, CallbackManifest.manifest_factory
+    # )
+    # jobs_to_actions = optional_object(jobs_to_actions, JobsToActions)
+    # if worker_count is None:
+    #     worker_count = get_worker_count(len(ewo.jobs), max_workers)
     do_jobs(
         esi_jobs=ewo.jobs,
         esi_provider=esi_provider,
@@ -77,8 +119,8 @@ def do_workorder(
         workorder_attributes=ewo.attributes(),
         observers=observers,
         worker_count=worker_count,
+        max_workers=max_workers,
     )
-    return ewo
 
 
 def get_worker_count(job_count, max_workers: int = 100) -> int:

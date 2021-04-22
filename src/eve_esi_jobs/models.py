@@ -16,6 +16,8 @@ logger.addHandler(logging.NullHandler())
 
 
 class SerializeMixin:
+    """Provides serialization and deserialization functions for pydantic models."""
+
     def serialize_json(self, exclude_defaults=True, indent=2, **kwargs):
         serialized_json = self.json(
             exclude_defaults=exclude_defaults, indent=indent, **kwargs
@@ -30,8 +32,7 @@ class SerializeMixin:
 
     @classmethod
     def deserialize_obj(cls, obj: Dict):
-        # cls = self.__class__
-        return cls(**obj)
+        return cls(**obj)  # type: ignore
 
     @classmethod
     def deserialize_yaml(cls, yaml_string: str):
@@ -74,6 +75,18 @@ class SerializeMixin:
 
 
 class JobCallback(BaseModel, SerializeMixin):
+    """
+    A JobCallback contains the info necessary to create an instance of an actual
+    callback at runtime.
+
+    Args:
+        callback_id (str): The id of the callback.
+        args (List[Any]): A list of args used to init the callback
+        kwargs (Dict[str, Any]): A dict used to init the callback
+        config (Dict[str, Any]): A dict of values used in the factory function
+            used to build the callback.
+    """
+
     callback_id: str
     args: List[Any] = []
     kwargs: Dict[str, Any] = {}
@@ -84,6 +97,15 @@ class JobCallback(BaseModel, SerializeMixin):
 
 
 class CallbackCollection(BaseModel, SerializeMixin):
+    """
+    A collection of callbacks used by an :class:`EsiJob`
+
+    Args:
+        success (List[JobCallback]): Callbacks to be used for a successful request.
+        retry (List[JobCallback]): Callbacks to be used when a request is retried.
+        fail (List[JobCallback]): Callbacks to be used for a failed request.
+    """
+
     success: List[JobCallback] = []
     retry: List[JobCallback] = []
     fail: List[JobCallback] = []
@@ -93,6 +115,28 @@ class CallbackCollection(BaseModel, SerializeMixin):
 
 
 class EsiJobResult(BaseModel, SerializeMixin):
+    """
+    The result of an executed :class:`EsiJob`.
+
+    Normally this class will be used by a callback to store response data on a job.
+    If the correct callback is not used, this class will never be attatched to a job.
+
+    The calbacks that currently create this class are:
+
+    * :class:`~eve_esi_jobs.callbacks.ResponseToEsiJob`
+    * :class:`~eve_esi_jobs.callbacks.ResultToEsiJob`
+
+    Args:
+        work_order_name (Optional[str]): The name of the containing workorder, if any.
+        work_order_id (Optional[str]): The id\_ of the containing workorder, if any.
+        work_order_uid (str): The uid of the containing workorder, if any.
+        attempts (int): The number of attempts made.
+        response (Optional[Any]): The data from :class:`Aiohttp.Response` as a dict.
+            Only present if :class:`~eve_esi_jobs.callbacks.ResponseToEsiJob` was used.
+        data (Optional[Any]): The data from a successful job. Only present if
+            :class:`~eve_esi_jobs.callbacks.ResultToEsiJob` was used.
+    """
+
     work_order_name: Optional[str] = None
     work_order_id: Optional[str] = None
     work_order_uid: str = ""
@@ -105,6 +149,25 @@ class EsiJobResult(BaseModel, SerializeMixin):
 
 
 class EsiJob(BaseModel, SerializeMixin):
+    """
+    A job definining a request for the Eve Online ESI.
+
+    Args:
+        name (str): The name of the job.
+        description (str): The description.
+        id_ (str): The user-defined id.
+        uid (UUID): A generated uuid4 unique identifier.
+        op_id (str): The op_id of the job.
+        max_attempts (int): The maximum number of attempts in the case of a retry.
+            -1 means unlimited retrys. Default is 5.
+        parameters (Dict[str, Any]): Parameters used by the request.
+        additional_attributes (Dict[str, Any]): Additional attributes that can be used
+            by callbacks.
+        callbacks (CallbackCollection): Callbacks used by the job.
+        result (Optional[EsiJobResult]): Information on the results of a job, only
+            available when certain callbacks have been used. see :class:`EsiJobResult`
+    """
+
     name: str = ""
     description: str = ""
     id_: str = ""
@@ -131,24 +194,30 @@ class EsiJob(BaseModel, SerializeMixin):
         """Update esi_job.additional_attributes with additional values"""
         self.additional_attributes.update(override)
 
-    def attributes(self):
-        """return a new combined dict of esi_job attributes, and additional_attributes.
+    def attributes(self) -> Dict[str, str]:
+        """Create a new dict with the combined values from :func:`EsiJob.parameters`,
+        :func:`EsiJob.job_attributes`, and :class:`EsiJob.additional_attributes`.
 
-        additional_attributes will overwrite local attributes in new dict.
+        :class:`EsiJob.additional_attributes` will overwrite :func:`EsiJob.job_attributes`
+        in the new dict.
         """
         params = combine_dictionaries(
-            self.parameters, [self._job_attributes(), self.additional_attributes]
+            self.parameters, [self.job_attributes(), self.additional_attributes]
         )
 
         return params
 
-    def _job_attributes(self) -> Dict[str, Union[int, str, None]]:
-        """make a dict of all the esi_job attributes usable in templates"""
-        params: Dict[str, Union[int, str, None]] = {
+    def job_attributes(self) -> Dict[str, str]:
+        """Make a dict of all the esi_job attributes usable in templates
+
+        Warning:
+            Do not use this function directly to get attributes. Use :py:func:`EsiJob.attributes`
+        """
+        params: Dict[str, str] = {
             "esi_job_name": self.name,
             "esi_job_id_": self.id_,
             "esi_job_op_id": self.op_id,
-            "esi_job_max_attempts": self.max_attempts,
+            "esi_job_max_attempts": str(self.max_attempts),
             "esi_job_uid": str(self.uid),
             "esi_job_iso_date_time": datetime.now().isoformat().replace(":", "-"),
         }
@@ -156,6 +225,22 @@ class EsiJob(BaseModel, SerializeMixin):
 
 
 class EsiWorkOrder(BaseModel, SerializeMixin):
+    """
+    A container class for :class:`EsiJob` s.
+
+    Args:
+        name (str): the name of the workorder.
+        description (str): The description.
+        id_ (str): The user-defined id.
+        uid: (UUID) A generated uuid4 unique identifier.
+        output_path (str): A path that will be prepended to any callback file paths for
+            a workorder's jobs. May contain template values.
+        additional_attributes (Dict[str, Any]): Additional attributes that can be
+            used by job callbacks. Will override attributes generated by a workorder, or
+            those of it's jobs.
+        jobs (List[EsiJob]): The jobs
+    """
+
     name: str = ""
     description: str = ""
     id_: str = ""
@@ -171,18 +256,25 @@ class EsiWorkOrder(BaseModel, SerializeMixin):
         """Update EsiWorkOrder additional_attributes with additional values"""
         self.additional_attributes.update(override)
 
-    def attributes(self):
-        """return a new combined dict of EsiWorkOrder attributes and and additional_attributes.
+    def attributes(self) -> Dict[str, str]:
+        """Create a new dict with the combined values from :func:`EsiWorkOrder.ewo_attributes`,
+        and :class:`EsiWorkOrder.additional_attributes`.
 
-        additional_attributes will overwrite local attributes in new dict.
+        :class:`EsiWorkOrder.additional_attributes` will overwrite values in
+        :func:`EsiWorkOrder.ewo_attributes` in the new dict.
         """
-        params = self._ewo_atributes()
+        params = self.ewo_atributes()
         params.update(self.additional_attributes)
         return params
 
-    def _ewo_atributes(self) -> Dict[str, Union[int, str, None]]:
-        """make a dict of all the EsiWorkOrder attributes usable in templates"""
-        params: Dict[str, Union[int, str, None]] = {
+    def ewo_atributes(self) -> Dict[str, str]:
+        """make a dict of all the EsiWorkOrder attributes usable in templates
+
+        Warning:
+            Do not use this function directly to get attributes. Use
+            :py:func:`EsiWorkOrder.attributes`
+        """
+        params: Dict[str, str] = {
             "ewo_name": self.name,
             "ewo_id": self.id_,
             "ewo_output_path": self.output_path,

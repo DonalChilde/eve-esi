@@ -7,7 +7,7 @@ Welcome to Eve Esi Job's documentation!
 
    readme
    installation
-   usage
+   use_api
    api
    contributing
    authors

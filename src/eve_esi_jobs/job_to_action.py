@@ -22,6 +22,8 @@ def validate_job(esi_job: EsiJob, esi_provider: EsiProvider):
 
 
 class JobsToActions:
+    """Contains logic for turning a :class:`EsiJob` into an :class:`~pfmsoft.aiohttp_queue.aiohttp.AiohttpAction`"""
+
     def __init__(self) -> None:
         pass
 
@@ -32,6 +34,17 @@ class JobsToActions:
         callback_manifest: CallbackManifest,
         observers: Optional[List[ActionObserver]] = None,
     ) -> List[AiohttpAction]:
+        """
+        Translate :class:`EsiJob` s into :class:`~pfmsoft.aiohttp_queue.aiohttp.AiohttpAction` s
+
+        Args:
+            esi_jobs: The jobs to get actions from.
+            esi_provider: The esi_provider.
+            callback_manifest: the callback manifest used to init the
+                :class:`~pfmsoft.aiohttp_queue.aiohttp.AiohttpActionCallback` s
+            observers: Observers for the actions. Defaults to None.
+
+        """
         actions = []
         observers = optional_object(observers, list)
         for esi_job in esi_jobs:
@@ -49,6 +62,9 @@ class JobsToActions:
         return actions
 
     def _build_path_params(self, esi_job, esi_provider) -> Dict[str, Any]:
+        """
+        Return the path parameters.
+        """
         try:
             path_params = self._split_parameters(esi_job, "path", esi_provider)
             return path_params
@@ -59,6 +75,10 @@ class JobsToActions:
     def _split_parameters(
         self, esi_job: EsiJob, split_id: str, esi_provider: EsiProvider
     ) -> Dict:
+        """
+        Finds all the EsiJob.parameters that have a location matching split_id,
+        check for missing params.
+        """
         # TODO refactor this to make more clear, add more validation?
         split_params = {}
         possible_parameters: Dict = esi_provider.op_id_lookup[esi_job.op_id].parameters
