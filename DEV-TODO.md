@@ -2,12 +2,21 @@
 
 ## before release
 
-- Callback manifest redo
-
-  - callback manifest default laods known callbacks, can add additional callbacks (user defined)
+- ADD organize testing, offer fixtures for some EsiJobs, and EsiWorkOrders?
+  - maybe just work from current test_resources
+  - look through older examples, make sure they are clear.
+- One place for pre defined callback collections?
+- EsiProvider rethink
+  - op_id info rethink
+- Support new yaml callback
+- AiohttpQueue v0.2.0 release fixes
+  - update callbacks
+    - repr
+    - file_path_template
+- DONE Callback manifest redo
+  - callback manifest default loads known callbacks, can add additional callbacks (user defined)
   - add_callback(callback_id,callback,factory_function, valid_targets)
-
-- add yaml function to models, mixin?
+- DONE add yaml function to models, mixin?
 
 - Docs
   - oh so many docs
