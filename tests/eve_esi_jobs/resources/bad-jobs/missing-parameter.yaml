@@ -1,7 +1,7 @@
 name: missing-parameter
 description: A job with a missing parameter, should result in a validation failure.
 id_: missing-parameter
-uid: 264ae299-b75f-4b83-8551-3f2985efa9d9
+uid: 65e31a17-02e1-430f-ad33-0b402be2cd98
 op_id: get_markets_region_id_history
 parameters:
   region_id: 10000002
@@ -9,6 +9,7 @@ callbacks:
   success:
   - callback_id: response_content_to_json
   - callback_id: response_to_esi_job
+  - callback_id: result_to_esi_job
   fail:
   - callback_id: response_to_esi_job
   - callback_id: log_job_failure

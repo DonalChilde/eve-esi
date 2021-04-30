@@ -1,13 +1,13 @@
 name: bad-validation-workorder
 description: A workorder that contains jobs that will fail validation.
 id_: bad-validation-workorder
-uid: 74d6c57a-28ac-4753-bb78-4c65b0f295ed
+uid: 6fbaa579-5e7c-46e5-9276-7854fba4c0b4
 output_path: samples/workorder_output/${ewo_name}
 jobs:
 - name: missing-parameter
   description: A job with a missing parameter, should result in a validation failure.
   id_: missing-parameter
-  uid: 35c63d62-f4a3-4da4-ae5c-b921cdd24138
+  uid: 8c282fa9-ac5f-4353-a796-149c96f6ee43
   op_id: get_markets_region_id_history
   parameters:
     region_id: 10000002
@@ -15,6 +15,7 @@ jobs:
     success:
     - callback_id: response_content_to_json
     - callback_id: response_to_esi_job
+    - callback_id: result_to_esi_job
     fail:
     - callback_id: response_to_esi_job
     - callback_id: log_job_failure

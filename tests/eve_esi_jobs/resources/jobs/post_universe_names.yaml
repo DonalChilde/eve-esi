@@ -1,5 +1,5 @@
 name: post_universe_names
-uid: fa7aed3b-8ba5-4e5c-a095-a7f457db683b
+uid: 6168ecb7-5dc6-468f-80a6-69e2ff276c84
 op_id: post_universe_names
 parameters:
   ids:
@@ -9,12 +9,13 @@ callbacks:
   success:
   - callback_id: response_content_to_json
   - callback_id: response_to_esi_job
+  - callback_id: result_to_esi_job
   - callback_id: save_esi_job_to_json_file
     kwargs:
-      file_path: data/post_universe_names-${esi_job_uid}-esi-job.json
-  - callback_id: save_json_result_to_file
+      file_path_template: data/post_universe_names-${esi_job_uid}-esi-job.json
+  - callback_id: save_result_to_json_file
     kwargs:
-      file_path: data/post_universe_names-${esi_job_uid}.json
+      file_path_template: data/post_universe_names-${esi_job_uid}.json
   fail:
   - callback_id: response_to_esi_job
   - callback_id: log_job_failure

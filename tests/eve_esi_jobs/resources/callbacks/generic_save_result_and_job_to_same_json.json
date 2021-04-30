@@ -12,7 +12,7 @@
     {
       "callback_id": "save_esi_job_to_json_file",
       "kwargs": {
-        "file_path": "job_data/${esi_job_op_id}-${esi_job_uid}.esi-job.json"
+        "file_path_template": "job_data/${esi_job_op_id}-${esi_job_uid}.esi-job.json"
       }
     }
   ],

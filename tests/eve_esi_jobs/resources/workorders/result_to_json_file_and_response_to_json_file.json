@@ -1,11 +1,11 @@
 {
   "name": "result_to_json_file_and_response_to_json_file",
   "description": "An example of saving the raw results to a json file, and the job with response data to a separate json file",
-  "uid": "b0a01b9b-6811-4cd3-afde-d084001eebb8",
+  "uid": "276b0788-19ef-4177-8a7a-1291f3f874fa",
   "output_path": "samples/order_output/${ewo_name}",
   "jobs": [
     {
-      "uid": "83c6a03d-5f09-43b0-be88-92d0345c11af",
+      "uid": "26515edd-bb1c-4914-abee-e886c588edfc",
       "op_id": "get_markets_region_id_history",
       "parameters": {
         "region_id": 10000002,
@@ -22,13 +22,13 @@
           {
             "callback_id": "save_esi_job_to_json_file",
             "kwargs": {
-              "file_path": "data/market-history/${region_id}-${type_id}-esi-job.json"
+              "file_path_template": "data/market-history/${region_id}-${type_id}-esi-job.json"
             }
           },
           {
-            "callback_id": "save_json_result_to_file",
+            "callback_id": "save_result_to_json_file",
             "kwargs": {
-              "file_path": "data/market-history/${region_id}-${type_id}.json"
+              "file_path_template": "data/market-history/${region_id}-${type_id}.json"
             }
           }
         ],
