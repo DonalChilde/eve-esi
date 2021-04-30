@@ -31,12 +31,21 @@ def example_workorder():
     )
     job.callbacks.success.append(
         models.JobCallback(
-            callback_id="save_json_result_to_file",
+            callback_id="save_result_to_json_file",
             kwargs={
-                "file_path": "${esi_job_id_}/market-history-${region_id}-${type_id}-esi-job.json"
+                "file_path_template": "${esi_job_id_}/market-history-${region_id}-${type_id}-esi-job.json"
             },
         )
     )
+    job.callbacks.success.append(
+        models.JobCallback(
+            callback_id="save_result_to_yaml_file",
+            kwargs={
+                "file_path_template": "${esi_job_id_}/market-history-${region_id}-${type_id}-esi-job.yaml"
+            },
+        )
+    )
+
     work_order.jobs.append(job)
     #####
     job_2 = get_markets_region_id_history(
@@ -53,15 +62,15 @@ def example_workorder():
         models.JobCallback(
             callback_id="save_esi_job_to_json_file",
             kwargs={
-                "file_path": "${esi_job_id_}/market-history-${region_id}-${type_id}-esi-job.json"
+                "file_path_template": "${esi_job_id_}/market-history-${region_id}-${type_id}-esi-job.json"
             },
         )
     )
     job_2.callbacks.success.append(
         models.JobCallback(
-            callback_id="save_json_result_to_file",
+            callback_id="save_result_to_json_file",
             kwargs={
-                "file_path": "${esi_job_id_}/market-history-${region_id}-${type_id}.json"
+                "file_path_template": "${esi_job_id_}/market-history-${region_id}-${type_id}.json"
             },
         )
     )
@@ -84,7 +93,7 @@ def example_workorder():
         models.JobCallback(
             callback_id="save_esi_job_to_json_file",
             kwargs={
-                "file_path": "${esi_job_id_}/market-history-${region_id}-${type_id}-esi-job.json"
+                "file_path_template": "${esi_job_id_}/market-history-${region_id}-${type_id}-esi-job.json"
             },
         )
     )
@@ -103,7 +112,7 @@ def example_workorder():
                     "region_id",
                     "type_id",
                 ],
-                "file_path": "${esi_job_id_}/market-history-${region_id}-${type_id}.csv",
+                "file_path_template": "${esi_job_id_}/market-history-${region_id}-${type_id}.csv",
             },
         )
     )
@@ -120,8 +129,10 @@ def example_workorder():
     job_4.callbacks.success.append(models.JobCallback(callback_id="check_for_pages"))
     job_4.callbacks.success.append(
         models.JobCallback(
-            callback_id="save_json_result_to_file",
-            kwargs={"file_path": "${esi_job_id_}/public-contracts/${region_id}.json"},
+            callback_id="save_result_to_json_file",
+            kwargs={
+                "file_path_template": "${esi_job_id_}/public-contracts/${region_id}.json"
+            },
         )
     )
     work_order.jobs.append(job_4)
@@ -150,7 +161,7 @@ def response_to_job_json_file():
         models.JobCallback(
             callback_id="save_esi_job_to_json_file",
             kwargs={
-                "file_path": "data/market-history/${region_id}-${type_id}-esi-job.json"
+                "file_path_template": "data/market-history/${region_id}-${type_id}-esi-job.json"
             },
         )
     )
@@ -180,7 +191,7 @@ def result_to_job_json_file():
         models.JobCallback(
             callback_id="save_esi_job_to_json_file",
             kwargs={
-                "file_path": "data/market-history/${region_id}-${type_id}-esi-job.json"
+                "file_path_template": "data/market-history/${region_id}-${type_id}-esi-job.json"
             },
         )
     )
@@ -211,14 +222,16 @@ def result_to_json_file_and_response_to_json_file():
         models.JobCallback(
             callback_id="save_esi_job_to_json_file",
             kwargs={
-                "file_path": "data/market-history/${region_id}-${type_id}-esi-job.json"
+                "file_path_template": "data/market-history/${region_id}-${type_id}-esi-job.json"
             },
         )
     )
     job.callbacks.success.append(
         models.JobCallback(
-            callback_id="save_json_result_to_file",
-            kwargs={"file_path": "data/market-history/${region_id}-${type_id}.json"},
+            callback_id="save_result_to_json_file",
+            kwargs={
+                "file_path_template": "data/market-history/${region_id}-${type_id}.json"
+            },
         )
     )
     job.callbacks.fail.append(models.JobCallback(callback_id="response_to_esi_job"))
@@ -249,7 +262,7 @@ def result_and_response_to_job_json_file():
         models.JobCallback(
             callback_id="save_esi_job_to_json_file",
             kwargs={
-                "file_path": "data/market-history/${region_id}-${type_id}-esi-job.json"
+                "file_path_template": "data/market-history/${region_id}-${type_id}-esi-job.json"
             },
         )
     )
@@ -275,8 +288,10 @@ def result_to_json_file():
 
     job.callbacks.success.append(
         models.JobCallback(
-            callback_id="save_json_result_to_file",
-            kwargs={"file_path": "data/market-history/${region_id}-${type_id}.json"},
+            callback_id="save_result_to_json_file",
+            kwargs={
+                "file_path_template": "data/market-history/${region_id}-${type_id}.json"
+            },
         )
     )
     job.callbacks.fail.append(models.JobCallback(callback_id="response_to_esi_job"))
@@ -317,7 +332,7 @@ def result_to_csv_file():
                     "region_id",
                     "type_id",
                 ],
-                "file_path": "data/market-history/${region_id}-${type_id}.csv",
+                "file_path_template": "data/market-history/${region_id}-${type_id}.csv",
             },
         )
     )
@@ -345,8 +360,8 @@ def result_with_pages_to_json_file():
     job.callbacks.success.append(models.JobCallback(callback_id="check_for_pages"))
     job.callbacks.success.append(
         models.JobCallback(
-            callback_id="save_json_result_to_file",
-            kwargs={"file_path": "data/public-contracts/${region_id}.json"},
+            callback_id="save_result_to_json_file",
+            kwargs={"file_path_template": "data/public-contracts/${region_id}.json"},
         )
     )
     job.callbacks.fail.append(models.JobCallback(callback_id="response_to_esi_job"))

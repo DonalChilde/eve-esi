@@ -8,7 +8,7 @@ import typer
 
 from eve_esi_jobs import do_workorder
 from eve_esi_jobs.models import EsiJob, EsiWorkOrder
-from eve_esi_jobs.typer_cli.cli_helpers import (  # load_esi_work_order_json,
+from eve_esi_jobs.typer_cli.cli_helpers import (
     FormatChoices,
     report_finished_task,
     validate_input_path,
@@ -57,12 +57,15 @@ not find mistakes that can only be checked on the server, eg. a non-existant typ
 
     # NOTE: path is not checked with results of template values.
     path_out = validate_output_path(path_out)
-    esi_provider = ctx.obj["esi_provider"]
+    operation_manifest = ctx.obj["operation_manifest"]
     ewo_ = EsiWorkOrder(output_path=str(path_out))
     # ewo_.output_path = str(path_out)
     ewo_.jobs.append(esi_job)
     observer = EsiObserver()
-    do_workorder(ewo_, esi_provider, observers=[observer])
+    try:
+        do_workorder(ewo_, operation_manifest, observers=[observer])
+    except Exception as ex:
+        raise typer.BadParameter(f"Error doing the job. {ex.__class__.__name__}: {ex}")
     report_on_jobs(ewo_.jobs)
     report_finished_task(ctx)
 
@@ -107,9 +110,12 @@ not find mistakes that can only be checked on the server, eg. a non-existant typ
     path_out = validate_output_path(path_out)
     output_path_string = str(path_out / Path(esi_work_order.output_path))
     esi_work_order.update_attributes({"ewo_output_path": output_path_string})
-    esi_provider = ctx.obj["esi_provider"]
+    operation_manifest = ctx.obj["operation_manifest"]
     observer = EsiObserver()
-    do_workorder(esi_work_order, esi_provider, observers=[observer])
+    try:
+        do_workorder(esi_work_order, operation_manifest, observers=[observer])
+    except Exception as ex:
+        raise typer.BadParameter(f"Error doing the job. {ex.__class__.__name__}: {ex}")
     report_on_jobs(esi_work_order.jobs)
     report_finished_task(ctx)
 

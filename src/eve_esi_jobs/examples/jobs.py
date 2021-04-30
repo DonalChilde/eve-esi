@@ -15,15 +15,15 @@ def get_markets_region_id_history(
             models.JobCallback(
                 callback_id="save_esi_job_to_json_file",
                 kwargs={
-                    "file_path": "data/market-history-${region_id}-${type_id}-esi-job.json"
+                    "file_path_template": "data/market-history-${region_id}-${type_id}-esi-job.json"
                 },
             )
         )
         callbacks.success.append(
             models.JobCallback(
-                callback_id="save_json_result_to_file",
+                callback_id="save_result_to_json_file",
                 kwargs={
-                    "file_path": "data/market-history-${region_id}-${type_id}-esi-job.json"
+                    "file_path_template": "data/market-history-${region_id}-${type_id}-esi-job.json"
                 },
             )
         )
@@ -44,13 +44,13 @@ def get_industry_facilities(
         callbacks.success.append(
             models.JobCallback(
                 callback_id="save_esi_job_to_json_file",
-                kwargs={"file_path": "data/industry-facilities-esi-job.json"},
+                kwargs={"file_path_template": "data/industry-facilities-esi-job.json"},
             )
         )
         callbacks.success.append(
             models.JobCallback(
-                callback_id="save_json_result_to_file",
-                kwargs={"file_path": "data/industry-facilities.json"},
+                callback_id="save_result_to_json_file",
+                kwargs={"file_path_template": "data/industry-facilities.json"},
             )
         )
     job = models.EsiJob(
@@ -69,13 +69,13 @@ def get_industry_systems(
         callbacks.success.append(
             models.JobCallback(
                 callback_id="save_esi_job_to_json_file",
-                kwargs={"file_path": "data/industry-systems-esi-job.json"},
+                kwargs={"file_path_template": "data/industry-systems-esi-job.json"},
             )
         )
         callbacks.success.append(
             models.JobCallback(
-                callback_id="save_json_result_to_file",
-                kwargs={"file_path": "data/industry-systems.json"},
+                callback_id="save_result_to_json_file",
+                kwargs={"file_path_template": "data/industry-systems.json"},
             )
         )
     job = models.EsiJob(
@@ -95,14 +95,16 @@ def post_universe_names(
             models.JobCallback(
                 callback_id="save_esi_job_to_json_file",
                 kwargs={
-                    "file_path": "data/post_universe_names-${esi_job_uid}-esi-job.json"
+                    "file_path_template": "data/post_universe_names-${esi_job_uid}-esi-job.json"
                 },
             )
         )
         callbacks.success.append(
             models.JobCallback(
-                callback_id="save_json_result_to_file",
-                kwargs={"file_path": "data/post_universe_names-${esi_job_uid}.json"},
+                callback_id="save_result_to_json_file",
+                kwargs={
+                    "file_path_template": "data/post_universe_names-${esi_job_uid}.json"
+                },
             )
         )
     job = models.EsiJob(

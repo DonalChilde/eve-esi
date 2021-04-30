@@ -2,14 +2,17 @@
 
 ## before release
 
+- DONE ADD yaml file output example
+- DONE move build action to job to action from esi_provider
 - ADD organize testing, offer fixtures for some EsiJobs, and EsiWorkOrders?
   - maybe just work from current test_resources
   - look through older examples, make sure they are clear.
 - One place for pre defined callback collections?
-- EsiProvider rethink
+- DONE EsiProvider rethink
   - op_id info rethink
-- Support new yaml callback
-- AiohttpQueue v0.2.0 release fixes
+    - split parameters by location
+    - add function to return required parameters
+- DONE AiohttpQueue v0.2.0 release fixes
   - update callbacks
     - repr
     - file_path_template

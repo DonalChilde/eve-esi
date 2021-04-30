@@ -1,6 +1,7 @@
 """A lookup table of valid callbacks for Esi Jobs."""
 import logging
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Callable, Dict, List, Optional, Type
 
 from pfmsoft.aiohttp_queue import ActionCallbacks, AiohttpActionCallback
@@ -8,8 +9,9 @@ from pfmsoft.aiohttp_queue.callbacks import (
     CheckForPages,
     ResponseContentToJson,
     ResponseContentToText,
-    SaveJsonResultToFile,
     SaveListOfDictResultToCSVFile,
+    SaveResultToJsonFile,
+    SaveResultToYamlFile,
 )
 
 from eve_esi_jobs.callbacks import (
@@ -32,11 +34,11 @@ class CallbackManifestEntry:
     valid_targets: List[str] = field(default_factory=list)
 
 
-def build_save_json_result_to_file(
+def build_save_result_to_json_file(
     job_callback: JobCallback, **kwargs
-) -> SaveJsonResultToFile:
+) -> SaveResultToJsonFile:
     _ = kwargs
-    callback = SaveJsonResultToFile(*job_callback.args, **job_callback.kwargs)
+    callback = SaveResultToJsonFile(*job_callback.args, **job_callback.kwargs)
     return callback
 
 
@@ -48,10 +50,21 @@ def build_save_list_of_dict_result_to_csv_file(
     return callback
 
 
+def build_save_result_to_yaml_file(
+    job_callback: JobCallback, **kwargs
+) -> SaveResultToYamlFile:
+    _ = kwargs
+    callback = SaveResultToYamlFile(*job_callback.args, **job_callback.kwargs)
+    return callback
+
+
 def build_save_esi_job_to_json_file(
     job_callback: JobCallback, **kwargs
 ) -> SaveEsiJobToJsonFile:
     _ = kwargs
+    # job_callback.kwargs["file_path_template"] = Path(
+    #     job_callback.kwargs["file_path_template"]
+    # )
     callback = SaveEsiJobToJsonFile(*job_callback.args, **job_callback.kwargs)
     return callback
 
@@ -88,25 +101,6 @@ def build_check_for_pages(job_callback: JobCallback, **kwargs) -> CheckForPages:
 def build_log_job_failure(job_callback: JobCallback, **kwargs) -> LogJobFailure:
     _, _ = job_callback, kwargs
     return LogJobFailure()
-
-
-# class DefaultCallbackFactory2:
-#     # FIXME change name to CallbackCollectionFactory
-#     def __init__(self) -> None:
-#         pass
-
-#     @staticmethod
-#     def default_callback_collection() -> CallbackCollection:
-#         callback_collection = CallbackCollection()
-#         callback_collection.success.append(
-#             JobCallback(callback_id="response_content_to_json")
-#         )
-#         callback_collection.success.append(
-#             JobCallback(callback_id="response_to_esi_job")
-#         )
-#         callback_collection.fail.append(JobCallback(callback_id="response_to_esi_job"))
-#         callback_collection.fail.append(JobCallback(callback_id="log_job_failure"))
-#         return callback_collection
 
 
 class CallbackManifest:
@@ -158,6 +152,22 @@ class CallbackManifest:
             raise ex
         return callback
 
+    def build_action_callbacks(
+        self,
+        job_callbacks: CallbackCollection,
+    ) -> ActionCallbacks:
+        action_callbacks = ActionCallbacks()
+        for job_callback in job_callbacks.success:
+            action_callback = self.init_callback("success", job_callback)
+            action_callbacks.success.append(action_callback)
+        for job_callback in job_callbacks.retry:
+            action_callback = self.init_callback("retry", job_callback)
+            action_callbacks.retry.append(action_callback)
+        for job_callback in job_callbacks.fail:
+            action_callback = self.init_callback("fail", job_callback)
+            action_callbacks.fail.append(action_callback)
+        return action_callbacks
+
 
 def new_manifest():
     manifest_entries: Dict[str, CallbackManifestEntry] = {
@@ -171,10 +181,15 @@ def new_manifest():
             valid_targets=["success"],
             factory_function=build_check_for_pages,
         ),
-        "save_json_result_to_file": CallbackManifestEntry(
-            callback=SaveJsonResultToFile,
+        "save_result_to_json_file": CallbackManifestEntry(
+            callback=SaveResultToJsonFile,
             valid_targets=["success"],
-            factory_function=build_save_json_result_to_file,
+            factory_function=build_save_result_to_json_file,
+        ),
+        "save_result_to_yaml_file": CallbackManifestEntry(
+            callback=SaveResultToYamlFile,
+            valid_targets=["success"],
+            factory_function=build_save_result_to_yaml_file,
         ),
         "save_list_of_dict_result_to_csv_file": CallbackManifestEntry(
             callback=SaveListOfDictResultToCSVFile,

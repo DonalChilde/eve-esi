@@ -11,6 +11,7 @@ from typer.testing import CliRunner
 from eve_esi_jobs import do_workorder
 from eve_esi_jobs.helpers import combine_dictionaries
 from eve_esi_jobs.models import EsiJob, EsiWorkOrder
+from eve_esi_jobs.operation_manifest import OperationManifest
 from eve_esi_jobs.typer_cli import create
 from eve_esi_jobs.typer_cli.eve_esi_cli import app
 
@@ -18,22 +19,27 @@ from eve_esi_jobs.typer_cli.eve_esi_cli import app
 # validate workorder functions
 
 
-def test_create():
+def test_create(esi_schema: FileResource):
     """Test the CLI."""
     runner = CliRunner()
     result = runner.invoke(app)
     assert result.exit_code == 0
     assert "Welcome to Eve Esi Jobs" in result.output
-    help_result = runner.invoke(app, ["create", "jobs", "--help"])
+    help_result = runner.invoke(
+        app, ["-s", str(esi_schema.file_path), "create", "jobs", "--help"]
+    )
+    print(help_result.output)
     assert help_result.exit_code == 0
     assert "eve-esi create jobs [OPTIONS] OP_ID" in help_result.output
 
 
-def test_create_job(esi_provider):
+def test_create_job(operation_manifest: OperationManifest):
     op_id = "get_markets_region_id_history"
     parameters = {"region_id": 10000002, "type_id": 34}
     callback_config = ""
-    job: EsiJob = create.create_job(op_id, parameters, callback_config, esi_provider)
+    job: EsiJob = create.create_job(
+        op_id, parameters, callback_config, operation_manifest
+    )
     assert job.op_id == op_id
 
 
@@ -90,49 +96,51 @@ def test_get_params_from_file(sample_data: Dict[str, FileResource]):
     assert result is None
 
 
-def test_default_file_path(esi_provider, test_app_dir):
+def test_default_file_path(operation_manifest: OperationManifest, test_app_dir):
     op_id = "get_markets_region_id_history"
     parameters = {"region_id": 10000002, "type_id": 34}
     callbacks = create.default_callback_collection()
     default_template = "job_data/${esi_job_op_id}-${esi_job_uid}.json"
     template = Template(default_template)
-    job: EsiJob = create.create_job(op_id, parameters, callbacks, esi_provider)
+    job: EsiJob = create.create_job(op_id, parameters, callbacks, operation_manifest)
     work_order = EsiWorkOrder(output_path=str(test_app_dir))
 
     work_order.jobs.append(job)
     # inspect(work_order)
     expected_path: Path = test_app_dir / Path(template.substitute(job.attributes()))
-    do_workorder(work_order, esi_provider)
+    do_workorder(work_order, operation_manifest)
     assert expected_path.is_file()
     assert expected_path.stat().st_size > 10
 
 
-def test_check_required_parameters(esi_provider):
-    op_id = "get_markets_region_id_history"
-    parameters = {"region_id": 10000002, "type_id": 34}
-    assert create.check_required_params(op_id, parameters, esi_provider)
+# def test_check_required_parameters(operation_manifest: OperationManifest):
+#     op_id = "get_markets_region_id_history"
+#     parameters = {"region_id": 10000002, "type_id": 34}
+#     assert create.check_required_params(op_id, parameters, operation_manifest)
 
-    op_id = "get_markets_region_id_history"
-    parameters = {"region_id": 10000002, "Fake_param": 34}
-    assert create.check_required_params(op_id, parameters, esi_provider) is False
+#     op_id = "get_markets_region_id_history"
+#     parameters = {"region_id": 10000002, "Fake_param": 34}
+#     assert create.check_required_params(op_id, parameters, operation_manifest) is False
 
 
-def test_filter_params(esi_provider):
-    op_id = "get_markets_region_id_history"
-    parameters = {"region_id": 10000002, "type_id": 34}
-    filtered_params = create.filter_extra_params(op_id, parameters, esi_provider)
-    for key in parameters:
-        assert key in filtered_params
+# def test_filter_params(operation_manifest: OperationManifest):
+#     op_id = "get_markets_region_id_history"
+#     parameters = {"region_id": 10000002, "type_id": 34}
+#     filtered_params = create.filter_extra_params(op_id, parameters, operation_manifest)
+#     for key in parameters:
+#         assert key in filtered_params
 
-    op_id = "get_markets_region_id_history"
-    parameters = {"region_id": 10000002, "type_id": 34}
-    extra_param = {"param1": 34, "param2": 10}
-    combined_params = combine_dictionaries(parameters, [extra_param])
-    filtered_params = create.filter_extra_params(op_id, combined_params, esi_provider)
-    for key in parameters:
-        assert key in filtered_params
-    for key in extra_param:
-        assert key not in filtered_params
+#     op_id = "get_markets_region_id_history"
+#     parameters = {"region_id": 10000002, "type_id": 34}
+#     extra_param = {"param1": 34, "param2": 10}
+#     combined_params = combine_dictionaries(parameters, [extra_param])
+#     filtered_params = create.filter_extra_params(
+#         op_id, combined_params, operation_manifest
+#     )
+#     for key in parameters:
+#         assert key in filtered_params
+#     for key in extra_param:
+#         assert key not in filtered_params
 
 
 def test_from_op_id_save_created_job(test_app_dir: Path, esi_schema: FileResource):

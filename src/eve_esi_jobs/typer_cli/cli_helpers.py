@@ -9,6 +9,7 @@ from typing import Any, Dict, Optional
 import typer
 
 from eve_esi_jobs.models import CallbackCollection, EsiJob, EsiWorkOrder, JobCallback
+from eve_esi_jobs.operation_manifest import OperationManifest
 
 logger = logging.getLogger(__name__)
 
@@ -25,25 +26,25 @@ def report_finished_task(ctx: typer.Context):
     typer.echo(f"Task completed in {seconds:0.2f} seconds")
 
 
-def load_json(file_path: Path, **kwargs) -> Any:
-    """
-    Load a json file.
+# def load_json(file_path: Path, **kwargs) -> Any:
+#     """
+#     Load a json file.
 
-    :param file_path: :py:class:`pathlib.Path` to the json file.
-    :param `**kwargs`: Addtional key word arguments supplied to :func:`json.load()`.
-    :raises Exception: Any exception raised during the loading of the file, or the conversion to json.
-    :return: The loaded json file.
-    """
+#     :param file_path: :py:class:`pathlib.Path` to the json file.
+#     :param `**kwargs`: Addtional key word arguments supplied to :func:`json.load()`.
+#     :raises Exception: Any exception raised during the loading of the file, or the conversion to json.
+#     :return: The loaded json file.
+#     """
 
-    try:
-        with open(file_path, "r") as json_file:
-            data = json.load(json_file, **kwargs)
-        return data
-    except Exception as error:
-        logger.exception(
-            "Error trying to load json file from %s", file_path, exc_info=True
-        )
-        raise error
+#     try:
+#         with open(file_path, "r") as json_file:
+#             data = json.load(json_file, **kwargs)
+#         return data
+#     except Exception as error:
+#         logger.exception(
+#             "Error trying to load json file from %s", file_path, exc_info=True
+#         )
+#         raise error
 
 
 def save_string(
@@ -168,8 +169,10 @@ def default_callback_collection() -> CallbackCollection:
     callback_collection.success.append(JobCallback(callback_id="response_to_esi_job"))
     callback_collection.success.append(
         JobCallback(
-            callback_id="save_json_result_to_file",
-            kwargs={"file_path": "job_data/${esi_job_op_id}-${esi_job_uid}.json"},
+            callback_id="save_result_to_json_file",
+            kwargs={
+                "file_path_template": "job_data/${esi_job_op_id}-${esi_job_uid}.json"
+            },
         )
     )
     callback_collection.fail.append(JobCallback(callback_id="response_to_esi_job"))
@@ -187,8 +190,8 @@ def completion_op_id(ctx: typer.Context, incomplete: str):
 
 
 def check_for_op_id(ctx: typer.Context, value: str):
-    esi_provider = ctx.obj["esi_provider"]
-    op_id_keys = list(esi_provider.op_id_lookup.keys())
+    operation_manifest: OperationManifest = ctx.obj["operation_manifest"]
+    op_id_keys = operation_manifest.available_op_ids()
     if value not in op_id_keys:
         raise typer.BadParameter(f"Only op_ids are allowed, tried: {value}")
     return value

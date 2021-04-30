@@ -12,19 +12,19 @@ from pfmsoft.aiohttp_queue.aiohttp import ActionObserver
 from pfmsoft.aiohttp_queue.runners import queue_runner
 
 from eve_esi_jobs.callback_manifest import CallbackManifest
-from eve_esi_jobs.esi_provider import EsiProvider
 from eve_esi_jobs.helpers import optional_object
 from eve_esi_jobs.job_preprocessor import JobPreprocessor
 from eve_esi_jobs.job_to_action import JobsToActions
 from eve_esi_jobs.models import EsiJob, EsiWorkOrder
+from eve_esi_jobs.operation_manifest import OperationManifest
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 
 def do_jobs(
-    esi_jobs: Sequence[EsiJob],
-    esi_provider: EsiProvider,
+    esi_jobs: List[EsiJob],
+    operation_manifest: OperationManifest,
     callback_manifest: Optional[CallbackManifest] = None,
     jobs_to_actions: Optional[JobsToActions] = None,
     workorder_attributes: Optional[Dict[str, Any]] = None,
@@ -41,7 +41,7 @@ def do_jobs(
 
     Args:
         esi_jobs: The jobs to do.
-        esi_provider: The esi_provider.
+        operation_manifest: The operation manifest.
         callback_manifest: The :class:`CallbackManifest` to use if other than default.
             Defaults to None.
         jobs_to_actions: The `JobToAction` to use if other than default. Defaults to None.
@@ -70,18 +70,19 @@ def do_jobs(
     for esi_job in esi_jobs:
         esi_job.update_attributes(workorder_attributes)
         job_preprocessor.pre_process_job(esi_job)
-    actions = jobs_to_actions.make_actions(
+    actions = JobsToActions().make_actions(
         esi_jobs=esi_jobs,
-        esi_provider=esi_provider,
+        operation_manifest=operation_manifest,
         callback_manifest=callback_manifest,
         observers=observers,
     )
+
     asyncio.run(queue_runner(actions, workers))
 
 
 def do_workorder(
     ewo: EsiWorkOrder,
-    esi_provider: EsiProvider,
+    operation_manifest: OperationManifest,
     worker_count: Optional[int] = None,
     callback_manifest: Optional[CallbackManifest] = None,
     jobs_to_actions: Optional[JobsToActions] = None,
@@ -95,7 +96,7 @@ def do_workorder(
 
     Args:
         ewo: The workorder to do.
-        esi_provider: The esi_provider.
+        operation_manifest: The operation manifest.
         worker_count: The number of workers to use. If not given, a resonable number of
             workers will be calculated. Defaults to None.
         callback_manifest: The :class:`CallbackManifest` to use if other than default.
@@ -113,7 +114,7 @@ def do_workorder(
     #     worker_count = get_worker_count(len(ewo.jobs), max_workers)
     do_jobs(
         esi_jobs=ewo.jobs,
-        esi_provider=esi_provider,
+        operation_manifest=operation_manifest,
         callback_manifest=callback_manifest,
         jobs_to_actions=jobs_to_actions,
         workorder_attributes=ewo.attributes(),

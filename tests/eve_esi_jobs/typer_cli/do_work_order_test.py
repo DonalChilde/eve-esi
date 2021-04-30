@@ -83,20 +83,21 @@ def test_do_bad_validation_workorder(
     runner = CliRunner()
     ewo_path = bad_workorders["bad-validation-workorder.json"].file_path
     output_path = test_app_dir / Path("test-do-bad-validation-workorder")
-    with pytest.raises(ValueError):
-        result = runner.invoke(
-            app,
-            [
-                "-s",
-                str(esi_schema.file_path),
-                "do",
-                "workorder",
-                str(ewo_path),
-                str(output_path),
-            ],
-            catch_exceptions=False,
-        )
-        _ = result
+
+    result = runner.invoke(
+        app,
+        [
+            "-s",
+            str(esi_schema.file_path),
+            "do",
+            "workorder",
+            str(ewo_path),
+            str(output_path),
+        ],
+        catch_exceptions=False,
+    )
+    print(result.output)
+    assert "Missing required parameters" in result.output
 
 
 def test_do_bad_status_workorder(

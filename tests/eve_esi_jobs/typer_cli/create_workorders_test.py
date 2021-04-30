@@ -11,7 +11,9 @@ from eve_esi_jobs.models import EsiWorkOrder
 from eve_esi_jobs.typer_cli.eve_esi_cli import app
 
 
-def test_create_workorder(test_app_dir, jobs: Dict[str, FileResource], esi_schema):
+def test_create_workorder(
+    test_app_dir, jobs: Dict[str, FileResource], esi_schema: FileResource
+):
     runner = CliRunner()
     output_path = test_app_dir / Path("create_workorder_test_result/")
     keys = list(jobs.keys())

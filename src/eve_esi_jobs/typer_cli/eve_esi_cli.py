@@ -10,7 +10,8 @@ from typing import Optional
 
 import typer
 
-from eve_esi_jobs.esi_provider import EsiProvider
+# from eve_esi_jobs.esi_provider import EsiProvider
+from eve_esi_jobs.operation_manifest import OperationManifest
 from eve_esi_jobs.typer_cli.app_config import make_config_from_env
 from eve_esi_jobs.typer_cli.app_data import load_schema
 from eve_esi_jobs.typer_cli.create import app as create_app
@@ -75,18 +76,20 @@ def eve_esi(
             schema = download_json(config.schema_url)
             schema_source = config.schema_url
     try:
-        esi_provider = EsiProvider(schema)
-    except Exception:
+        operation_manifest = OperationManifest(schema)
+    except Exception as ex:
         logger.exception(
-            "Tried to make esi_provider with invalid schema. version: %s, source: %s",
+            "Tried to make operation_manifest with invalid schema. version: %s, source: %s, error: %s, msg: %s",
             version,
             schema_source,
+            ex.__class__.__name__,
+            ex,
         )
         raise typer.BadParameter(
             "The provided schema was invalid. please try a different one."
         )
-    ctx.obj["esi_provider"] = esi_provider
-    typer.echo(f"Loaded ESI schema version {esi_provider.schema_version}.\n")
+    ctx.obj["operation_manifest"] = operation_manifest
+    typer.echo(f"Loaded ESI schema version {operation_manifest.version}.\n")
 
 
 if __name__ == "__main__":

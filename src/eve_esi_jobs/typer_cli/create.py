@@ -8,8 +8,10 @@ from typing import Dict, List, Optional
 import typer
 import yaml
 
-from eve_esi_jobs.esi_provider import EsiProvider
 from eve_esi_jobs.models import CallbackCollection, EsiJob, EsiWorkOrder
+
+# from eve_esi_jobs.esi_provider import EsiProvider
+from eve_esi_jobs.operation_manifest import OperationManifest
 from eve_esi_jobs.typer_cli.cli_helpers import (
     FormatChoices,
     check_for_op_id,
@@ -162,7 +164,7 @@ def jobs(
 
     Csv input files must have properly labeled columns.
     """
-    esi_provider: EsiProvider = ctx.obj["esi_provider"]
+    operation_manifest = ctx.obj["operation_manifest"]
     # path_out = optional_object(path_out, Path, ".")
     if path_out.is_file:
         typer.BadParameter("path_out must not be a file.")
@@ -174,12 +176,12 @@ def jobs(
         callback_collection = load_callbacks(callback_path)
     jobs_: List[EsiJob] = []
     if not file_data:
-        job = create_job(op_id, parameters, callback_collection, esi_provider)
+        job = create_job(op_id, parameters, callback_collection, operation_manifest)
         jobs_.append(job)
     else:
         for params in file_data:
             params.update(parameters)
-            job = create_job(op_id, params, callback_collection, esi_provider)
+            job = create_job(op_id, params, callback_collection, operation_manifest)
             jobs_.append(job)
     # validate jobs
     for job in jobs_:
@@ -238,59 +240,62 @@ def create_job(
     op_id: str,
     parameters: Dict,
     callbacks: CallbackCollection,
-    esi_provider: EsiProvider,
+    operation_manifest: OperationManifest,
 ):
-
-    if not check_required_params(op_id, parameters, esi_provider):
+    try:
+        op_info = operation_manifest.op_info(op_id=op_id)
+        op_info.check_required_params(parameters)
+    except Exception as ex:
         raise typer.BadParameter(
-            f"Missing required parameters for {op_id}, was given {parameters}"
+            f"Exception creating job. {ex.__class__.__name__}: {ex}"
         )
-    filtered_params = filter_extra_params(op_id, parameters, esi_provider)
+    params_by_location = op_info.parse_request_params(parameters)
+    filtered_params = params_by_location.consolidate_params()
     job_dict = {
         "op_id": op_id,
         "name": "",
         "parameters": filtered_params,
         "callbacks": callbacks,
     }
-    job = EsiJob(**job_dict)
+    job = EsiJob.deserialize_obj(job_dict)
 
     return job
 
 
-def check_required_params(op_id, parameters, esi_provider: EsiProvider) -> bool:
-    """check that required params are present"""
-    op_id_info = esi_provider.op_id_lookup.get(op_id, None)
-    if op_id_info is None:
-        raise typer.BadParameter(f"op_id: {op_id} does not exist.")
-    required_params = [
-        param
-        for param in op_id_info.parameters.values()
-        if param.get("required", False)
-    ]
-    for item in required_params:
-        name = item.get("name")
-        if name not in parameters:
-            return False
-    return True
+# def check_required_params(op_id, parameters, esi_provider: EsiProvider) -> bool:
+#     """check that required params are present"""
+#     op_id_info = esi_provider.op_id_lookup.get(op_id, None)
+#     if op_id_info is None:
+#         raise typer.BadParameter(f"op_id: {op_id} does not exist.")
+#     required_params = [
+#         param
+#         for param in op_id_info.parameters.values()
+#         if param.get("required", False)
+#     ]
+#     for item in required_params:
+#         name = item.get("name")
+#         if name not in parameters:
+#             return False
+#     return True
 
 
-def filter_extra_params(
-    op_id: str, parameters: Dict, esi_provider: EsiProvider
-) -> Dict:
-    op_id_info = esi_provider.op_id_lookup.get(op_id, None)
-    if op_id_info is None:
-        raise typer.BadParameter(f"op_id: {op_id} does not exist.")
-    legal_parameter_names: List[str] = list(op_id_info.parameters.keys())
-    filtered_params = {}
-    for name in legal_parameter_names:
-        if name in parameters:
-            filtered_params[name] = parameters[name]
-    return filtered_params
+# def filter_extra_params(
+#     op_id: str, parameters: Dict, esi_provider: EsiProvider
+# ) -> Dict:
+#     op_id_info = esi_provider.op_id_lookup.get(op_id, None)
+#     if op_id_info is None:
+#         raise typer.BadParameter(f"op_id: {op_id} does not exist.")
+#     legal_parameter_names: List[str] = list(op_id_info.parameters.keys())
+#     filtered_params = {}
+#     for name in legal_parameter_names:
+#         if name in parameters:
+#             filtered_params[name] = parameters[name]
+#     return filtered_params
 
 
-def validate_job(job: EsiJob, esi_provider):
-    _, _ = job, esi_provider
-    return True
+# def validate_job(job: EsiJob, esi_provider):
+#     _, _ = job, esi_provider
+#     return True
 
 
 def resolve_job_file_path(job: EsiJob, file_path_template: str, path_out: Path):

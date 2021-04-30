@@ -12,7 +12,7 @@ def get_industry_facilities():
     job.callbacks.success.append(
         models.JobCallback(
             callback_id="save_esi_job_to_json_file",
-            kwargs={"file_path": "data/industry-facilities.json"},
+            kwargs={"file_path_template": "data/industry-facilities.json"},
         )
     )
     return job
@@ -28,7 +28,7 @@ def get_industry_systems():
     job.callbacks.success.append(
         models.JobCallback(
             callback_id="save_esi_job_to_json_file",
-            kwargs={"file_path": "data/industry-systems.json"},
+            kwargs={"file_path_template": "data/industry-systems.json"},
         )
     )
     return job

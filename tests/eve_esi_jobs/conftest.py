@@ -10,8 +10,10 @@ from typing import Any, Dict, List, Optional
 import pytest
 from rich import inspect
 
-from eve_esi_jobs.esi_provider import EsiProvider
 from eve_esi_jobs.helpers import optional_object
+
+# from eve_esi_jobs.esi_provider import EsiProvider
+from eve_esi_jobs.operation_manifest import OperationManifest
 
 APP_LOG_LEVEL = logging.INFO
 
@@ -57,13 +59,22 @@ def file_handler(
     return handler
 
 
+# @pytest.fixture(scope="session")
+# def esi_provider(esi_schema):
+#     provider: EsiProvider = EsiProvider(esi_schema.data)
+#     assert provider.schema is not None
+#     assert provider.schema["basePath"] == "/latest"
+#     assert provider.schema_version == "1.7.15"
+#     return provider
+
+
 @pytest.fixture(scope="session")
-def esi_provider(esi_schema):
-    provider: EsiProvider = EsiProvider(esi_schema.data)
-    assert provider.schema is not None
-    assert provider.schema["basePath"] == "/latest"
-    assert provider.schema_version == "1.7.15"
-    return provider
+def operation_manifest(esi_schema: FileResource):
+    schema_string = esi_schema.file_path.read_text()
+    manifest: OperationManifest = OperationManifest(json.loads(schema_string))
+    assert manifest.base_path == "/latest"
+    assert manifest.version == "1.7.15"
+    return manifest
 
 
 @pytest.fixture(scope="session", name="test_log_path")

@@ -26,8 +26,10 @@ def generic_save_result_to_json() -> models.CallbackCollection:
     )
     callback_collection.success.append(
         models.JobCallback(
-            callback_id="save_json_result_to_file",
-            kwargs={"file_path": "job_data/${esi_job_op_id}-${esi_job_uid}.json"},
+            callback_id="save_result_to_json_file",
+            kwargs={
+                "file_path_template": "job_data/${esi_job_op_id}-${esi_job_uid}.json"
+            },
         )
     )
     callback_collection.fail.append(
@@ -47,15 +49,17 @@ def generic_save_result_and_job_to_separate_json() -> models.CallbackCollection:
     )
     callback_collection.success.append(
         models.JobCallback(
-            callback_id="save_json_result_to_file",
-            kwargs={"file_path": "job_data/${esi_job_op_id}-${esi_job_uid}.json"},
+            callback_id="save_result_to_json_file",
+            kwargs={
+                "file_path_template": "job_data/${esi_job_op_id}-${esi_job_uid}.json"
+            },
         )
     )
     callback_collection.success.append(
         models.JobCallback(
             callback_id="save_esi_job_to_json_file",
             kwargs={
-                "file_path": "job_data/${esi_job_op_id}-${esi_job_uid}.esi-job.json"
+                "file_path_template": "job_data/${esi_job_op_id}-${esi_job_uid}.esi-job.json"
             },
         )
     )
@@ -81,7 +85,7 @@ def generic_save_result_and_job_to_same_json() -> models.CallbackCollection:
         models.JobCallback(
             callback_id="save_esi_job_to_json_file",
             kwargs={
-                "file_path": "job_data/${esi_job_op_id}-${esi_job_uid}.esi-job.json"
+                "file_path_template": "job_data/${esi_job_op_id}-${esi_job_uid}.esi-job.json"
             },
         )
     )

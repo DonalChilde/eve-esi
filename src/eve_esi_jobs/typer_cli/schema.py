@@ -10,10 +10,12 @@ from typing import Dict, Optional
 import typer
 import yaml
 from pfmsoft.aiohttp_queue import ActionCallbacks, AiohttpAction
+from pfmsoft.aiohttp_queue.aiohttp import AiohttpRequest
 from pfmsoft.aiohttp_queue.callbacks import ResponseContentToJson
-from pfmsoft.aiohttp_queue.runners import do_action_runner
+from pfmsoft.aiohttp_queue.runners import do_single_action_runner
 
-from eve_esi_jobs.esi_provider import EsiProvider
+# from eve_esi_jobs.esi_provider import EsiProvider
+from eve_esi_jobs.operation_manifest import OperationManifest
 from eve_esi_jobs.typer_cli.app_config import EveEsiJobConfig
 from eve_esi_jobs.typer_cli.app_data import save_json_to_app_data
 from eve_esi_jobs.typer_cli.cli_helpers import (
@@ -37,11 +39,12 @@ def browse(
     ),
 ):
     """Browse schema by op_id."""
-    esi_provider: EsiProvider = ctx.obj["esi_provider"]
-    op_id_info = esi_provider.op_id_lookup.get(op_id, None)
-    if op_id_info is None:
-        typer.BadParameter(f"Invalid op_id: {op_id}")
-    typer.echo(yaml.dump(dataclasses.asdict(op_id_info), sort_keys=False))
+    operation_manifest: OperationManifest = ctx.obj["operation_manifest"]
+    try:
+        op_info = operation_manifest.op_info(op_id)
+    except ValueError:
+        raise typer.BadParameter(f"Invalid op_id: {op_id}")
+    typer.echo(yaml.dump(dataclasses.asdict(op_info), sort_keys=False))
     report_finished_task(ctx)
 
 
@@ -62,8 +65,8 @@ def list_op_ids(
     ),
 ):
     """List available op_ids."""
-    esi_provider: EsiProvider = ctx.obj["esi_provider"]
-    op_id_keys = list(esi_provider.op_id_lookup)
+    operation_manifest: OperationManifest = ctx.obj["operation_manifest"]
+    op_id_keys = operation_manifest.available_op_ids()
     op_id_keys.sort()
     if output == OpidOutput.JSON:
         op_ids = json.dumps(op_id_keys, indent=2)
@@ -121,15 +124,16 @@ def download(
 def download_json(url):
     """Convenience method for downloading a single url, expecting json"""
     callbacks = ActionCallbacks(success=[ResponseContentToJson()])
-    action = AiohttpAction("get", url, callbacks=callbacks)
-    do_action_runner([action])
+    aiohttp_args = AiohttpRequest(method="get", url=url)
+    action = AiohttpAction(aiohttp_args=aiohttp_args, callbacks=callbacks)
+    do_single_action_runner(action)
     if action.response.status == 200:
-        return action.result
+        return action.response_data
     logger.warning(
         "Failed to download url. url: %s, status: %s, msg: %s",
         action.response.real_url,
         action.response.status,
-        action.result,
+        action.response_data,
     )
     typer.echo(
         f"Url: {url} failed with code: {action.response.status} {action.response.reason}"

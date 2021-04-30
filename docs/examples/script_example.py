@@ -4,7 +4,7 @@ import json
 import urllib.request
 from pathlib import Path
 
-from eve_esi_jobs import EsiProvider, do_workorder, models
+from eve_esi_jobs import OperationManifest, do_workorder, models
 from eve_esi_jobs.model_helpers import default_callback_collection
 
 
@@ -24,7 +24,7 @@ def example():
             print(f"Schema saved to {PATH_TO_SCHEMA}")
 
     schema_json = json.loads(schema)
-    esi_provider = EsiProvider(schema_json)
+    operation_manifest = OperationManifest(schema_json)
 
     workorder = models.EsiWorkOrder()
     workorder.name = "Script-Example"
@@ -45,7 +45,7 @@ def example():
     job_2.callbacks = default_callback_collection()
     workorder.jobs.append(job_2)
 
-    do_workorder(workorder, esi_provider)
+    do_workorder(workorder, operation_manifest)
 
     print(workorder.name)
     for job in workorder.jobs:

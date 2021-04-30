@@ -6,3 +6,4 @@ pydantic
 pfmsoft-aiohttp-queue
 typer[all]
 pyyaml
+more-itertools

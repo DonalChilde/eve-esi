@@ -31,7 +31,8 @@ from string import Template
 from typing import Dict, List, Optional
 
 from eve_esi_jobs.helpers import optional_object
-from eve_esi_jobs.typer_cli.cli_helpers import load_json
+
+# from eve_esi_jobs.typer_cli.cli_helpers import load_json
 
 logger = logging.getLogger(__name__)
 ROUTE: Dict = {
@@ -104,7 +105,8 @@ def load_json_from_app_data(
     file_name = get_data_filename(route_name, params)
     file_path = app_dir / sub_path / version / Path(file_name)
     try:
-        data = load_json(file_path)
+        data_string = file_path.read_text()
+        data = json.loads(data_string)
     except Exception as ex:
         logger.error(
             "Unable to load %s with params: %s to path %s\nError message: %s",

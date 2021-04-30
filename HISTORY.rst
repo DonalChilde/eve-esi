@@ -5,7 +5,9 @@ History
 0.1.3 (2021-04-?)
 ------------------
 
-
+* ADD yaml file output example
+* CHANGE Update to Pfmsoft Aiohttp Queue 0.2.1
+* CHANGE translating job to AiohttpActions now done in JobsToActions
 * ADD Option for yaml input and output of jobs and workorders.
 * CHANGE workorder.parent_path_template now workorder.output_path
 * ADD do job from cli without workorder
