@@ -4,7 +4,9 @@ from typing import Any, Dict, List, Set
 
 from rich import print
 
+from eve_esi_jobs.exceptions import BadOpId, BadRequestParameter, MissingParameter
 from eve_esi_jobs.helpers import combine_dictionaries
+from eve_esi_jobs.models import CallbackCollection, EsiJob
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -31,10 +33,10 @@ class OperationInfo:
     description: str
     path: str
     parameters_by_location: ParametersByLocation
-    required_params: Set[str]
+    required_params: List[str]
     responses: Dict[str, Any]
 
-    def parse_request_params(self, params: Dict):
+    def request_params_to_locations(self, params: Dict) -> ParametersByLocation:
         """Split request parameters into their locations.
 
         Note: extra parameters are not used.
@@ -51,15 +53,53 @@ class OperationInfo:
                 request_params_by_location.header[key] = value
         return request_params_by_location
 
-    def check_required_params(self, request_params: Dict):
+    def check_params(self, request_params: Dict):
         request_set = set(request_params.keys())
-        if not self.required_params.issubset(request_params):
-            # if self.required_params not in request_set:
-            raise ValueError(
+        if not set(self.required_params).issubset(request_params):
+            raise MissingParameter(
                 f"Missing required parameters for {self.op_id}, expected "
                 f"{self.required_params} was given {request_set}"
             )
-        # NOTE can do further validation here, type?
+        for key, value in request_params.items():
+            if value == "NOTSET":
+                raise BadRequestParameter(f"Required parameter {key} is 'NOTSET'")
+
+    def build_default_params(
+        self,
+        only_required: bool = False,
+    ):
+        params = {}
+        for key, value in self.parameters_by_location.consolidate_params().items():
+            if only_required:
+                if value.get("required", False):
+                    params[key] = value.get("default", "NOTSET")
+            else:
+                if value.get("required", False) or "default" in value:
+                    params[key] = value.get("default", "NOTSET")
+        return params
+
+    def create_job(
+        self,
+        parameters: Dict,
+        callbacks: CallbackCollection,
+        include_default_params: bool = False,
+    ) -> EsiJob:
+        if include_default_params:
+            default_params = self.build_default_params()
+            combined_params = combine_dictionaries(default_params, [parameters])
+        else:
+            combined_params = parameters
+        filtered_params_by_location = self.request_params_to_locations(combined_params)
+        job_params = filtered_params_by_location.consolidate_params()
+        job_dict = {
+            "op_id": self.op_id,
+            "name": "",
+            "parameters": job_params,
+            "callbacks": callbacks,
+        }
+        job = EsiJob.deserialize_obj(job_dict)
+
+        return job
 
 
 class OperationManifest:
@@ -91,13 +131,13 @@ class OperationManifest:
                 manifest[op_info.op_id] = op_info
         return manifest
 
-    def available_op_ids(self):
+    def available_op_ids(self) -> List[str]:
         return list(self.manifest.keys())
 
     def op_info(self, op_id: str) -> OperationInfo:
         op_info = self.manifest.get(op_id, None)
         if op_info is None:
-            raise ValueError(f"Could not find op_id: {op_id} in manifest.")
+            raise BadOpId(f"Could not find op_id: {op_id} in manifest.")
         return op_info
 
     def url_template(self, op_id: str) -> str:
@@ -110,11 +150,11 @@ class OperationManifest:
         common_params: Dict[str, Any] = schema["parameters"]
         return common_params
 
-    def _required_params(self, parameters: List[Dict]) -> Set[str]:
-        required_params = set()
+    def _required_params(self, parameters: List[Dict]) -> List[str]:
+        required_params = []
         for param in parameters:
             if param.get("required", False):
-                required_params.add(param.get("name", None))
+                required_params.append(param.get("name", None))
         return required_params
 
     def _params_by_location(self, parameters: List[Dict]) -> ParametersByLocation:

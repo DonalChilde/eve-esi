@@ -2,6 +2,8 @@
 
 ## before release
 
+- DONE ADD Create job function on OperationInfo class
+- DONE ADD option to create that adds all possible params to a job, with a combination of default values, supplied values, and "NOTSET"
 - DONE ADD yaml file output example
 - DONE move build action to job to action from esi_provider
 - ADD organize testing, offer fixtures for some EsiJobs, and EsiWorkOrders?

@@ -180,9 +180,13 @@ def default_callback_collection() -> CallbackCollection:
     return callback_collection
 
 
+# @click.command()
 def completion_op_id(ctx: typer.Context, incomplete: str):
     _ = ctx
     completion = []
+
+    # ctx_hack = get_current_context()
+    # typer.echo(ctx_hack.obj["operation_manifest"])
     for name in OPID:
         if name.startswith(incomplete):
             completion.append(name)

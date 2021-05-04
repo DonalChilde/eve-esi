@@ -1,9 +1,12 @@
 from typing import Dict
 
+import click
 import typer
+from rich import inspect
 
 app = typer.Typer()
 app2 = typer.Typer()
+app3 = typer.Typer()
 app.add_typer(app2, name="schlock")
 
 RULES = {
@@ -26,8 +29,10 @@ def hello(ctx: typer.Context, name: str):
 
 
 def autocomplete_rules(ctx: typer.Context):
+    # typer.echo(inspect(ctx))
+    # typer.echo(repr(ctx.obj))
     rules: Dict = ctx.obj["rules"]
-    comps = list(rules)
+    comps = list(rules.keys())
     return comps
 
 

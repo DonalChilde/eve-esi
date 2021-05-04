@@ -33,16 +33,6 @@ def test_create(esi_schema: FileResource):
     assert "eve-esi create jobs [OPTIONS] OP_ID" in help_result.output
 
 
-def test_create_job(operation_manifest: OperationManifest):
-    op_id = "get_markets_region_id_history"
-    parameters = {"region_id": 10000002, "type_id": 34}
-    callback_config = ""
-    job: EsiJob = create.create_job(
-        op_id, parameters, callback_config, operation_manifest
-    )
-    assert job.op_id == op_id
-
-
 def test_decode_param_string():
     # good string
     good_params = {"region_id": 34}
@@ -102,7 +92,8 @@ def test_default_file_path(operation_manifest: OperationManifest, test_app_dir):
     callbacks = create.default_callback_collection()
     default_template = "job_data/${esi_job_op_id}-${esi_job_uid}.json"
     template = Template(default_template)
-    job: EsiJob = create.create_job(op_id, parameters, callbacks, operation_manifest)
+    op_info = operation_manifest.op_info(op_id)
+    job: EsiJob = op_info.create_job(parameters, callbacks)
     work_order = EsiWorkOrder(output_path=str(test_app_dir))
 
     work_order.jobs.append(job)
@@ -143,7 +134,7 @@ def test_default_file_path(operation_manifest: OperationManifest, test_app_dir):
 #         assert key not in filtered_params
 
 
-def test_from_op_id_save_created_job(test_app_dir: Path, esi_schema: FileResource):
+def test_from_op_id_save_created_job_json(test_app_dir: Path, esi_schema: FileResource):
     runner = CliRunner()
     op_id = "get_markets_region_id_history"
     parameters = {"region_id": 10000002, "type_id": 34}
@@ -156,6 +147,7 @@ def test_from_op_id_save_created_job(test_app_dir: Path, esi_schema: FileResourc
             "create",
             "jobs",
             op_id,
+            "-d",
             "-p",
             json.dumps(parameters),
             str(output_path),
@@ -166,6 +158,37 @@ def test_from_op_id_save_created_job(test_app_dir: Path, esi_schema: FileResourc
     assert result.exit_code == 0
     sub_dir = output_path / Path("created-jobs")
     json_files = list(sub_dir.glob("*.json"))
+    assert len(json_files) == 1
+    for file in json_files:
+        assert file.stat().st_size > 10
+
+
+def test_from_op_id_save_created_job_yaml(test_app_dir: Path, esi_schema: FileResource):
+    runner = CliRunner()
+    op_id = "get_markets_region_id_history"
+    parameters = {"region_id": 10000002, "type_id": 34}
+    output_path = test_app_dir / Path("test_from_op_id_save_created_job")
+    result = runner.invoke(
+        app,
+        [
+            "-s",
+            str(esi_schema.file_path),
+            "create",
+            "jobs",
+            op_id,
+            "-d",
+            "-f",
+            "yaml",
+            "-p",
+            json.dumps(parameters),
+            str(output_path),
+        ],
+        catch_exceptions=False,
+    )
+    print(result.output)
+    assert result.exit_code == 0
+    sub_dir = output_path / Path("created-jobs")
+    json_files = list(sub_dir.glob("*.yaml"))
     assert len(json_files) == 1
     for file in json_files:
         assert file.stat().st_size > 10

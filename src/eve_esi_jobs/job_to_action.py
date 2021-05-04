@@ -28,8 +28,8 @@ class JobsToActions:
         callback_manifest = optional_object(callback_manifest, new_manifest)
         observers = optional_object(observers, list)
         op_info = operation_manifest.op_info(esi_job.op_id)
-        op_info.check_required_params(esi_job.parameters)
-        request_params = op_info.parse_request_params(esi_job.parameters)
+        op_info.check_params(esi_job.parameters)
+        request_params = op_info.request_params_to_locations(esi_job.parameters)
         url_template = Template(operation_manifest.url_template(esi_job.op_id))
         context = {"esi_job": esi_job}
         aiohttp_args = AiohttpRequest(

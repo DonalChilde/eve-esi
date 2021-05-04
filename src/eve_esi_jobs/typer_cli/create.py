@@ -8,9 +8,9 @@ from typing import Dict, List, Optional
 import typer
 import yaml
 
+from eve_esi_jobs.exceptions import BadRequestParameter, MissingParameter
+from eve_esi_jobs.helpers import combine_dictionaries
 from eve_esi_jobs.models import CallbackCollection, EsiJob, EsiWorkOrder
-
-# from eve_esi_jobs.esi_provider import EsiProvider
 from eve_esi_jobs.operation_manifest import OperationManifest
 from eve_esi_jobs.typer_cli.cli_helpers import (
     FormatChoices,
@@ -118,6 +118,13 @@ def jobs(
         help="Optional. Full or partial parameters as a json encoded dictionary string. "
         "Keys must be valid parameters for selected op_id.",
     ),
+    default_params: bool = typer.Option(
+        False,
+        "-d",
+        "--default-params",
+        help="Include all parameters that are required, or have default values. "
+        "Missing values will be 'NOTSET'.",
+    ),
     callback_path: Optional[Path] = typer.Option(
         None,
         "-c",
@@ -164,7 +171,7 @@ def jobs(
 
     Csv input files must have properly labeled columns.
     """
-    operation_manifest = ctx.obj["operation_manifest"]
+    operation_manifest: OperationManifest = ctx.obj["operation_manifest"]
     # path_out = optional_object(path_out, Path, ".")
     if path_out.is_file:
         typer.BadParameter("path_out must not be a file.")
@@ -175,15 +182,32 @@ def jobs(
     else:
         callback_collection = load_callbacks(callback_path)
     jobs_: List[EsiJob] = []
-    if not file_data:
-        job = create_job(op_id, parameters, callback_collection, operation_manifest)
-        jobs_.append(job)
-    else:
-        for params in file_data:
-            params.update(parameters)
-            job = create_job(op_id, params, callback_collection, operation_manifest)
+    try:
+        op_info = operation_manifest.op_info(op_id)
+        if not file_data:
+            job = op_info.create_job(
+                parameters,
+                callback_collection,
+                include_default_params=default_params,
+                # only_required_default_params=False,
+                # allow_notset=False,
+            )
             jobs_.append(job)
-    # validate jobs
+        else:
+            for params in file_data:
+                params.update(parameters)
+                job = op_info.create_job(
+                    params,
+                    callback_collection,
+                    include_default_params=default_params,
+                    # only_required_default_params=False,
+                    # allow_notset=False,
+                )
+                jobs_.append(job)
+    except Exception as ex:
+        raise typer.BadParameter(
+            f"Exception creating job. {ex.__class__.__name__}: {ex}"
+        )
     for job in jobs_:
         file_path = resolve_job_file_path(job, file_name, path_out)
         try:
@@ -192,7 +216,6 @@ def jobs(
             raise typer.BadParameter(
                 f"Error saving job to {save_path}. {ex.__class__.__name__}, {ex}"
             )
-        save_string(job.serialize_json(), file_path, parents=True)
         logger.info("Saved job %s at %s", job.uid, file_path)
     typer.echo(f"{len(jobs_)} jobs saved to {path_out}")
     report_finished_task(ctx)
@@ -236,30 +259,49 @@ def load_callbacks(file_path: Path) -> CallbackCollection:
         )
 
 
-def create_job(
-    op_id: str,
-    parameters: Dict,
-    callbacks: CallbackCollection,
-    operation_manifest: OperationManifest,
-):
-    try:
-        op_info = operation_manifest.op_info(op_id=op_id)
-        op_info.check_required_params(parameters)
-    except Exception as ex:
-        raise typer.BadParameter(
-            f"Exception creating job. {ex.__class__.__name__}: {ex}"
-        )
-    params_by_location = op_info.parse_request_params(parameters)
-    filtered_params = params_by_location.consolidate_params()
-    job_dict = {
-        "op_id": op_id,
-        "name": "",
-        "parameters": filtered_params,
-        "callbacks": callbacks,
-    }
-    job = EsiJob.deserialize_obj(job_dict)
+# def create_job(
+#     op_id: str,
+#     parameters: Dict,
+#     callbacks: CallbackCollection,
+#     operation_manifest: OperationManifest,
+#     include_default_params: bool = False,
+#     only_required_default_params: bool = True,
+#     allow_notset: bool = False,
+# ):
 
-    return job
+#     try:
+#         op_info = operation_manifest.op_info(op_id=op_id)
+#         if include_default_params:
+#             default_params = op_info.build_default_params(only_required_default_params)
+#             combined_params = combine_dictionaries(parameters, [default_params])
+#         else:
+#             combined_params = parameters
+#         op_info.check_params(combined_params)
+#     except BadRequestParameter as ex:
+#         if not allow_notset:
+#             raise typer.BadParameter(
+#                 f"Exception creating job. {ex.__class__.__name__}: {ex}"
+#             )
+#     except MissingParameter as ex:
+#         raise typer.BadParameter(
+#             f"Exception creating job. {ex.__class__.__name__}: {ex}"
+#         )
+#     except Exception as ex:
+#         raise typer.BadParameter(
+#             f"Exception creating job. {ex.__class__.__name__}: {ex}"
+#         )
+
+#     filtered_params_by_location = op_info.request_params_to_locations(combined_params)
+#     job_params = filtered_params_by_location.consolidate_params()
+#     job_dict = {
+#         "op_id": op_id,
+#         "name": "",
+#         "parameters": job_params,
+#         "callbacks": callbacks,
+#     }
+#     job = EsiJob.deserialize_obj(job_dict)
+
+#     return job
 
 
 # def check_required_params(op_id, parameters, esi_provider: EsiProvider) -> bool:
