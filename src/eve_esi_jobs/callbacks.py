@@ -1,136 +1,243 @@
+import csv
+import json
 import logging
 from pathlib import Path
-from typing import Dict, Optional
+from string import Template
+from typing import Dict, List, Optional
 
-from pfmsoft.aiohttp_queue import AiohttpAction, AiohttpActionCallback
-from pfmsoft.aiohttp_queue.callbacks import SaveResultToTxtFile
+import aiofiles
+import yaml
+from more_itertools import spy
 
-from eve_esi_jobs.models import EsiJob, EsiJobResult
-
-# pylint: disable=useless-super-delegation
+from eve_esi_jobs.helpers import combine_dictionaries
+from eve_esi_jobs.models import EsiJob
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 
-class SaveEsiJobToJsonFile(SaveResultToTxtFile):
-    """Save an `EsiJob` to file after execution.
+# pylint: disable=[useless-super-delegation,no-self-use]
 
-    Previous callbacks decide if the `EsiJob` contains the result data,
-    and/or the response data"""
+
+class EsiJobCallback:
+    def __init__(self, job: EsiJob) -> None:
+        self.job = job
+
+    async def do_callback(self):
+        raise NotImplementedError()
+
+
+class SaveJobResultToTxtFile(EsiJobCallback):
+    """ """
 
     def __init__(
         self,
-        file_path: Optional[Path] = None,
+        job: EsiJob,
         mode: str = "w",
         file_path_template: Optional[str] = None,
-        path_values: Optional[Dict[str, str]] = None,
+        file_ending: Optional[str] = ".txt",
+    ) -> None:
+        super().__init__(job)
+        self.file_path: Optional[Path] = None
+        self.mode = mode
+        self.file_path_template = file_path_template
+        self.file_ending = file_ending
+
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__name__}("
+            f"file_path={self.file_path!r}, mode={self.mode!r}, "
+            f"file_path_template={self.file_path_template!r}, "
+            f"file_ending={self.file_ending!r}, job_attributes={self.job.attributes()!r}"
+            ")"
+        )
+
+    def refine_path(self):
+        """Refine the file path."""
+
+        template = Template(str(self.file_path_template))
+        resolved_string = template.safe_substitute(self.job.attributes())
+        self.file_path = Path(resolved_string)
+        if self.file_ending is not None:
+            assert self.file_path is not None
+            self.file_path = self.file_path.with_suffix(self.file_ending)
+
+    def get_data(self) -> str:
+        """expects job.result.data to be a string."""
+        assert self.job.result is not None
+        data = json.dumps(self.job.result.data)
+        return data
+
+    async def do_callback(self):
+        self.refine_path()
+        try:
+            assert self.file_path is not None
+            self.file_path.parent.mkdir(parents=True, exist_ok=True)
+            async with aiofiles.open(
+                str(self.file_path), mode=self.mode
+            ) as file:  # type:ignore
+                data = self.get_data()
+                await file.write(data)
+        except Exception as ex:
+            logger.exception("Exception saving file with %r.", self)
+            raise ex
+
+
+class SaveJobResultToJsonFile(SaveJobResultToTxtFile):
+    """ """
+
+    def __init__(
+        self,
+        job: EsiJob,
+        mode: str = "w",
+        file_path_template: Optional[str] = None,
         file_ending: str = ".json",
     ) -> None:
         super().__init__(
-            file_path,
+            job=job,
             mode=mode,
             file_path_template=file_path_template,
-            path_values=path_values,
             file_ending=file_ending,
         )
 
-    def get_data(self, caller: AiohttpAction, *args, **kwargs) -> str:
-        """expects data (caller.result in super) to be json."""
-        job: EsiJob = caller.context.get("esi_job", None)
-        if job is not None:
-            data_string = job.json(indent=2)
-        else:
-            data_string = ""
-        return data_string
+    def get_data(self) -> str:
+        """expects job.result.data to be json."""
+        assert self.job.result is not None
+        json_data = json.dumps(self.job.result.data, indent=2)
+        return json_data
 
 
-class ResultToEsiJob(AiohttpActionCallback):
-    """Copies result to `EsiJob` for use outside of event loop"""
+class SaveJobResultToYamlFile(SaveJobResultToTxtFile):
+    """ """
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        job: EsiJob,
+        mode: str = "w",
+        file_path_template: Optional[str] = None,
+        file_ending: str = ".yaml",
+    ) -> None:
+        super().__init__(
+            job=job,
+            mode=mode,
+            file_path_template=file_path_template,
+            file_ending=file_ending,
+        )
 
-    async def do_callback(self, caller: AiohttpAction, *args, **kwargs):
-        _, _ = args, kwargs
-        # NOTE this can be dropped when aiohttp-queue implements exception catch fail logic.
+    def get_data(self) -> str:
+        """expects job.result.data to be json."""
+        assert self.job.result is not None
+        yaml_data = yaml.dump(self.job.result.data, sort_keys=False)
+        return yaml_data
+
+
+class SaveListOfDictResultToCSVFile(SaveJobResultToTxtFile):
+    """Save the result to a CSV file.
+
+    Expects the job.result.data to be a List[Dict].
+    """
+
+    def __init__(
+        self,
+        job: EsiJob,
+        mode: str = "w",
+        file_path_template: Optional[str] = None,
+        file_ending: str = ".csv",
+        field_names: Optional[List[str]] = None,
+        additional_fields: Dict = None,
+    ) -> None:
+        super().__init__(
+            job=job,
+            mode=mode,
+            file_path_template=file_path_template,
+            file_ending=file_ending,
+        )
+        self.field_names = field_names
+        self.additional_fields = additional_fields
+
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__name__}("
+            f"file_path={self.file_path!r}, mode={self.mode!r}, "
+            f"file_path_template={self.file_path_template!r}, "
+            f"file_ending={self.file_ending!r}, job_attributes={self.job.attributes()!r}, "
+            f"field_names={self.field_names!r}, additional_fields={self.additional_fields!r}, "
+            ")"
+        )
+
+    def get_data(self) -> List[Dict]:  # type: ignore
+        """expects job.result.data to be a List[Dict]."""
+        assert self.job.result is not None
+        assert self.job.result.data is list
+        data: List[Dict] = self.job.result.data
+        if self.additional_fields is not None:
+            combined_data = []
+            for item in data:
+                combined_data.append(
+                    combine_dictionaries(item, [self.additional_fields])
+                )
+            return combined_data
+        return data
+
+    async def do_callback(self):
+        self.refine_path()
         try:
-            esi_job: "EsiJob" = caller.context.get("esi_job", None)
-            if esi_job is None:
-                raise ValueError(f"EsiJob was not attatched to {caller}")
-            if esi_job.result is None:
-                esi_job.result = EsiJobResult()
-            esi_job.result.data = caller.response_data
-            job_attributes = esi_job.attributes()
-            esi_job.result.attempts = caller.attempts
-            esi_job.result.work_order_id = job_attributes.get("ewo_id", "")  # type: ignore
-            esi_job.result.work_order_name = job_attributes.get("ewo_name", "")  # type: ignore
-            esi_job.result.work_order_uid = job_attributes.get("ewo_uid", "")
+            assert self.file_path is not None
+            self.file_path.parent.mkdir(parents=True, exist_ok=True)
+            data = self.get_data()
+            if self.field_names is None:
+                first, data_iter = spy(data)
+                self.field_names = list(first[0].keys())
+                data = data_iter
+            with open(str(self.file_path), mode=self.mode) as file:
+                writer = csv.DictWriter(file, fieldnames=self.field_names)
+                writer.writeheader()
+                for item in data:
+                    writer.writerow(item)
         except Exception as ex:
-            self.fail(caller, f"{ex.__class__.__name__} {ex}")
+            logger.exception("Exception saving file with %r.", self)
             raise ex
 
-    def __repr__(self) -> str:
-        return (
-            f"{self.__class__.__name__}("
-            f"state={self.state!r}, state_message={self.state_message!r}"
-            ")"
+
+class SaveEsiJobToJsonFile(SaveJobResultToTxtFile):
+    """Save an `EsiJob` to file."""
+
+    def __init__(
+        self,
+        job: EsiJob,
+        mode: str = "w",
+        file_path_template: Optional[str] = None,
+        file_ending: str = ".json",
+    ) -> None:
+        super().__init__(
+            job=job,
+            mode=mode,
+            file_path_template=file_path_template,
+            file_ending=file_ending,
         )
 
+    def get_data(self) -> str:
+        """ """
+        return self.job.serialize_json()
 
-class ResponseToEsiJob(AiohttpActionCallback):
-    """Copies response info to the `EsiJob` in json format."""
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+class SaveEsiJobToYamlFile(SaveJobResultToTxtFile):
+    """Save an `EsiJob` to file."""
 
-    async def do_callback(self, caller: AiohttpAction, *args, **kwargs):
-        _, _ = args, kwargs
-        # NOTE this can be dropped when aiohttp-queue implements exception catch fail logic.
-        try:
-            esi_job: EsiJob = caller.context.get("esi_job", None)
-            if esi_job is None:
-                raise ValueError(f"EsiJob was not attatched to {caller}")
-            # if caller.response is not None:
-            #     esi_job.result["response"] = response_to_json(caller.response)
-            if esi_job.result is None:
-                esi_job.result = EsiJobResult()
-            esi_job.result.response = caller.response_meta_to_dict()
-            job_attributes = esi_job.attributes()
-            # print(job_attributes)
-            esi_job.result.attempts = caller.max_attempts
-            esi_job.result.work_order_id = job_attributes.get("ewo_id", "")
-            esi_job.result.work_order_name = job_attributes.get("ewo_name", "")
-            esi_job.result.work_order_uid = job_attributes.get("ewo_uid", "")
-        except Exception as ex:
-            self.fail(caller, f"{ex.__class__.__name__} {ex}")
-            raise ex
-
-    def __repr__(self) -> str:
-        return (
-            f"{self.__class__.__name__}("
-            f"state={self.state!r}, state_message={self.state_message!r}"
-            ")"
+    def __init__(
+        self,
+        job: EsiJob,
+        mode: str = "w",
+        file_path_template: Optional[str] = None,
+        file_ending: str = ".yaml",
+    ) -> None:
+        super().__init__(
+            job=job,
+            mode=mode,
+            file_path_template=file_path_template,
+            file_ending=file_ending,
         )
 
-
-class LogJobFailure(AiohttpActionCallback):
-    """surplus to requirements? AiohttpAction will log a failure as well, just without the job info."""
-
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-
-    async def do_callback(self, caller: AiohttpAction, *args, **kwargs):
-        _, _ = args, kwargs
-        try:
-            esi_job: EsiJob = caller.context.get("esi_job", None)
-            logger.warning("Job failed. %r", esi_job)
-        except Exception as ex:
-            logger.exception("failure in callback %s", ex)
-
-    def __repr__(self) -> str:
-        return (
-            f"{self.__class__.__name__}("
-            f"state={self.state!r}, state_message={self.state_message!r}"
-            ")"
-        )
+    def get_data(self) -> str:
+        """ """
+        return self.job.serialize_yaml()
