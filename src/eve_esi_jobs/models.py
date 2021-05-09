@@ -1,9 +1,8 @@
 import json
 import logging
 from datetime import datetime
-from itertools import chain
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid4
 
 import yaml
@@ -96,26 +95,26 @@ class JobCallback(BaseModel, SerializeMixin):
         extra = "forbid"
 
 
-class CallbackCollection(BaseModel, SerializeMixin):
-    """
-    A collection of callbacks used by an :class:`EsiJob`
+# class CallbackCollection(BaseModel, SerializeMixin):
+#     """
+#     A collection of callbacks used by an :class:`EsiJob`
 
-    Args:
-        success (List[JobCallback]): Callbacks to be used for a successful request.
-        retry (List[JobCallback]): Callbacks to be used when a request is retried.
-        fail (List[JobCallback]): Callbacks to be used for a failed request.
-    """
+#     Args:
+#         success (List[JobCallback]): Callbacks to be used for a successful request.
+#         retry (List[JobCallback]): Callbacks to be used when a request is retried.
+#         fail (List[JobCallback]): Callbacks to be used for a failed request.
+#     """
 
-    success: List[JobCallback] = []
-    retry: List[JobCallback] = []
-    fail: List[JobCallback] = []
+#     success: List[JobCallback] = []
+#     retry: List[JobCallback] = []
+#     fail: List[JobCallback] = []
 
-    class Config:
-        extra = "forbid"
+#     class Config:
+#         extra = "forbid"
 
 
 class EsiJobResult(BaseModel, SerializeMixin):
-    """
+    r"""
     The result of an executed :class:`EsiJob`.
 
     Normally this class will be used by a callback to store response data on a job.
@@ -176,19 +175,11 @@ class EsiJob(BaseModel, SerializeMixin):
     max_attempts: int = 5
     parameters: Dict[str, Any] = {}
     additional_attributes: Dict[str, Any] = {}
-    callbacks: CallbackCollection = CallbackCollection()
+    callbacks: List[JobCallback] = []
     result: Optional[EsiJobResult] = None
 
     class Config:
         extra = "forbid"
-
-    def callback_iter(self) -> Iterable:
-        """An iterator that chains all the callbacks"""
-        return chain(
-            self.callbacks.success,
-            self.callbacks.retry,
-            self.callbacks.fail,
-        )
 
     def update_attributes(self, override: Dict):
         """Update esi_job.additional_attributes with additional values"""
