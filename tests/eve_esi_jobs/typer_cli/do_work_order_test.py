@@ -31,7 +31,9 @@ def test_do_job_help(esi_schema):
     assert "Usage: eve-esi do job [OPTIONS] PATH_IN [PATH_OUT]" in result.output
 
 
-def test_do_job(esi_schema, jobs: Dict[str, FileResource], test_app_dir: Path):
+def test_do_job(
+    esi_schema: FileResource, jobs: Dict[str, FileResource], test_app_dir: Path
+):
     runner = CliRunner()
     job_path = jobs["get_industry_facilities.json"].file_path
     output_path = test_app_dir / Path("test-do-job")
@@ -49,7 +51,7 @@ def test_do_job(esi_schema, jobs: Dict[str, FileResource], test_app_dir: Path):
 
 
 def test_do_example_workorder(
-    esi_schema, workorders: Dict[str, FileResource], test_app_dir: Path
+    esi_schema: FileResource, workorders: Dict[str, FileResource], test_app_dir: Path
 ):
     runner = CliRunner()
     ewo_path = workorders["example_workorder.json"].file_path
@@ -64,7 +66,7 @@ def test_do_example_workorder(
             str(ewo_path),
             str(output_path),
         ],
-        catch_exceptions=False,
+        catch_exceptions=True,
     )
     print(result.output)
     assert result.exit_code == 0

@@ -5,7 +5,14 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "eve-esi",
+      "name": "eve-esi test",
+      "type": "python",
+      "request": "test",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "eve-esi cli",
       "type": "python",
       "request": "launch",
       "program": "${workspaceFolder}/src/eve_esi_jobs/typer_cli/eve_esi_cli.py",

@@ -4,13 +4,14 @@
 
 import json
 import logging
+from datetime import datetime
 from pathlib import Path
 from time import perf_counter_ns
 from typing import Optional
 
 import typer
 
-# from eve_esi_jobs.esi_provider import EsiProvider
+from eve_esi_jobs.eve_esi_jobs import EveEsiJobs
 from eve_esi_jobs.operation_manifest import OperationManifest
 from eve_esi_jobs.typer_cli.app_config import make_config_from_env
 from eve_esi_jobs.typer_cli.app_data import load_schema
@@ -48,8 +49,7 @@ def eve_esi(
     config = make_config_from_env()
     typer.echo(f"Logging at {config.log_path}")
     ctx.obj = {}
-    start = perf_counter_ns()
-    ctx.obj["start_time"] = start
+    ctx.obj["start_time"] = datetime.now()
     logger.info("loading schema")
     ctx.obj["config"] = config
     schema = None
@@ -76,10 +76,10 @@ def eve_esi(
             schema = download_json(config.schema_url)
             schema_source = config.schema_url
     try:
-        operation_manifest = OperationManifest(schema)
+        runner = EveEsiJobs(esi_schema=schema)
     except Exception as ex:
         logger.exception(
-            "Tried to make operation_manifest with invalid schema. version: %s, source: %s, error: %s, msg: %s",
+            "Tried to make EveEsiJobs with invalid schema. version: %s, source: %s, error: %s, msg: %s",
             version,
             schema_source,
             ex.__class__.__name__,
@@ -88,8 +88,8 @@ def eve_esi(
         raise typer.BadParameter(
             "The provided schema was invalid. please try a different one."
         )
-    ctx.obj["operation_manifest"] = operation_manifest
-    typer.echo(f"Loaded ESI schema version {operation_manifest.version}.\n")
+    ctx.obj["runner"] = runner
+    typer.echo(f"Loaded ESI schema version {runner.operation_manifest.version}.\n")
 
 
 if __name__ == "__main__":

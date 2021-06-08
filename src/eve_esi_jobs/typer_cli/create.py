@@ -8,17 +8,14 @@ from typing import Dict, List, Optional
 import typer
 import yaml
 
+from eve_esi_jobs.eve_esi_jobs import EveEsiJobs
 from eve_esi_jobs.exceptions import BadRequestParameter, MissingParameter
-from eve_esi_jobs.helpers import combine_dictionaries
-from eve_esi_jobs.models import CallbackCollection, EsiJob, EsiWorkOrder
-from eve_esi_jobs.operation_manifest import OperationManifest
+from eve_esi_jobs.models import EsiJob, EsiWorkOrder
 from eve_esi_jobs.typer_cli.cli_helpers import (
     FormatChoices,
     check_for_op_id,
     completion_op_id,
-    default_callback_collection,
     report_finished_task,
-    save_string,
 )
 
 app = typer.Typer(help="Create jobs and workorders")
@@ -63,7 +60,7 @@ def workorder(
 
     Can also add jobs to an existing Workorder.
     """
-    _ = ctx
+    runner: EveEsiJobs = ctx.obj["runner"]
     if not path_in.exists():
         raise typer.BadParameter(f"{path_in} does not exist.")
     if path_in.is_file():
@@ -73,27 +70,29 @@ def workorder(
     loaded_jobs = []
     for maybe_job in maybe_jobs:
         try:
-            loaded_job = EsiJob.deserialize_file(maybe_job)
+            loaded_job = runner.deserialize_job(file_path=maybe_job)
         except Exception as ex:
             raise typer.BadParameter(f"Error decoding job at {maybe_job}, msg:{ex}")
         loaded_jobs.append(loaded_job)
     if not loaded_jobs:
         raise typer.BadParameter(f"No jobs found at {path_in}")
     if ewo_path is None:
-        ewo_ = get_default_workorder()
+        ewo = get_default_workorder()
     else:
         try:
-            ewo_ = EsiWorkOrder.deserialize_file(ewo_path)
+            ewo = runner.deserialize_workorder(file_path=ewo_path)
         except Exception as ex:
             raise typer.BadParameter(
                 f"Error decoding workorder string. {ex.__class__.__name__}, {ex}"
             )
-    ewo_.jobs.extend(loaded_jobs)
+    ewo.jobs.extend(loaded_jobs)
     output_path = path_out / file_name
     out_template = Template(str(output_path))
-    file_path = Path(out_template.substitute(ewo_.attributes()))
+    file_path = Path(out_template.substitute(ewo.attributes()))
     try:
-        saved_path = ewo_.serialize_file(file_path, format_id)
+        saved_path, _ = runner.serialize_workorder(
+            workorder=ewo, file_path=file_path, data_format=format_id
+        )
         typer.echo(f"Workorder saved to {saved_path}")
         report_finished_task(ctx)
     except Exception as ex:
@@ -124,12 +123,6 @@ def jobs(
         "--default-params",
         help="Include all parameters that are required, or have default values. "
         "Missing values will be 'NOTSET'.",
-    ),
-    callback_path: Optional[Path] = typer.Option(
-        None,
-        "-c",
-        "--callbacks",
-        help="Optional. Path to custom callbacks to be used. ",
     ),
     file_name: str = typer.Option(
         "created-jobs/${esi_job_op_id}-${esi_job_uid}",
@@ -171,24 +164,20 @@ def jobs(
 
     Csv input files must have properly labeled columns.
     """
-    operation_manifest: OperationManifest = ctx.obj["operation_manifest"]
+    runner: EveEsiJobs = ctx.obj["runner"]
     # path_out = optional_object(path_out, Path, ".")
     if path_out.is_file:
         typer.BadParameter("path_out must not be a file.")
     file_data: Optional[List[Dict]] = get_params_from_file(data_path)
     parameters: Dict = decode_param_string(param_string)
-    if callback_path is None:
-        callback_collection = default_callback_collection()
-    else:
-        callback_collection = load_callbacks(callback_path)
     jobs_: List[EsiJob] = []
     try:
-        op_info = operation_manifest.op_info(op_id)
         if not file_data:
-            job = op_info.create_job(
-                parameters,
-                callback_collection,
-                include_default_params=default_params,
+            job = runner.create_job(
+                op_id=op_id,
+                parameters=parameters,
+                callbacks=[],
+                # include_default_params=default_params,
                 # only_required_default_params=False,
                 # allow_notset=False,
             )
@@ -196,10 +185,10 @@ def jobs(
         else:
             for params in file_data:
                 params.update(parameters)
-                job = op_info.create_job(
-                    params,
-                    callback_collection,
-                    include_default_params=default_params,
+                job = runner.create_job(
+                    op_id=op_id,
+                    parameters=params,
+                    callbacks=[],
                     # only_required_default_params=False,
                     # allow_notset=False,
                 )
@@ -211,7 +200,10 @@ def jobs(
     for job in jobs_:
         file_path = resolve_job_file_path(job, file_name, path_out)
         try:
-            save_path = job.serialize_file(file_path, format_id)
+            save_path, _ = runner.serialize_job(
+                job=job, file_path=file_path, data_format=format_id
+            )
+            # save_path = job.serialize_file(file_path, format_id)
         except Exception as ex:
             raise typer.BadParameter(
                 f"Error saving job to {save_path}. {ex.__class__.__name__}, {ex}"
@@ -249,14 +241,15 @@ def get_params_from_file(file_path: Optional[Path]) -> Optional[List[Dict]]:
     return None
 
 
-def load_callbacks(file_path: Path) -> CallbackCollection:
-    try:
-        callback_collection = CallbackCollection.deserialize_file(file_path)
-        return callback_collection
-    except Exception as ex:
-        raise typer.BadParameter(
-            f"Error decoding callback string. {ex.__class__.__name__}, {ex}"
-        )
+# def load_callbacks(file_path: Path) -> List[JobCallback]:
+#     try:
+#         # callback_collection = CallbackCollection.deserialize_file(file_path)
+#         raise NotImplementedError()
+#         # return callback_collection
+#     except Exception as ex:
+#         raise typer.BadParameter(
+#             f"Error decoding callback string. {ex.__class__.__name__}, {ex}"
+#         )
 
 
 # def create_job(

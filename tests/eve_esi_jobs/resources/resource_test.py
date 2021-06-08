@@ -8,9 +8,7 @@ from pathlib import Path
 import yaml
 
 from eve_esi_jobs import models
-from eve_esi_jobs.model_helpers import default_callback_collection
-from eve_esi_jobs.typer_cli.examples import (
-    save_callback_examples,
+from eve_esi_jobs.typer_cli.examples import (  # save_callback_examples,
     save_input_data_examples,
     save_job_examples,
     save_work_order_examples,
@@ -39,14 +37,14 @@ def test_ewo_examples():
     init.touch()
 
 
-def test_callback_collections():
-    if not REFRESH_RESOURCES:
-        assert True
-        return
-    parent_path = Path(__file__).parent
-    data_path = save_callback_examples(parent_path)
-    init = data_path / Path("__init__.py")
-    init.touch()
+# def test_callback_collections():
+#     if not REFRESH_RESOURCES:
+#         assert True
+#         return
+#     parent_path = Path(__file__).parent
+#     data_path = save_callback_examples(parent_path)
+#     init = data_path / Path("__init__.py")
+#     init.touch()
 
 
 def test_save_input_data_examples():
@@ -155,7 +153,7 @@ def missing_parameter_job():
         id_="missing-parameter",
         op_id="get_markets_region_id_history",
         parameters={"region_id": 10000002},
-        callbacks=default_callback_collection(),
+        # callbacks=default_callback_collection(),
     )
     return job
 
@@ -167,6 +165,6 @@ def bad_parameter_job():
         id_="bad-parameter",
         op_id="get_markets_region_id_history",
         parameters={"region_id": 10000002, "type_id": 0},
-        callbacks=default_callback_collection(),
+        # callbacks=default_callback_collection(),
     )
     return job

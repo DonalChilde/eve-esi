@@ -8,7 +8,7 @@ import typer
 from tests.eve_esi_jobs.conftest import FileResource
 from typer.testing import CliRunner
 
-from eve_esi_jobs import do_workorder
+# from eve_esi_jobs import do_workorder
 from eve_esi_jobs.helpers import combine_dictionaries
 from eve_esi_jobs.models import EsiJob, EsiWorkOrder
 from eve_esi_jobs.operation_manifest import OperationManifest
@@ -86,22 +86,22 @@ def test_get_params_from_file(sample_data: Dict[str, FileResource]):
     assert result is None
 
 
-def test_default_file_path(operation_manifest: OperationManifest, test_app_dir):
-    op_id = "get_markets_region_id_history"
-    parameters = {"region_id": 10000002, "type_id": 34}
-    callbacks = create.default_callback_collection()
-    default_template = "job_data/${esi_job_op_id}-${esi_job_uid}.json"
-    template = Template(default_template)
-    op_info = operation_manifest.op_info(op_id)
-    job: EsiJob = op_info.create_job(parameters, callbacks)
-    work_order = EsiWorkOrder(output_path=str(test_app_dir))
+# def test_default_file_path(operation_manifest: OperationManifest, test_app_dir):
+#     op_id = "get_markets_region_id_history"
+#     parameters = {"region_id": 10000002, "type_id": 34}
+#     callbacks = create.default_callback_collection()
+#     default_template = "job_data/${esi_job_op_id}-${esi_job_uid}.json"
+#     template = Template(default_template)
+#     op_info = operation_manifest.op_info(op_id)
+#     job: EsiJob = op_info.create_job(parameters, callbacks)
+#     work_order = EsiWorkOrder(output_path=str(test_app_dir))
 
-    work_order.jobs.append(job)
-    # inspect(work_order)
-    expected_path: Path = test_app_dir / Path(template.substitute(job.attributes()))
-    do_workorder(work_order, operation_manifest)
-    assert expected_path.is_file()
-    assert expected_path.stat().st_size > 10
+#     work_order.jobs.append(job)
+#     # inspect(work_order)
+#     expected_path: Path = test_app_dir / Path(template.substitute(job.attributes()))
+#     do_workorder(work_order, operation_manifest)
+#     assert expected_path.is_file()
+#     assert expected_path.stat().st_size > 10
 
 
 # def test_check_required_parameters(operation_manifest: OperationManifest):

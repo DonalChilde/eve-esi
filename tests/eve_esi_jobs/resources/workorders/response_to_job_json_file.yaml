@@ -1,21 +1,15 @@
 name: response_to_job_json_file
 description: An example of saving a completed job to a json file, including the response
   data. Result data intentionaly left out.
-uid: 95ee92af-630d-4776-aa41-e4ab10eae1b6
+uid: 7b7a2b6d-11e3-436d-892d-de77b300e1d1
 output_path: samples/order_output/${ewo_name}
 jobs:
-- uid: 87594288-c696-4038-a220-adf70bbea620
+- uid: 94a847b0-8d0a-4806-817f-8944b2dd456f
   op_id: get_markets_region_id_history
   parameters:
     region_id: 10000002
     type_id: 34
   callbacks:
-    success:
-    - callback_id: response_content_to_json
-    - callback_id: response_to_esi_job
-    - callback_id: save_esi_job_to_json_file
-      kwargs:
-        file_path_template: data/market-history/${region_id}-${type_id}-esi-job.json
-    fail:
-    - callback_id: response_to_esi_job
-    - callback_id: log_job_failure
+  - callback_id: save_esi_job_to_json_file
+    kwargs:
+      file_path_template: data/market-history/${region_id}-${type_id}-esi-job.json

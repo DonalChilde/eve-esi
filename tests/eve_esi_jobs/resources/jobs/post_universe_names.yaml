@@ -1,21 +1,14 @@
 name: post_universe_names
-uid: 6168ecb7-5dc6-468f-80a6-69e2ff276c84
+uid: d8fcf819-2bae-46e0-9c79-16433d16186b
 op_id: post_universe_names
 parameters:
   ids:
   - 95465499
   - 30000142
 callbacks:
-  success:
-  - callback_id: response_content_to_json
-  - callback_id: response_to_esi_job
-  - callback_id: result_to_esi_job
-  - callback_id: save_esi_job_to_json_file
-    kwargs:
-      file_path_template: data/post_universe_names-${esi_job_uid}-esi-job.json
-  - callback_id: save_result_to_json_file
-    kwargs:
-      file_path_template: data/post_universe_names-${esi_job_uid}.json
-  fail:
-  - callback_id: response_to_esi_job
-  - callback_id: log_job_failure
+- callback_id: save_esi_job_to_json_file
+  kwargs:
+    file_path_template: data/post_universe_names-${esi_job_uid}-esi-job.json
+- callback_id: save_result_to_json_file
+  kwargs:
+    file_path_template: data/post_universe_names-${esi_job_uid}.json

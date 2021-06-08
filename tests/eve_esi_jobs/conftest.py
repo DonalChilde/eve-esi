@@ -32,15 +32,15 @@ def logger_(test_log_path):
     log_dir_path: Path = test_log_path / Path("test-logs")
     log_dir_path.mkdir(parents=True, exist_ok=True)
     log_file_path = log_dir_path / Path(log_file_name)
-    handler = file_handler(log_file_path)
+    handler = file_handler(log_file_path, log_level=log_level)
     _logger.addHandler(handler)
     _logger.setLevel(log_level)
     ############################################################
     # NOTE add file handler to other library modules as needed #
     ############################################################
-    # async_logger = logging.getLogger("eve_esi_jobs")
-    # async_logger.addHandler(file_handler)
-    # async_logger.setLevel(log_level)
+    async_logger = logging.getLogger("eve_esi_jobs")
+    async_logger.addHandler(handler)
+    async_logger.setLevel(log_level)
     return _logger
 
 
@@ -132,11 +132,11 @@ def jobs_() -> Dict[str, FileResource]:
     return sample_data
 
 
-@pytest.fixture(scope="session", name="callback_collections")
-def callback_collections_() -> Dict[str, FileResource]:
-    resource_path: str = "tests.eve_esi_jobs.resources.callbacks"
-    sample_data = make_file_resources_from_resource_path(resource_path)
-    return sample_data
+# @pytest.fixture(scope="session", name="callback_collections")
+# def callback_collections_() -> Dict[str, FileResource]:
+#     resource_path: str = "tests.eve_esi_jobs.resources.callbacks"
+#     sample_data = make_file_resources_from_resource_path(resource_path)
+#     return sample_data
 
 
 def make_file_resources_from_resource_path(

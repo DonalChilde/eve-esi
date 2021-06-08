@@ -2,26 +2,49 @@
 
 ## before release
 
-- DONE ADD Create job function on OperationInfo class
-- DONE ADD option to create that adds all possible params to a job, with a combination of default values, supplied values, and "NOTSET"
-- DONE ADD yaml file output example
-- DONE move build action to job to action from esi_provider
-- ADD organize testing, offer fixtures for some EsiJobs, and EsiWorkOrders?
-  - maybe just work from current test_resources
-  - look through older examples, make sure they are clear.
-- One place for pre defined callback collections?
-- DONE EsiProvider rethink
-  - op_id info rethink
-    - split parameters by location
-    - add function to return required parameters
-- DONE AiohttpQueue v0.2.0 release fixes
-  - update callbacks
-    - repr
-    - file_path_template
-- DONE Callback manifest redo
-  - callback manifest default loads known callbacks, can add additional callbacks (user defined)
-  - add_callback(callback_id,callback,factory_function, valid_targets)
-- DONE add yaml function to models, mixin?
+## rewrite to remove pfmsoft-aiohttp-queue dependency
+
+- test aiohttp worker retry code.
+  - make use of worker retry logic in EsiRemote.
+    - remove retry logic from EsiRemote.
+- update source code to use new AiohttpQueueRunner.
+  - rethink success fail signals, re task exceptions.
+- reorg source exceptions, include job.
+- update EveEsiJob queue runners to AiohtpQueue format.
+- make new observer for cli.
+  - observers need to report job,exceptions
+    - collect multiple exceptions from callbacks, make it so each callback has a chance to complete
+    - use task exception reporting instead?
+- wrap custom exceptions in callbacks
+- eval moving/bridging job creation from operation_manifest to EveEsiJobs
+- Update cli to use EveEsiJobs. pass that around instead of op_man
+- Remove call_collection from tests
+- Update cli tests.
+- DONE Need a separate queue implementation for AiohttpRequests to get pages
+  - change current code over to use new AiohttpRequest
+  - simplify esiremote, remove duplicated function re AiohttpRequest and EsiSourceResult
+    - rethink what im trying to accomplish here.
+- fix pages - do pages have separate etags?
+- implement local store
+  - DONE Simplest solution is complete
+- survey for logging
+- fix cli
+- update docs
+- better messaging for observers
+  - Make logging observer
+- DONE move callbacks to eve-esi, adjust method sig.
+  - callbacks work with jobs, not aiohttp.
+- Jobs only have success callbacks.
+  - DONE update model
+- make remote and local providers.
+  - app data store
+    - data schema
+    - route for non-direct esi data? eg. combined calls like region_id,name
+      - static, derived, dynamic? some way to categorize, so that it is easy to regenerate selected parts of data store.
+  - esi source
+- make queue for jobs
+- worker to run jobs queue
+- def ensure_type(value,expected_type,custom_cast=None)->T:
 
 - Docs
   - oh so many docs
@@ -73,7 +96,28 @@
 - ADD figure out auth
   - start with token in header? aquire manually and test function.
 
-aiohttp-queue
+## Project outline
 
-- json save to file pass json kwargs
-- yaml save to file pass yaml kwargs
+### API
+
+- Create jobs that can be saved to disk for reuse.
+  - Serialize and deserialize from supported formats. Json, Yaml.
+- Jobs offer optional callbacks for post processing.
+  - Most likely used to save data to disk.
+  - Callbacks should not change data stored on a job, make a copy as necessary.
+- Do a list of jobs concurrently.
+  - Put jobs in a queue.
+  - Use a defined number of workers to do the jobs.
+    - Workers support observer pattern for reporting on progress.
+  - Retrieved data is stored in the job for later processing.
+    - Also store retrieval state, and error messages.
+    - Location of data used, local, remote
+- Support local and remote data sources.
+  - sources can be None, but one must exist
+  - Local source is checked first for matching data.
+    - Local source can be selectively purged/refreshed/expired.
+    - Local source offers reports on age of data, size, etc.
+  - Remote source is then checked to see if data is changed (Etag).
+    - Remote source supports rate limiting, ops per second.
+    - Remote source supports retrying for certain errors (500s).
+  - Most recent data attatched to job, updated in local source as necessary.

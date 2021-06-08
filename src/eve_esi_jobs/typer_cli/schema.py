@@ -3,19 +3,15 @@
 import dataclasses
 import json
 import logging
+import urllib.request
 from enum import Enum
 from pathlib import Path
 from typing import Dict, Optional
 
 import typer
 import yaml
-from pfmsoft.aiohttp_queue import ActionCallbacks, AiohttpAction
-from pfmsoft.aiohttp_queue.aiohttp import AiohttpRequest
-from pfmsoft.aiohttp_queue.callbacks import ResponseContentToJson
-from pfmsoft.aiohttp_queue.runners import do_single_action_runner
 
-# from eve_esi_jobs.esi_provider import EsiProvider
-from eve_esi_jobs.operation_manifest import OperationManifest
+from eve_esi_jobs.eve_esi_jobs import EveEsiJobs
 from eve_esi_jobs.typer_cli.app_config import EveEsiJobConfig
 from eve_esi_jobs.typer_cli.app_data import save_json_to_app_data
 from eve_esi_jobs.typer_cli.cli_helpers import (
@@ -39,9 +35,9 @@ def browse(
     ),
 ):
     """Browse schema by op_id."""
-    operation_manifest: OperationManifest = ctx.obj["operation_manifest"]
+    runner: EveEsiJobs = ctx.obj["runner"]
     try:
-        op_info = operation_manifest.op_info(op_id)
+        op_info = runner.operation_manifest.op_info(op_id)
     except ValueError:
         raise typer.BadParameter(f"Invalid op_id: {op_id}")
     typer.echo(yaml.dump(dataclasses.asdict(op_info), sort_keys=False))
@@ -65,8 +61,8 @@ def list_op_ids(
     ),
 ):
     """List available op_ids."""
-    operation_manifest: OperationManifest = ctx.obj["operation_manifest"]
-    op_id_keys = operation_manifest.available_op_ids()
+    runner: EveEsiJobs = ctx.obj["runner"]
+    op_id_keys = runner.operation_manifest.available_op_ids()
     op_id_keys.sort()
     if output == OpidOutput.JSON:
         op_ids = json.dumps(op_id_keys, indent=2)
@@ -123,19 +119,17 @@ def download(
 
 def download_json(url):
     """Convenience method for downloading a single url, expecting json"""
-    callbacks = ActionCallbacks(success=[ResponseContentToJson()])
-    aiohttp_args = AiohttpRequest(method="get", url=url)
-    action = AiohttpAction(aiohttp_args=aiohttp_args, callbacks=callbacks)
-    do_single_action_runner(action)
-    if action.response.status == 200:
-        return action.response_data
-    logger.warning(
-        "Failed to download url. url: %s, status: %s, msg: %s",
-        action.response.real_url,
-        action.response.status,
-        action.response_data,
-    )
-    typer.echo(
-        f"Url: {url} failed with code: {action.response.status} {action.response.reason}"
-    )
+    # FIXME move to helpers
+    # FIXME check for 200
+    # https://stackoverflow.com/a/22530527/105844
+    # URL = "https://esi.evetech.net/latest/swagger.json"
+    # NOTE response changed as of 3.9 handle deprecated?
+    # https://docs.python.org/3/library/urllib.request.html#urllib.response.addinfourl
+    with urllib.request.urlopen(url) as response:
+        if response.status == 200:
+            data = json.loads(
+                response.read().decode(response.info().get_param("charset") or "utf-8")
+            )
+            print(f"Downloaded schema from {url}")
+            return data
     return None

@@ -1,39 +1,23 @@
 {
   "name": "result_with_pages_to_json_file",
   "description": "An example of saving the raw results with a paged api to a json file.",
-  "uid": "9114332d-9a2c-4bb5-815c-7a48ef9dfe69",
+  "uid": "02d74721-9140-49fc-ae6f-e7012a741f1c",
   "output_path": "samples/order_output/${ewo_name}",
   "jobs": [
     {
-      "uid": "c61f5750-8d62-4bda-81bd-685fc1187f99",
+      "uid": "1391f818-11cb-49c5-b886-30cbb4e593d4",
       "op_id": "get_contracts_public_region_id",
       "parameters": {
         "region_id": 10000002
       },
-      "callbacks": {
-        "success": [
-          {
-            "callback_id": "response_content_to_json"
-          },
-          {
-            "callback_id": "check_for_pages"
-          },
-          {
-            "callback_id": "save_result_to_json_file",
-            "kwargs": {
-              "file_path_template": "data/public-contracts/${region_id}.json"
-            }
+      "callbacks": [
+        {
+          "callback_id": "save_result_to_json_file",
+          "kwargs": {
+            "file_path_template": "data/public-contracts/${region_id}.json"
           }
-        ],
-        "fail": [
-          {
-            "callback_id": "response_to_esi_job"
-          },
-          {
-            "callback_id": "log_job_failure"
-          }
-        ]
-      }
+        }
+      ]
     }
   ]
 }

@@ -9,6 +9,7 @@ import aiofiles
 import yaml
 from more_itertools import spy
 
+from eve_esi_jobs.exceptions import CallbackError
 from eve_esi_jobs.helpers import combine_dictionaries
 from eve_esi_jobs.models import EsiJob
 
@@ -33,8 +34,8 @@ class SaveJobResultToTxtFile(EsiJobCallback):
     def __init__(
         self,
         job: EsiJob,
+        file_path_template: str,
         mode: str = "w",
-        file_path_template: Optional[str] = None,
         file_ending: Optional[str] = ".txt",
     ) -> None:
         super().__init__(job)
@@ -78,6 +79,7 @@ class SaveJobResultToTxtFile(EsiJobCallback):
             ) as file:  # type:ignore
                 data = self.get_data()
                 await file.write(data)
+                logger.info("Data saved to %s", self.file_path)
         except Exception as ex:
             logger.exception("Exception saving file with %r.", self)
             raise ex
@@ -89,8 +91,8 @@ class SaveJobResultToJsonFile(SaveJobResultToTxtFile):
     def __init__(
         self,
         job: EsiJob,
+        file_path_template: str,
         mode: str = "w",
-        file_path_template: Optional[str] = None,
         file_ending: str = ".json",
     ) -> None:
         super().__init__(
@@ -113,8 +115,8 @@ class SaveJobResultToYamlFile(SaveJobResultToTxtFile):
     def __init__(
         self,
         job: EsiJob,
+        file_path_template: str,
         mode: str = "w",
-        file_path_template: Optional[str] = None,
         file_ending: str = ".yaml",
     ) -> None:
         super().__init__(
@@ -140,8 +142,8 @@ class SaveListOfDictResultToCSVFile(SaveJobResultToTxtFile):
     def __init__(
         self,
         job: EsiJob,
+        file_path_template: str,
         mode: str = "w",
-        file_path_template: Optional[str] = None,
         file_ending: str = ".csv",
         field_names: Optional[List[str]] = None,
         additional_fields: Dict = None,
@@ -168,7 +170,7 @@ class SaveListOfDictResultToCSVFile(SaveJobResultToTxtFile):
     def get_data(self) -> List[Dict]:  # type: ignore
         """expects job.result.data to be a List[Dict]."""
         assert self.job.result is not None
-        assert self.job.result.data is list
+        # assert self.job.result.data is list
         data: List[Dict] = self.job.result.data
         if self.additional_fields is not None:
             combined_data = []
@@ -194,8 +196,10 @@ class SaveListOfDictResultToCSVFile(SaveJobResultToTxtFile):
                 writer.writeheader()
                 for item in data:
                     writer.writerow(item)
+            logger.info("Data saved to %s", self.file_path)
         except Exception as ex:
-            logger.exception("Exception saving file with %r.", self)
+            error = CallbackError(None, exception=ex, callback=self)
+            logger.exception("Exception saving file with %r. Error: %s", self, error)
             raise ex
 
 
@@ -205,8 +209,8 @@ class SaveEsiJobToJsonFile(SaveJobResultToTxtFile):
     def __init__(
         self,
         job: EsiJob,
+        file_path_template: str,
         mode: str = "w",
-        file_path_template: Optional[str] = None,
         file_ending: str = ".json",
     ) -> None:
         super().__init__(
@@ -227,8 +231,8 @@ class SaveEsiJobToYamlFile(SaveJobResultToTxtFile):
     def __init__(
         self,
         job: EsiJob,
+        file_path_template: str,
         mode: str = "w",
-        file_path_template: Optional[str] = None,
         file_ending: str = ".yaml",
     ) -> None:
         super().__init__(

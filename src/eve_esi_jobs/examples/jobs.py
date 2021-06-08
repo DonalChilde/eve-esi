@@ -1,17 +1,38 @@
-from typing import Optional
+from typing import List, Optional
 
 from eve_esi_jobs import models
-from eve_esi_jobs.model_helpers import default_callback_collection
+
+
+def get_contracts_public_region_id(
+    region_id: int, callbacks: Optional[List[models.JobCallback]] = None
+):
+    if callbacks is None:
+        callbacks = []
+        callbacks.append(
+            models.JobCallback(
+                callback_id="save_result_to_json_file",
+                kwargs={
+                    "file_path_template": "data/contracts-public-${region_id}.json"
+                },
+            )
+        )
+    job = models.EsiJob(
+        op_id="get_contracts_public_region_id",
+        name="get_contracts_public_region_id",
+        callbacks=callbacks,
+    )
+    job.parameters = {"region_id": region_id}
+    return job
 
 
 def get_markets_region_id_history(
     region_id: int,
     type_id: int,
-    callbacks: Optional[models.CallbackCollection] = None,
+    callbacks: Optional[List[models.JobCallback]] = None,
 ):
     if callbacks is None:
-        callbacks = default_callback_collection()
-        callbacks.success.append(
+        callbacks = []
+        callbacks.append(
             models.JobCallback(
                 callback_id="save_esi_job_to_json_file",
                 kwargs={
@@ -19,11 +40,11 @@ def get_markets_region_id_history(
                 },
             )
         )
-        callbacks.success.append(
+        callbacks.append(
             models.JobCallback(
                 callback_id="save_result_to_json_file",
                 kwargs={
-                    "file_path_template": "data/market-history-${region_id}-${type_id}-esi-job.json"
+                    "file_path_template": "data/market-history-${region_id}-${type_id}.json"
                 },
             )
         )
@@ -37,17 +58,17 @@ def get_markets_region_id_history(
 
 
 def get_industry_facilities(
-    callbacks: Optional[models.CallbackCollection] = None,
+    callbacks: Optional[List[models.JobCallback]] = None,
 ):
     if callbacks is None:
-        callbacks = default_callback_collection()
-        callbacks.success.append(
+        callbacks = []
+        callbacks.append(
             models.JobCallback(
                 callback_id="save_esi_job_to_json_file",
                 kwargs={"file_path_template": "data/industry-facilities-esi-job.json"},
             )
         )
-        callbacks.success.append(
+        callbacks.append(
             models.JobCallback(
                 callback_id="save_result_to_json_file",
                 kwargs={"file_path_template": "data/industry-facilities.json"},
@@ -62,17 +83,17 @@ def get_industry_facilities(
 
 
 def get_industry_systems(
-    callbacks: Optional[models.CallbackCollection] = None,
+    callbacks: Optional[List[models.JobCallback]] = None,
 ):
     if callbacks is None:
-        callbacks = default_callback_collection()
-        callbacks.success.append(
+        callbacks = []
+        callbacks.append(
             models.JobCallback(
                 callback_id="save_esi_job_to_json_file",
                 kwargs={"file_path_template": "data/industry-systems-esi-job.json"},
             )
         )
-        callbacks.success.append(
+        callbacks.append(
             models.JobCallback(
                 callback_id="save_result_to_json_file",
                 kwargs={"file_path_template": "data/industry-systems.json"},
@@ -87,11 +108,11 @@ def get_industry_systems(
 
 
 def post_universe_names(
-    callbacks: Optional[models.CallbackCollection] = None,
+    callbacks: Optional[List[models.JobCallback]] = None,
 ):
     if callbacks is None:
-        callbacks = default_callback_collection()
-        callbacks.success.append(
+        callbacks = []
+        callbacks.append(
             models.JobCallback(
                 callback_id="save_esi_job_to_json_file",
                 kwargs={
@@ -99,7 +120,7 @@ def post_universe_names(
                 },
             )
         )
-        callbacks.success.append(
+        callbacks.append(
             models.JobCallback(
                 callback_id="save_result_to_json_file",
                 kwargs={

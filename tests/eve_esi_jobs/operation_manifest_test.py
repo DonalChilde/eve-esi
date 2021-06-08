@@ -1,14 +1,11 @@
-import dataclasses
-import json
 from typing import Dict
 
 import pytest
-import yaml
 from rich import inspect
 from tests.eve_esi_jobs.conftest import FileResource
 
 from eve_esi_jobs.exceptions import BadRequestParameter, MissingParameter
-from eve_esi_jobs.models import CallbackCollection, EsiJob
+from eve_esi_jobs.models import EsiJob
 from eve_esi_jobs.operation_manifest import OperationInfo, OperationManifest
 
 
@@ -26,11 +23,9 @@ def test_create_job(
     op_id = "get_markets_region_id_history"
     op_info = operation_manifest.op_info(op_id)
     parameters = {"region_id": 10000002, "type_id": 34}
-    callback_json = json.loads(callback_collections["no_file_output.json"].data)
-    callback_collection = CallbackCollection.deserialize_obj(callback_json)
-    job: EsiJob = op_info.create_job(
-        parameters, callback_collection, include_default_params=True
-    )
+    # callback_json = json.loads(callback_collections["no_file_output.json"].data)
+    # callback_collection = CallbackCollection.deserialize_obj(callback_json)
+    job: EsiJob = op_info.create_job(parameters, include_default_params=True)
     print(job.serialize_yaml())
     assert job.op_id == op_id
     assert job.parameters["datasource"] == "tranquility"
@@ -42,11 +37,9 @@ def test_create_job_missing_param_with_defaults(
     op_id = "get_markets_region_id_history"
     op_info = operation_manifest.op_info(op_id)
     parameters = {"region_id": 10000002}
-    callback_json = json.loads(callback_collections["no_file_output.json"].data)
-    callback_collection = CallbackCollection.deserialize_obj(callback_json)
-    job: EsiJob = op_info.create_job(
-        parameters, callback_collection, include_default_params=True
-    )
+    # callback_json = json.loads(callback_collections["no_file_output.json"].data)
+    # callback_collection = CallbackCollection.deserialize_obj(callback_json)
+    job: EsiJob = op_info.create_job(parameters, include_default_params=True)
     print(job.serialize_yaml())
     assert job.op_id == op_id
     assert job.parameters["type_id"] == "NOTSET"
@@ -60,11 +53,9 @@ def test_create_job_missing_param_without_defaults(
     op_id = "get_markets_region_id_history"
     op_info = operation_manifest.op_info(op_id)
     parameters = {"region_id": 10000002}
-    callback_json = json.loads(callback_collections["no_file_output.json"].data)
-    callback_collection = CallbackCollection.deserialize_obj(callback_json)
-    job: EsiJob = op_info.create_job(
-        parameters, callback_collection, include_default_params=False
-    )
+    # callback_json = json.loads(callback_collections["no_file_output.json"].data)
+    # callback_collection = CallbackCollection.deserialize_obj(callback_json)
+    job: EsiJob = op_info.create_job(parameters, include_default_params=False)
     print(job.serialize_yaml())
     assert job.op_id == op_id
     with pytest.raises(MissingParameter):

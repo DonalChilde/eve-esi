@@ -1,12 +1,12 @@
 import logging
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Set
+from typing import Any, Dict, List, Optional, Set
 
 from rich import print
 
 from eve_esi_jobs.exceptions import BadOpId, BadRequestParameter, MissingParameter
-from eve_esi_jobs.helpers import combine_dictionaries
-from eve_esi_jobs.models import CallbackCollection, EsiJob
+from eve_esi_jobs.helpers import combine_dictionaries, optional_object
+from eve_esi_jobs.models import EsiJob, JobCallback
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -81,14 +81,16 @@ class OperationInfo:
     def create_job(
         self,
         parameters: Dict,
-        callbacks: CallbackCollection,
+        callbacks: Optional[List[JobCallback]] = None,
         include_default_params: bool = False,
     ) -> EsiJob:
+        # FIXME is this used?
         if include_default_params:
             default_params = self.build_default_params()
             combined_params = combine_dictionaries(default_params, [parameters])
         else:
             combined_params = parameters
+        callbacks = optional_object(callbacks, list)
         filtered_params_by_location = self.request_params_to_locations(combined_params)
         job_params = filtered_params_by_location.consolidate_params()
         job_dict = {

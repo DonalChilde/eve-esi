@@ -1,14 +1,15 @@
 """Common helper functions"""
 import json
 import logging
+from datetime import datetime
 from enum import Enum
 from pathlib import Path
 from time import perf_counter_ns
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import typer
 
-from eve_esi_jobs.models import CallbackCollection, EsiJob, EsiWorkOrder, JobCallback
+from eve_esi_jobs.models import EsiJob, EsiWorkOrder, JobCallback
 from eve_esi_jobs.operation_manifest import OperationManifest
 
 logger = logging.getLogger(__name__)
@@ -20,10 +21,10 @@ class FormatChoices(str, Enum):
 
 
 def report_finished_task(ctx: typer.Context):
-    start = ctx.obj.get("start_time", perf_counter_ns())
-    end = perf_counter_ns()
-    seconds = (end - start) / 1000000000
-    typer.echo(f"Task completed in {seconds:0.2f} seconds")
+    start: datetime = ctx.obj.get("start_time", datetime.now())
+    end = datetime.now()
+    took = end - start
+    typer.echo(f"Task completed in {took.total_seconds():0.2f} seconds")
 
 
 # def load_json(file_path: Path, **kwargs) -> Any:
@@ -161,13 +162,9 @@ def validate_output_path(path_out: str) -> str:
     return str(output_path)
 
 
-def default_callback_collection() -> CallbackCollection:
-    callback_collection = CallbackCollection()
-    callback_collection.success.append(
-        JobCallback(callback_id="response_content_to_json")
-    )
-    callback_collection.success.append(JobCallback(callback_id="response_to_esi_job"))
-    callback_collection.success.append(
+def default_callback_collection() -> List[JobCallback]:
+    callback_collection = []
+    callback_collection.append(
         JobCallback(
             callback_id="save_result_to_json_file",
             kwargs={
@@ -175,8 +172,6 @@ def default_callback_collection() -> CallbackCollection:
             },
         )
     )
-    callback_collection.fail.append(JobCallback(callback_id="response_to_esi_job"))
-    callback_collection.fail.append(JobCallback(callback_id="log_job_failure"))
     return callback_collection
 
 

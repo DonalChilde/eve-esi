@@ -2,22 +2,14 @@ name: bad-status-workorder
 description: A workorder that contains jobs that will fail on the server in various
   ways.
 id_: bad-status-workorder
-uid: a5eb7f00-3dd8-4dec-8ef2-0e8041e57b7c
+uid: 6d55157d-d91b-4d6a-b6ba-3d6b4dc8bf81
 output_path: samples/workorder_output/${ewo_name}
 jobs:
 - name: bad-parameter
   description: A job with a bad parameter, should result in a 400 bad request.
   id_: bad-parameter
-  uid: 6cf81878-f50a-403b-92b6-d90a525fb127
+  uid: e70a679f-3db0-4b6f-9559-c91b2d9f5da3
   op_id: get_markets_region_id_history
   parameters:
     region_id: 10000002
     type_id: 0
-  callbacks:
-    success:
-    - callback_id: response_content_to_json
-    - callback_id: response_to_esi_job
-    - callback_id: result_to_esi_job
-    fail:
-    - callback_id: response_to_esi_job
-    - callback_id: log_job_failure

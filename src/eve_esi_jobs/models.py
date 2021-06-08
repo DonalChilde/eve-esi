@@ -3,11 +3,12 @@ import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from uuid import UUID, uuid4
+from uuid import NAMESPACE_DNS, UUID, uuid4, uuid5
 
 import yaml
 from pydantic import BaseModel, Field  # pylint: disable=no-name-in-module
 
+from eve_esi_jobs.aiohttp_queue import ResponseMeta
 from eve_esi_jobs.helpers import combine_dictionaries
 
 logger = logging.getLogger(__name__)
@@ -23,10 +24,10 @@ class SerializeMixin:
         )
         return serialized_json
 
-    def serialize_yaml(self):
+    def serialize_yaml(self, sort_keys=False, **kwargs):
         json_string = self.serialize_json()
         json_rep = json.loads(json_string)
-        serialized_yaml = yaml.dump(json_rep, sort_keys=False)
+        serialized_yaml = yaml.dump(json_rep, sort_keys=sort_keys, **kwargs)
         return serialized_yaml
 
     @classmethod
@@ -57,7 +58,7 @@ class SerializeMixin:
             return cls.deserialize_json(string_data)
         return cls.deserialize_yaml(string_data)
 
-    def serialize_file(self, file_path: Path, file_format: str) -> Path:
+    def serialize_file(self, file_path: Path, file_format: str, **kwargs) -> Path:
         valid_formats = ["json", "yaml"]
         if file_format.lower() not in valid_formats:
             raise ValueError(f"Invalid file suffix, must be one of {valid_formats}")
@@ -65,9 +66,9 @@ class SerializeMixin:
         if file_path.suffix.lower() != file_ending:
             file_path = file_path.with_suffix(file_ending)
         if file_format == "json":
-            string_data = self.serialize_json()
+            string_data = self.serialize_json(**kwargs)
         else:
-            string_data = self.serialize_yaml()
+            string_data = self.serialize_yaml(**kwargs)
         file_path.parent.mkdir(parents=True, exist_ok=True)
         file_path.write_text(string_data)
         return file_path
@@ -87,61 +88,23 @@ class JobCallback(BaseModel, SerializeMixin):
     """
 
     callback_id: str
-    args: List[Any] = []
     kwargs: Dict[str, Any] = {}
-    config: Dict[str, Any] = {}
 
     class Config:
         extra = "forbid"
 
 
-# class CallbackCollection(BaseModel, SerializeMixin):
-#     """
-#     A collection of callbacks used by an :class:`EsiJob`
-
-#     Args:
-#         success (List[JobCallback]): Callbacks to be used for a successful request.
-#         retry (List[JobCallback]): Callbacks to be used when a request is retried.
-#         fail (List[JobCallback]): Callbacks to be used for a failed request.
-#     """
-
-#     success: List[JobCallback] = []
-#     retry: List[JobCallback] = []
-#     fail: List[JobCallback] = []
-
-#     class Config:
-#         extra = "forbid"
-
-
 class EsiJobResult(BaseModel, SerializeMixin):
-    r"""
+    """
     The result of an executed :class:`EsiJob`.
 
-    Normally this class will be used by a callback to store response data on a job.
-    If the correct callback is not used, this class will never be attatched to a job.
 
-    The calbacks that currently create this class are:
-
-    * :class:`~eve_esi_jobs.callbacks.ResponseToEsiJob`
-    * :class:`~eve_esi_jobs.callbacks.ResultToEsiJob`
-
-    Args:
-        work_order_name (Optional[str]): The name of the containing workorder, if any.
-        work_order_id (Optional[str]): The id\_ of the containing workorder, if any.
-        work_order_uid (str): The uid of the containing workorder, if any.
-        attempts (int): The number of attempts made.
-        response (Optional[Any]): The data from :class:`Aiohttp.Response` as a dict.
-            Only present if :class:`~eve_esi_jobs.callbacks.ResponseToEsiJob` was used.
-        data (Optional[Any]): The data from a successful job. Only present if
-            :class:`~eve_esi_jobs.callbacks.ResultToEsiJob` was used.
     """
 
-    work_order_name: Optional[str] = None
-    work_order_id: Optional[str] = None
-    work_order_uid: str = ""
-    attempts: int = 0
-    response: Optional[Any] = None
-    data: Optional[Any] = None
+    op_id: str
+    param_sig: UUID
+    response: ResponseMeta
+    data: Any
 
     class Config:
         extra = "forbid"
@@ -165,6 +128,7 @@ class EsiJob(BaseModel, SerializeMixin):
         callbacks (CallbackCollection): Callbacks used by the job.
         result (Optional[EsiJobResult]): Information on the results of a job, only
             available when certain callbacks have been used. see :class:`EsiJobResult`
+        source: Info from the source used, including error messages and state.
     """
 
     name: str = ""
@@ -172,14 +136,26 @@ class EsiJob(BaseModel, SerializeMixin):
     id_: str = ""
     uid: UUID = Field(default_factory=uuid4)
     op_id: str
-    max_attempts: int = 5
+    # max_attempts: int = 5
     parameters: Dict[str, Any] = {}
     additional_attributes: Dict[str, Any] = {}
     callbacks: List[JobCallback] = []
     result: Optional[EsiJobResult] = None
+    source: Optional[str] = None  # for future reporting on source
 
     class Config:
         extra = "forbid"
+
+    def param_sig(self):
+        param_values = {
+            key: value
+            for (key, value) in self.parameters.items()
+            if key.lower() != "if-none-match"
+        }
+        param_string = json.dumps(param_values, sort_keys=True)
+        # print(param_string)
+        ns_uuid = uuid5(NAMESPACE_DNS, self.op_id)
+        return uuid5(ns_uuid, param_string)
 
     def update_attributes(self, override: Dict):
         """Update esi_job.additional_attributes with additional values"""
@@ -208,7 +184,6 @@ class EsiJob(BaseModel, SerializeMixin):
             "esi_job_name": self.name,
             "esi_job_id_": self.id_,
             "esi_job_op_id": self.op_id,
-            "esi_job_max_attempts": str(self.max_attempts),
             "esi_job_uid": str(self.uid),
             "esi_job_iso_date_time": datetime.now().isoformat().replace(":", "-"),
         }

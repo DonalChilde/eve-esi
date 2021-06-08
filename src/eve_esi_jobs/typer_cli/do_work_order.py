@@ -6,15 +6,13 @@ from typing import List, Optional
 
 import typer
 
-from eve_esi_jobs import do_workorder
+from eve_esi_jobs.eve_esi_jobs import EveEsiJobs
 from eve_esi_jobs.models import EsiJob, EsiWorkOrder
 from eve_esi_jobs.typer_cli.cli_helpers import (
-    FormatChoices,
     report_finished_task,
     validate_input_path,
     validate_output_path,
 )
-from eve_esi_jobs.typer_cli.observer import EsiObserver
 
 app = typer.Typer(help="""Do jobs and workorders.""")
 logger = logging.getLogger(__name__)
@@ -44,8 +42,9 @@ not find mistakes that can only be checked on the server, eg. a non-existant typ
         typer.BadParameter("not implemented yet.")
     path_in = validate_input_path(path_in)
     file_path = Path(path_in)
+    runner: EveEsiJobs = ctx.obj["runner"]
     try:
-        esi_job = EsiJob.deserialize_file(file_path)
+        esi_job = runner.deserialize_job(file_path)
     except Exception as ex:
         logger.exception(
             "Error deserializing job from file: %s. Error: %s, msg: %s",
@@ -57,16 +56,15 @@ not find mistakes that can only be checked on the server, eg. a non-existant typ
 
     # NOTE: path is not checked with results of template values.
     path_out = validate_output_path(path_out)
-    operation_manifest = ctx.obj["operation_manifest"]
-    ewo_ = EsiWorkOrder(output_path=str(path_out))
-    # ewo_.output_path = str(path_out)
-    ewo_.jobs.append(esi_job)
-    observer = EsiObserver()
+
+    ewo = EsiWorkOrder(output_path=str(path_out))
+    ewo.jobs.append(esi_job)
+    # observer = EsiObserver()
     try:
-        do_workorder(ewo_, operation_manifest, observers=[observer])
+        runner.do_workorder(ewo)
     except Exception as ex:
         raise typer.BadParameter(f"Error doing the job. {ex.__class__.__name__}: {ex}")
-    report_on_jobs(ewo_.jobs)
+    report_on_jobs(ewo.jobs)
     report_finished_task(ctx)
 
 
@@ -95,8 +93,9 @@ not find mistakes that can only be checked on the server, eg. a non-existant typ
         typer.BadParameter("not implemented yet.")
     path_in = validate_input_path(path_in)
     file_path = Path(path_in)
+    runner: EveEsiJobs = ctx.obj["runner"]
     try:
-        esi_work_order = EsiWorkOrder.deserialize_file(file_path)
+        ewo = runner.deserialize_workorder(file_path)
     except Exception as ex:
         logger.exception(
             "Error deserializing workorder from file: %s. Error: %s, msg: %s",
@@ -108,15 +107,16 @@ not find mistakes that can only be checked on the server, eg. a non-existant typ
 
     # NOTE: path is not checked with results of template values.
     path_out = validate_output_path(path_out)
-    output_path_string = str(path_out / Path(esi_work_order.output_path))
-    esi_work_order.update_attributes({"ewo_output_path": output_path_string})
-    operation_manifest = ctx.obj["operation_manifest"]
-    observer = EsiObserver()
+    output_path_string = str(path_out / Path(ewo.output_path))
+
+    # observer = EsiObserver()
     try:
-        do_workorder(esi_work_order, operation_manifest, observers=[observer])
+        runner.do_workorder(
+            workorder=ewo, override_values={"ewo_output_path": output_path_string}
+        )
     except Exception as ex:
         raise typer.BadParameter(f"Error doing the job. {ex.__class__.__name__}: {ex}")
-    report_on_jobs(esi_work_order.jobs)
+    report_on_jobs(ewo.jobs)
     report_finished_task(ctx)
 
 
@@ -125,9 +125,10 @@ def report_on_jobs(esi_jobs: List[EsiJob]):
     failures = 0
     no_info = len(esi_jobs)
     # jobs with retries?
-    for job_ in esi_jobs:
-        if job_.result is not None and job_.result.response is not None:
-            status = job_.result.response.get("status", None)
+    # FIXME local vs remote vs 304?
+    for esi_job in esi_jobs:
+        if esi_job.result is not None and esi_job.result.response is not None:
+            status = esi_job.result.response.status
             if status == 200:
                 successes += 1
                 no_info -= 1
@@ -135,6 +136,7 @@ def report_on_jobs(esi_jobs: List[EsiJob]):
                 failures += 1
                 no_info -= 1
     typer.echo(
+        f"Fix this output!\n"
         f"Network response -> Successes: {successes}, Failures: {failures}, "
         f"Not Reporting: {no_info}"
     )
